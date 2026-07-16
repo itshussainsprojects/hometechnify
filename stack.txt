@@ -1,0 +1,1167 @@
+**On-Demand Home Services App
+
+Complete Technology Stack Documentation**
+
+1. Overview of Technology Stack
+
+This application is built using a modern, scalable, and mostly open-source technology stack.
+The stack is selected to support:
+
+Cross-platform mobile development
+
+Real-time features (chat, booking updates)
+
+Location-based services
+
+Secure data handling
+
+Easy deployment on Google Play Store
+
+The system consists of:
+
+Mobile Application
+
+Backend Server
+
+Database
+
+Admin Panel
+
+Supporting Services
+
+2. Mobile Application Stack
+2.1 Framework
+
+Flutter (Dart)
+
+Why Flutter:
+
+Single codebase for Android & iOS
+
+High performance (near native)
+
+Excellent UI & animation support
+
+Open-source and free to use
+
+Used For:
+
+User App
+
+Provider App
+
+2.2 UI & UX
+
+Flutter Material UI
+
+Custom widgets
+
+Animated bottom navigation
+
+Responsive layouts
+
+2.3 State Management
+
+Provider / Riverpod / Bloc (any one)
+
+Clean and scalable architecture
+
+3. Backend Technology Stack
+3.1 Backend Runtime
+
+Node.js
+
+Open-source
+
+Event-driven and fast
+
+Ideal for real-time apps
+
+3.2 Backend Framework
+
+Express.js
+
+Lightweight
+
+Flexible
+
+Easy API development
+
+3.3 API Type
+
+RESTful APIs
+
+JSON-based communication
+
+Role-based access (User / Provider / Admin)
+
+4. Database Stack
+4.1 Primary Database
+
+MongoDB
+
+Why MongoDB:
+
+NoSQL (flexible schema)
+
+Easy to store bookings, chat, services
+
+Widely used in production apps
+
+Hosting Options:
+
+MongoDB Community (self-hosted)
+
+MongoDB Atlas Free Tier
+
+4.2 Data Stored
+
+Users
+
+Providers
+
+Services
+
+Bookings
+
+Chats
+
+Reviews
+
+Notifications
+
+5. Authentication & Authorization
+5.1 Authentication Method
+
+Email-based OTP
+
+(or phone OTP in future – paid)
+
+Flow:
+
+User enters email
+
+OTP sent via SMTP
+
+OTP verification
+
+JWT token issued
+
+5.2 Authorization
+
+JWT (JSON Web Tokens)
+
+Role-based access control
+
+6. File Storage System
+Storage Type
+
+Local Server Storage
+
+Used For:
+
+CNIC images
+
+Profile pictures
+
+Job images/videos
+
+Structure Example:
+
+/uploads/
+  /cnic/
+  /profiles/
+  /jobs/
+
+7. Real-Time Communication
+7.1 Chat System
+
+Socket.IO
+
+Real-time text chat
+
+Booking status updates
+
+Provider availability
+
+7.2 Audio & Video Calls
+
+WebRTC
+
+Peer-to-peer communication
+
+No paid service required
+
+Suitable for MVP & small scale
+
+8. Maps & Location Services
+Map Provider
+
+OpenStreetMap
+
+Map Library
+
+MapLibre
+
+Leaflet
+
+Features:
+
+Show user location
+
+Show provider location
+
+Distance calculation
+
+9. Notification System
+Type
+
+In-App Notifications
+
+Email Notifications
+
+Stored In:
+
+MongoDB Notifications Collection
+
+10. Payment System (Free Model)
+Payment Type
+
+Cash on Service
+
+Manual confirmation
+
+Reason:
+
+No gateway cost
+
+Play Store compliant
+
+Suitable for MVP
+
+11. Admin Panel Stack
+Frontend
+
+React.js
+OR
+
+HTML + Bootstrap
+
+Backend
+
+Same Node.js backend
+
+Admin-only APIs
+
+12. Hosting & Deployment
+Backend Hosting (Free Options)
+
+Render (Free tier)
+
+Railway
+
+Fly.io
+
+Database Hosting
+
+MongoDB Atlas Free Tier
+
+File Hosting
+
+Same backend server
+
+13. Security Measures
+
+HTTPS
+
+JWT authentication
+
+Input validation
+
+Role-based permissions
+
+Protected admin routes
+
+Secure file access
+
+14. Architecture Pattern
+
+Client–Server architecture
+
+REST API based
+
+Modular backend structure
+
+Scalable for future upgrades
+
+15. Play Store Compatibility
+
+This tech stack is 100% compatible with Google Play Store.
+
+✔ MongoDB allowed
+✔ Flutter allowed
+✔ Node.js backend allowed
+✔ Local storage allowed
+
+Mandatory requirements handled:
+
+Privacy Policy
+
+Data Safety disclosure
+
+Permission justification
+
+16. Future Upgrade Friendly Stack
+
+Later you can add:
+
+Paid SMS OTP
+
+Payment gateways
+
+Push notifications
+
+Cloud storage
+
+Microservices
+
+Without changing the core system.
+
+17. Final Stack Summary (One Look)
+Layer	Technology
+Mobile App	Flutter
+Backend	Node.js + Express
+Database	MongoDB
+Auth	Email OTP + JWT
+Storage	Local Server
+Chat	Socket.IO
+Calls	WebRTC
+Maps	OpenStreetMap
+Notifications	In-App + Email
+Payments	Cash on Service
+Admin Panel	React / Bootstrap
+Hosting	Free Tier Platforms
+✅ Final One-Line Statement
+
+The application uses Flutter for mobile development, Node.js with Express for backend services, MongoDB for database management, Socket.IO and WebRTC for real-time communication, OpenStreetMap for location services, and a free, self-hosted infrastructure suitable for Play Store deployment.
+
+Agar chaho next main:
+
+📄 Is tech stack ko PDF bana doon
+
+🧱 Architecture diagram draw kar doon
+
+📁 Flutter + backend folder structure
+
+📝 Final project documentation pack
+
+Bol bhai, next kya 🔥
+
+On-Demand Home Services App – Complete System Documentation (In-Depth)
+1. Project Overview
+
+This project is an On-Demand Home Services Mobile Application designed to connect customers with nearby verified service providers such as plumbers, electricians, cleaners, AC technicians, carpenters, painters, and other home maintenance professionals.
+
+The application works on a real-time, location-based model, similar to platforms like Urban Company, Uber, Careem, and TaskRabbit, where users can instantly request services and choose from multiple available providers.
+
+The goal of this system is to:
+
+Reduce the time required to find reliable home service professionals
+
+Provide transparent pricing and verified providers
+
+Enable real-time communication and tracking
+
+Ensure secure payments and trust through ratings and reviews
+
+2. User Roles & Permissions
+
+The system consists of three primary roles, each with specific permissions and responsibilities.
+
+2.1 User (Customer)
+
+The user is the customer who requests home services.
+
+Key capabilities:
+
+Register/Login using mobile number & OTP
+
+Select services (plumber, electrician, etc.)
+
+Post jobs using text, image, voice, or video
+
+View nearby service providers on the map
+
+Compare providers based on rating, price, and experience
+
+Chat, call, and negotiate with providers
+
+Confirm booking and make payments
+
+Track booking status
+
+Provide feedback and ratings
+
+2.2 Service Provider
+
+A service provider is a professional offering services.
+
+Key capabilities:
+
+Register as provider
+
+Complete identity verification (CNIC + Selfie)
+
+Set service categories and availability
+
+Receive job requests
+
+Accept or reject bookings
+
+Communicate with users
+
+Navigate to user location
+
+Complete jobs
+
+Receive payments and earnings
+
+View ratings and reviews
+
+2.3 Admin (Web Panel)
+
+Admin controls the entire ecosystem.
+
+Key capabilities:
+
+Manage users and providers
+
+Verify provider documents
+
+Approve or reject providers
+
+Create and manage service categories
+
+Set pricing rules and commission
+
+Monitor bookings and payments
+
+Handle disputes and complaints
+
+View analytics and reports
+
+3. Complete App Flow
+
+The complete user journey is designed to be smooth and intuitive.
+
+App Launch Flow
+
+Splash Screen (Animated – 2 screens)
+
+Onboarding Screens (3 screens)
+
+Introduction (Skip option)
+
+Features explanation
+
+Role selection (User / Provider)
+
+Authentication Flow
+
+Login / Signup Screen
+
+OTP Verification
+
+Role-based redirection
+
+Provider-Only Flow
+
+Identity Verification (CNIC Front, CNIC Back, Selfie)
+
+Verification Processing
+
+Admin Approval
+
+Verification Success
+
+Main App Flow
+
+Location Permission
+
+Home Screen
+
+Service Selection
+
+Booking Flow
+
+Payment
+
+Feedback & Completion
+
+4. Authentication System
+
+The authentication system is OTP-based for maximum security and ease of use.
+
+Login
+
+User enters:
+
+Full Name
+
+Mobile Number
+
+System sends OTP to the mobile number
+
+OTP verification confirms identity
+
+Signup
+
+New users are redirected to signup
+
+Required fields:
+
+Full Name
+
+Mobile Number
+
+On successful registration, user is redirected to login
+
+Benefits of OTP authentication:
+
+No password management
+
+Reduced fraud
+
+Faster onboarding
+
+5. Provider Verification System
+
+To ensure trust and safety, providers must complete identity verification.
+
+Verification Steps
+
+Instruction Screen (requirements explained)
+
+CNIC Front Photo Upload
+
+CNIC Back Photo Upload
+
+Live Selfie Capture
+
+Verification Processing Screen
+
+Verification Success / Pending Approval
+
+Admin Review
+
+Admin manually reviews documents
+
+Approves or rejects provider
+
+Rejection includes reason
+
+6. Home Screen UI & Components
+
+The Home Screen is the core interaction point.
+
+Header Section
+
+User’s current location
+
+Notification bell (with red indicator)
+
+Main Content
+
+Search bar for services
+
+Location preview map
+
+Services grid (icons + names)
+
+Promotional banners
+
+Bottom Navigation Bar
+
+Home
+
+Notifications
+
+Bookings
+
+Profile
+
+Animated navigation enhances UX.
+
+7. Service Booking Flow
+Job Posting
+
+When a user selects a service (e.g., plumber), a bottom sheet appears allowing:
+
+Text description
+
+Image upload
+
+Voice note
+
+Short video
+
+Provider Discovery
+
+Map view shows nearby providers
+
+Providers displayed as circular profile icons
+
+Sorted by:
+
+Distance
+
+Rating
+
+Availability
+
+User can:
+
+Reject provider (carousel style)
+
+Book selected provider
+
+8. Provider Profile & Selection
+
+Provider profile includes:
+
+Profile photo
+
+Name & skill
+
+Rating & reviews
+
+Completed jobs
+
+Experience
+
+Gallery
+
+User clicks Book to continue.
+
+9. Chat, Call & Negotiation
+
+After booking:
+
+In-app chat starts
+
+Voice & video call available
+
+Price negotiation supported
+
+Final price auto-updates before checkout
+
+10. Checkout & Payment System
+Checkout Screen Includes
+
+Provider profile
+
+Booking date & time
+
+Service charges
+
+Traveling charges
+
+Total amount
+
+Address
+
+Promo code option
+
+Payment Methods
+
+JazzCash
+
+Easypaisa
+
+(Future: Cards & Wallet)
+
+11. Booking Completion & Feedback
+
+After successful payment:
+
+Payment success screen
+
+Booking received summary
+
+Job completion confirmation
+
+Feedback screen:
+
+Star rating
+
+Review comment
+
+User is redirected to Home.
+
+12. Provider App Flow
+Provider Dashboard
+
+Online/Offline toggle
+
+Job requests
+
+Earnings wallet
+
+Job Lifecycle
+
+Receive request
+
+Accept or reject
+
+Navigate to user
+
+Complete job
+
+Receive payment
+
+13. Admin Panel (Web Dashboard)
+
+Admin dashboard includes:
+
+User management
+
+Provider verification
+
+Service management
+
+Pricing & commission
+
+Payment monitoring
+
+Dispute resolution
+
+Analytics & reports
+
+isko bhi phr refine krdo abb 
+
+Bilkul bhai 👍
+Neeche main isi document ko refine, polish, professional aur structured bana raha hoon — language smooth, headings clear, flow strong.
+Ye version final documentation / PDF / proposal / Play Store submission ke liye ready hai.
+
+**On-Demand Home Services App
+
+Complete System Documentation (Refined & In-Depth)**
+
+1. Project Overview
+
+This project is an On-Demand Home Services Mobile Application developed to connect customers with nearby verified home service professionals, including plumbers, electricians, cleaners, AC technicians, carpenters, painters, and other maintenance experts.
+
+The application operates on a real-time, location-based service model, similar to platforms such as Urban Company, Uber, Careem, and TaskRabbit. Users can instantly request services, view available providers nearby, compare them, and book the most suitable professional.
+
+Primary Objectives
+
+Reduce the time required to find trusted home service providers
+
+Offer transparent pricing and verified professionals
+
+Enable real-time communication and live booking updates
+
+Ensure trust through ratings, reviews, and secure workflows
+
+2. User Roles & Permissions
+
+The system is designed around three core roles, each with defined permissions and responsibilities.
+
+2.1 User (Customer)
+
+The User is the end customer who requests home services.
+
+Key Capabilities:
+
+Register and log in using mobile number and OTP
+
+Browse and search available services
+
+Post service requests using:
+
+Text
+
+Images
+
+Voice notes
+
+Short videos
+
+View nearby service providers on the map
+
+Compare providers based on rating, price, experience, and distance
+
+Chat, call, and negotiate pricing with providers
+
+Confirm bookings and make payments
+
+Track booking status in real time
+
+Submit ratings and feedback after service completion
+
+2.2 Service Provider
+
+A Service Provider is a professional offering home services through the platform.
+
+Key Capabilities:
+
+Register as a provider
+
+Complete identity verification (CNIC + live selfie)
+
+Select service categories and manage availability
+
+Receive nearby job requests
+
+Accept or reject service bookings
+
+Communicate with customers via chat, audio, and video calls
+
+Navigate to the customer’s location using maps
+
+Mark jobs as completed
+
+Receive payments and view earnings
+
+Build credibility through ratings and reviews
+
+2.3 Admin (Web Panel)
+
+The Admin manages and controls the entire platform ecosystem.
+
+Key Capabilities:
+
+Manage users and service providers
+
+Review and verify provider documents
+
+Approve or reject provider accounts
+
+Create, update, and manage service categories
+
+Configure pricing rules and platform commission
+
+Monitor bookings and payment activities
+
+Handle disputes, complaints, and refunds
+
+View analytics, reports, and platform performance
+
+3. Complete App Flow
+
+The complete user journey is designed to be simple, intuitive, and efficient.
+
+3.1 App Launch Flow
+
+Splash Screen (Animated – 2 screens)
+
+Onboarding Screens (3 screens):
+
+Introduction (with Skip option)
+
+Features overview
+
+Role selection (User / Provider)
+
+3.2 Authentication Flow
+
+Login / Signup screen
+
+OTP verification
+
+Role-based redirection (User or Provider dashboard)
+
+3.3 Provider-Only Flow
+
+Identity verification:
+
+CNIC front image
+
+CNIC back image
+
+Live selfie capture
+
+Verification processing screen
+
+Admin approval
+
+Verification success screen
+
+3.4 Main App Flow
+
+Location permission
+
+Home screen
+
+Service selection
+
+Booking flow
+
+Payment
+
+Feedback and completion
+
+4. Authentication System
+
+The application uses an OTP-based authentication system to ensure security and ease of use.
+
+Login Process
+
+User enters:
+
+Full name
+
+Mobile number
+
+System sends OTP to the provided number
+
+OTP verification confirms user identity
+
+Signup Process
+
+New users are redirected to the signup screen
+
+Required information:
+
+Full name
+
+Mobile number
+
+After successful signup, the user proceeds to login
+
+Benefits of OTP Authentication:
+
+No password management required
+
+Reduced risk of account misuse
+
+Faster onboarding experience
+
+5. Provider Verification System
+
+To maintain platform trust and safety, all service providers must complete identity verification.
+
+Verification Steps
+
+Instruction screen explaining requirements
+
+CNIC front photo upload
+
+CNIC back photo upload
+
+Live selfie capture
+
+Verification processing screen
+
+Verification success or pending approval
+
+Admin Review
+
+Admin manually reviews submitted documents
+
+Provider account is approved or rejected
+
+Rejection includes a reason for correction
+
+6. Home Screen UI & Components
+
+The Home Screen serves as the primary interaction hub.
+
+Header Section
+
+Current user location
+
+Notification bell with unread indicator
+
+Main Content
+
+Search bar for services
+
+Location preview map
+
+Service categories grid (icons + labels)
+
+Promotional banners and offers
+
+Bottom Navigation Bar
+
+Home
+
+Notifications
+
+Bookings
+
+Profile
+
+Smooth animations enhance the overall user experience.
+
+7. Service Booking Flow
+Job Posting
+
+When a user selects a service (e.g., plumber), a bottom sheet opens allowing the user to:
+
+Enter text description
+
+Upload images
+
+Record a voice note
+
+Upload a short video
+
+Provider Discovery
+
+Nearby providers appear on a map view
+
+Providers shown as circular profile icons
+
+Providers are sorted based on:
+
+Distance
+
+Rating
+
+Availability
+
+User Actions:
+
+Reject providers (carousel-style swipe)
+
+Select and book a preferred provider
+
+8. Provider Profile & Selection
+
+The provider profile displays:
+
+Profile photo
+
+Name and skill
+
+Ratings and reviews
+
+Number of completed jobs
+
+Years of experience
+
+Work gallery
+
+User clicks Book to proceed.
+
+9. Chat, Call & Negotiation
+
+Once a provider is selected:
+
+In-app chat is enabled
+
+Audio and video calling options available
+
+Price negotiation supported
+
+Final agreed price is auto-updated before checkout
+
+10. Checkout & Payment System
+Checkout Screen Includes
+
+Provider profile
+
+Booking date and time
+
+Service charges
+
+Traveling charges
+
+Total payable amount
+
+Service address
+
+Promo code option
+
+Payment Methods
+
+JazzCash
+
+Easypaisa
+
+(Future support for cards and wallet systems)
+
+11. Booking Completion & Feedback
+
+After successful payment:
+
+Payment success screen
+
+Booking received summary
+
+Job completion confirmation
+
+Feedback screen:
+
+Star rating
+
+Written review
+
+User is then redirected to the Home screen.
+
+12. Provider App Flow
+Provider Dashboard
+
+Online / Offline availability toggle
+
+Incoming job requests
+
+Earnings wallet and history
+
+Job Lifecycle
+
+Receive service request
+
+Accept or reject
+
+Navigate to customer location
+
+Complete the job
+
+Receive payment
+
+13. Admin Panel (Web Dashboard)
+
+The admin web dashboard provides:
+
+User and provider management
+
+Provider verification controls
+
+Service and category management
+
+Pricing and commission configuration
+
+Booking and payment monitoring
+
+Dispute and complaint resolution
+
+Detailed analytics and reporting
+
+✅ Final Note
+
+This refined system design ensures the application is:
+
+Scalable
+
+Secure
+
+User-friendly
+
+Business-ready
+
+It is suitable for MVP launch, Play Store deployment, and future expansion.
+
+Agar chaho to next step main main:
+
+📄 Is refined version ka final PDF bana doon
+
+🧱 Architecture & flow diagrams add kar doon
+
+📝 Play Store Privacy Policy likh doon
+
+📱 Flutter screen-by-screen mapping kar doon
+
+Bas bolo bhai 👍

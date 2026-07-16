@@ -1,0 +1,285 @@
+﻿flutter : Package 
+file_picker:linux 
+references 
+file_picker:linux as 
+the default plugin, 
+but it does not 
+provide an inline 
+implementation.
+At line:1 char:1
++ flutter analyze 
+2>&1 | Out-File 
+-FilePath 
+analyze_output2.txt 
+-Encodi ...
++ 
+~~~~~~~~~~~~~~~~~~~~
+    + CategoryInfo   
+           : NotSpe  
+  cified: (Package   
+  file_pi...imple    
+mentation.:Strin    
+g) [], RemoteExc    
+eption
+    + FullyQualified 
+   ErrorId : Native  
+  CommandError
+ 
+Ask the maintainers 
+of file_picker to 
+either avoid 
+referencing a 
+default 
+implementation via 
+`platforms: linux: 
+default_package: 
+file_picker` or add 
+an inline 
+implementation to 
+file_picker via 
+`platforms: linux:` 
+`pluginClass` or 
+`dartPluginClass`.
+
+Package 
+file_picker:macos 
+references 
+file_picker:macos as 
+the default plugin, 
+but it does not 
+provide an inline 
+implementation.
+Ask the maintainers 
+of file_picker to 
+either avoid 
+referencing a 
+default 
+implementation via 
+`platforms: macos: 
+default_package: 
+file_picker` or add 
+an inline 
+implementation to 
+file_picker via 
+`platforms: macos:` 
+`pluginClass` or 
+`dartPluginClass`.
+
+Package 
+file_picker:windows 
+references 
+file_picker:windows 
+as the default 
+plugin, but it does 
+not provide an 
+inline 
+implementation.
+Ask the maintainers 
+of file_picker to 
+either avoid 
+referencing a 
+default 
+implementation via 
+`platforms: windows: 
+default_package: 
+file_picker` or add 
+an inline 
+implementation to 
+file_picker via 
+`platforms: 
+windows:` 
+`pluginClass` or 
+`dartPluginClass`.
+
+Package 
+file_picker:linux 
+references 
+file_picker:linux as 
+the default plugin, 
+but it does not 
+provide an inline 
+implementation.
+Ask the maintainers 
+of file_picker to 
+either avoid 
+referencing a 
+default 
+implementation via 
+`platforms: linux: 
+default_package: 
+file_picker` or add 
+an inline 
+implementation to 
+file_picker via 
+`platforms: linux:` 
+`pluginClass` or 
+`dartPluginClass`.
+
+Package 
+file_picker:macos 
+references 
+file_picker:macos as 
+the default plugin, 
+but it does not 
+provide an inline 
+implementation.
+Ask the maintainers 
+of file_picker to 
+either avoid 
+referencing a 
+default 
+implementation via 
+`platforms: macos: 
+default_package: 
+file_picker` or add 
+an inline 
+implementation to 
+file_picker via 
+`platforms: macos:` 
+`pluginClass` or 
+`dartPluginClass`.
+
+Package 
+file_picker:windows 
+references 
+file_picker:windows 
+as the default 
+plugin, but it does 
+not provide an 
+inline 
+implementation.
+Ask the maintainers 
+of file_picker to 
+either avoid 
+referencing a 
+default 
+implementation via 
+`platforms: windows: 
+default_package: 
+file_picker` or add 
+an inline 
+implementation to 
+file_picker via 
+`platforms: 
+windows:` 
+`pluginClass` or 
+`dartPluginClass`.
+
+Package 
+file_picker:linux 
+references 
+file_picker:linux as 
+the default plugin, 
+but it does not 
+provide an inline 
+implementation.
+Ask the maintainers 
+of file_picker to 
+either avoid 
+referencing a 
+default 
+implementation via 
+`platforms: linux: 
+default_package: 
+file_picker` or add 
+an inline 
+implementation to 
+file_picker via 
+`platforms: linux:` 
+`pluginClass` or 
+`dartPluginClass`.
+
+Package 
+file_picker:macos 
+references 
+file_picker:macos as 
+the default plugin, 
+but it does not 
+provide an inline 
+implementation.
+Ask the maintainers 
+of file_picker to 
+either avoid 
+referencing a 
+default 
+implementation via 
+`platforms: macos: 
+default_package: 
+file_picker` or add 
+an inline 
+implementation to 
+file_picker via 
+`platforms: macos:` 
+`pluginClass` or 
+`dartPluginClass`.
+
+Package 
+file_picker:windows 
+references 
+file_picker:windows 
+as the default 
+plugin, but it does 
+not provide an 
+inline 
+implementation.
+Ask the maintainers 
+of file_picker to 
+either avoid 
+referencing a 
+default 
+implementation via 
+`platforms: windows: 
+default_package: 
+file_picker` or add 
+an inline 
+implementation to 
+file_picker via 
+`platforms: 
+windows:` 
+`pluginClass` or 
+`dartPluginClass`.
+
+Analyzing hometechnify...                                       
+
+   info - Unnecessary use of multiple underscores - lib\features\auth\screens\role_selection_screen.dart:153:31 - unnecessary_underscores
+   info - Unnecessary use of multiple underscores - lib\features\auth\screens\role_selection_screen.dart:153:35 - unnecessary_underscores
+   info - Unnecessary use of multiple underscores - lib\features\booking\my_bookings_screen.dart:260:29 - unnecessary_underscores
+   info - Unnecessary use of multiple underscores - lib\features\chat\screens\negotiation_screen.dart:332:31 - unnecessary_underscores
+  error - Undefined class 'ProviderData' - lib\features\home\widgets\provider_card.dart:10:9 - undefined_class
+   info - 'scale' is deprecated and shouldn't be used. Use scaleByVector3, scaleByVector4, or scaleByDouble instead - lib\features\home\widgets\provider_card.dart:31:40 - deprecated_member_use
+   info - 'scale' is deprecated and shouldn't be used. Use scaleByVector3, scaleByVector4, or scaleByDouble instead - lib\features\home\widgets\service_card.dart:46:40 - deprecated_member_use
+   info - Unnecessary use of multiple underscores - lib\features\job\screens\nearby_providers_screen.dart:156:26 - unnecessary_underscores
+   info - The private field _currentLocation could be 'final' - lib\features\job\screens\post_job_screen.dart:30:10 - prefer_final_fields
+   info - Unnecessary use of multiple underscores - lib\features\notifications\notifications_screen.dart:120:37 - unnecessary_underscores
+warning - The declaration '_buildLanguageOption' isn't referenced - lib\features\profile\profile_screen.dart:40:10 - unused_element
+   info - Don't use 'BuildContext's across async gaps - lib\features\provider\screens\booking_request_screen.dart:479:23 - use_build_context_synchronously
+   info - Unnecessary use of multiple underscores - lib\features\provider\screens\earnings_screen.dart:188:33 - unnecessary_underscores
+   info - Use a 'SizedBox' to add whitespace to a layout - lib\features\provider\screens\job_post_detail_screen.dart:256:17 - sized_box_for_whitespace
+warning - The declaration '_currentTime' isn't referenced - lib\features\provider\screens\job_requests_screen.dart:24:21 - unused_element
+   info - Unnecessary use of multiple underscores - lib\features\provider\screens\job_requests_screen.dart:176:29 - unnecessary_underscores
+   info - Unnecessary use of multiple underscores - lib\features\provider\screens\job_requests_screen.dart:321:29 - unnecessary_underscores
+   info - Unnecessary use of multiple underscores - lib\features\provider\screens\job_requests_screen.dart:438:29 - unnecessary_underscores
+   info - Unnecessary use of multiple underscores - lib\features\provider\screens\profile_actions_screen.dart:67:29 - unnecessary_underscores
+   info - Unnecessary use of multiple underscores - lib\features\provider\screens\provider_dashboard_screen.dart:510:33 - unnecessary_underscores
+warning - The declaration '_buildServiceBadge' isn't referenced - lib\features\provider\screens\provider_job_detail_screen.dart:384:10 - unused_element
+   info - Don't use 'BuildContext's across async gaps - lib\features\provider\screens\provider_login_screen.dart:34:38 - use_build_context_synchronously
+   info - Unnecessary use of multiple underscores - lib\features\provider\screens\provider_notifications_screen.dart:289:29 - unnecessary_underscores
+   info - Unnecessary use of multiple underscores - lib\features\provider\screens\provider_notifications_screen.dart:371:29 - unnecessary_underscores
+   info - Unnecessary use of multiple underscores - lib\features\provider\screens\provider_notifications_screen.dart:472:29 - unnecessary_underscores
+   info - 'activeColor' is deprecated and shouldn't be used. Use activeThumbColor or activeTrackColor instead. This feature was deprecated after v3.31.0-2.0.pre - lib\features\provider\screens\provider_profile_screen.dart:633:13 - deprecated_member_use
+   info - Unnecessary use of multiple underscores - lib\features\provider\screens\services_list_screen.dart:106:43 - unnecessary_underscores
+   info - The private field _totalEarnings could be 'final' - lib\features\provider\screens\wallet_screen.dart:23:10 - prefer_final_fields
+   info - The private field _transactions could be 'final' - lib\features\provider\screens\wallet_screen.dart:25:30 - prefer_final_fields
+   info - Unnecessary use of multiple underscores - lib\features\provider\screens\wallet_screen.dart:335:31 - unnecessary_underscores
+   info - Unnecessary use of multiple underscores - lib\features\provider\screens\wallet_screen.dart:426:31 - unnecessary_underscores
+   info - Unnecessary use of multiple underscores - lib\features\provider\screens\workers_list_screen.dart:55:37 - unnecessary_underscores
+warning - The value of the local variable 'currentProvider' isn't used - lib\features\provider_map\provider_map_screen.dart:141:11 - unused_local_variable
+   info - 'translate' is deprecated and shouldn't be used. Use translateByVector3, translateByVector4, or translateByDouble instead - lib\features\provider_map\provider_map_screen.dart:315:40 - deprecated_member_use
+warning - The value of the field '_providerAccepted' isn't used - lib\features\provider_map\provider_map_screen.dart:861:8 - unused_field
+   info - Unnecessary use of multiple underscores - lib\features\services\service_detail_screen.dart:239:33 - unnecessary_underscores
+   info - 'activeColor' is deprecated and shouldn't be used. Use activeThumbColor instead. This feature was deprecated after v3.31.0-2.0.pre - lib\features\settings\settings_screen.dart:260:19 - deprecated_member_use
+   info - Unnecessary use of multiple underscores - lib\features\splash\splash_screen.dart:131:53 - unnecessary_underscores
+   info - Unnecessary use of multiple underscores - lib\features\splash\splash_screen.dart:131:57 - unnecessary_underscores
+
+39 issues found. 
+(ran in 1.2s)

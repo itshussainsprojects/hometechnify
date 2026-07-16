@@ -1,0 +1,40 @@
+{
+  "project_info": {
+    "project_number": "301805360481",
+    "firebase_url": "https://hometechnify-6d041-default-rtdb.firebaseio.com",
+    "project_id": "hometechnify-6d041",
+    "storage_bucket": "hometechnify-6d041.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:301805360481:android:2cf25a1cfa80d20a3aa120",
+        "android_client_info": {
+          "package_name": "com.hometechnify.app"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "301805360481-qnr3hoe3mvtbb1cqtksg7556h5ut5u5a.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyBASAjtOAV_5SXfZ6cHZo0n_sYenGAo0OA"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "301805360481-qnr3hoe3mvtbb1cqtksg7556h5ut5u5a.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

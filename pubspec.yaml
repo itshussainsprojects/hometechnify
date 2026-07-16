@@ -1,0 +1,145 @@
+name: home_technify
+description: "On-Demand Home Services App - Connect with verified service providers"
+publish_to: 'none'
+version: 1.0.0+1
+
+environment:
+  sdk: ^3.10.4
+
+# Dependencies specify other packages that your package needs in order to work.
+# To automatically upgrade your package dependencies to the latest versions
+# consider running `flutter pub upgrade --major-versions`. Alternatively,
+# dependencies can be manually updated by changing the version numbers below to
+# the latest version available on pub.dev. To see which dependencies have newer
+# versions available, run `flutter pub outdated`.
+dependencies:
+  flutter:
+    sdk: flutter
+
+  # UI & Icons
+  cupertino_icons: ^1.0.8
+  flutter_svg: ^2.0.10+1
+  image_picker: ^1.0.7
+  file_picker: ^10.3.10
+  
+  # Maps
+  flutter_map: ^6.1.0
+  latlong2: ^0.9.0
+  
+  # Animations
+  animations: ^2.0.11
+  shimmer: ^3.0.0
+  flutter_animate: ^4.5.0
+  
+  # State Management (for UI state)
+  provider: ^6.1.2
+  
+  # Utilities
+  smooth_page_indicator: ^1.2.0+3
+  pinput: ^5.0.1
+  fl_chart: ^1.1.1
+  flutter_dotenv: ^6.0.0
+  json_annotation: ^4.9.0
+  skeletonizer: ^2.1.2
+  firebase_core: ^3.8.1
+  firebase_auth: ^5.5.1
+  google_sign_in: ^6.2.2
+  http: ^1.6.0
+  dio: ^5.7.0
+  cloud_firestore: ^5.6.12
+  firebase_messaging: ^15.1.3
+  firebase_analytics: ^11.4.1
+  flutter_local_notifications: ^17.2.2
+  geolocator: ^14.0.2
+  geocoding: ^4.0.0
+  shared_preferences: ^2.5.4
+  permission_handler: ^12.0.1
+  record: ^6.2.0
+  audioplayers: ^6.5.1
+  path_provider: ^2.1.5
+  video_player: ^2.8.6
+  chewie: ^1.7.1
+  video_compress: ^3.1.4
+  open_filex: ^4.4.0
+  url_launcher: ^6.2.5
+  
+  # Real-time Socket.IO
+  socket_io_client: ^2.0.3+1
+  
+  # WebView for Payments
+  webview_flutter: ^4.4.2
+  intl: ^0.19.0
+  supabase_flutter: ^2.12.0
+
+  path: any
+  http_parser: any
+  flutter_map_tile_caching: any
+dev_dependencies:
+  flutter_test:
+    sdk: flutter
+
+  # The "flutter_lints" package below contains a set of recommended lints to
+  # encourage good coding practices. The lint set provided by the package is
+  # activated in the `analysis_options.yaml` file located at the root of your
+  # package. See that file for information about deactivating specific lint
+  # rules and activating additional ones.
+  flutter_lints: ^6.0.0
+  build_runner: ^2.10.5
+  json_serializable: ^6.11.4
+
+# For information on the generic Dart part of this file, see the
+# following page: https://dart.dev/tools/pub/pubspec
+
+# The following section is specific to Flutter packages.
+flutter:
+
+  # The following line ensures that the Material Icons font is
+  # included with your application, so that you can use the icons in
+  # the material Icons class.
+  uses-material-design: true
+
+  assets:
+    - assets/anim/techy/
+    - assets/anim/techy_alpha/
+    - assets/images/techy_wave.webp
+    - assets/images/techy_wave_nobg.webp
+    - assets/images/logo.png
+    - assets/images/banner_home.png
+    - assets/images/banner_ac_sale.png
+    - assets/images/banner_plumbing.png
+    - assets/images/login_illustration.png
+    - .env
+
+  fonts:
+    - family: PlusJakartaSans
+      fonts:
+        - asset: assets/fonts/PlusJakartaSans-Regular.ttf
+          weight: 400
+        - asset: assets/fonts/PlusJakartaSans-Medium.ttf
+          weight: 500
+        - asset: assets/fonts/PlusJakartaSans-SemiBold.ttf
+          weight: 600
+        - asset: assets/fonts/PlusJakartaSans-Bold.ttf
+          weight: 700
+        - asset: assets/fonts/PlusJakartaSans-ExtraBold.ttf
+          weight: 800
+
+  # To add custom fonts to your application, add a fonts section here,
+  # in this "flutter" section. Each entry in this list should have a
+  # "family" key with the font family name, and a "fonts" key with a
+  # list giving the asset and other descriptors for the font. For
+  # example:
+  # fonts:
+  #   - family: Schyler
+  #     fonts:
+  #       - asset: fonts/Schyler-Regular.ttf
+  #       - asset: fonts/Schyler-Italic.ttf
+  #         style: italic
+  #   - family: Trajan Pro
+  #     fonts:
+  #       - asset: fonts/TrajanPro.ttf
+  #       - asset: fonts/TrajanPro_Bold.ttf
+  #         weight: 700
+  #
+  # For details regarding fonts from package dependencies,
+  # see https://flutter.dev/to/font-from-package

@@ -1,0 +1,301 @@
+﻿Analyzing hometechnify...                                       
+
+warning - The value of the field '_iconsPath' isn't used - lib\core\constants\app_assets.dart:6:23 - unused_field
+warning - Unused import: '../constants/constants.dart' - lib\core\services\api_service.dart:4:8 - unused_import
+   info - Don't invoke 'print' in production code - lib\core\services\api_service.dart:37:12 - avoid_print
+   info - Don't invoke 'print' in production code - lib\core\services\api_service.dart:63:7 - avoid_print
+   info - Don't invoke 'print' in production code - lib\core\services\api_service.dart:65:7 - avoid_print
+   info - Don't invoke 'print' in production code - lib\core\services\background_service.dart:5:5 - avoid_print
+   info - Don't invoke 'print' in production code - lib\core\services\background_service.dart:10:5 - avoid_print
+warning - Unused import: 'package:flutter_map_tile_caching/flutter_map_tile_caching.dart' - lib\core\services\map_service.dart:3:8 - unused_import
+   info - Don't invoke 'print' in production code - lib\core\services\map_service.dart:10:7 - avoid_print
+   info - Don't invoke 'print' in production code - lib\core\services\map_service.dart:12:7 - avoid_print
+warning - Unused import: 'package:flutter/foundation.dart' - lib\core\services\push_notification_service.dart:3:8 - unused_import
+   info - Don't invoke 'print' in production code - lib\core\services\push_notification_service.dart:9:3 - avoid_print
+   info - Don't invoke 'print' in production code - lib\core\services\push_notification_service.dart:32:5 - avoid_print
+   info - Don't invoke 'print' in production code - lib\core\services\push_notification_service.dart:60:13 - avoid_print
+   info - Don't invoke 'print' in production code - lib\core\services\push_notification_service.dart:89:7 - avoid_print
+   info - Don't invoke 'print' in production code - lib\core\services\push_notification_service.dart:90:7 - avoid_print
+   info - Don't invoke 'print' in production code - lib\core\services\push_notification_service.dart:95:9 - avoid_print
+   info - Don't invoke 'print' in production code - lib\core\services\push_notification_service.dart:128:7 - avoid_print
+   info - Don't invoke 'print' in production code - lib\core\services\push_notification_service.dart:131:7 - avoid_print
+   info - The imported package 'intl' isn't a dependency of the importing package - lib\core\utils\date_formatter.dart:1:8 - depend_on_referenced_packages
+warning - Unused import: 'package:dio/dio.dart' - lib\features\address\data\repositories\remote_address_repository.dart:1:8 - unused_import
+warning - Unused import: '../../../../core/config/env_config.dart' - lib\features\address\data\repositories\remote_address_repository.dart:4:8 - unused_import
+warning - Unused import: '../../core/widgets/async_value_wrapper.dart' - lib\features\address\my_addresses_screen.dart:11:8 - unused_import
+   info - Don't use 'BuildContext's across async gaps - lib\features\address\providers\address_provider.dart:50:34 - use_build_context_synchronously
+   info - Don't use 'BuildContext's across async gaps - lib\features\address\providers\address_provider.dart:52:32 - use_build_context_synchronously
+   info - Don't use 'BuildContext's across async gaps - lib\features\address\providers\address_provider.dart:70:34 - use_build_context_synchronously
+   info - Don't use 'BuildContext's across async gaps - lib\features\address\providers\address_provider.dart:74:32 - use_build_context_synchronously
+warning - Unused import: 'dart:io' - lib\features\admin\screens\admin_dashboard_screen.dart:1:8 - unused_import
+   info - 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss - lib\features\admin\screens\admin_notification_screen.dart:226:72 - deprecated_member_use
+   info - 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss - lib\features\admin\screens\admin_notification_screen.dart:266:92 - deprecated_member_use
+   info - 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss - lib\features\admin\screens\admin_notification_screen.dart:422:60 - deprecated_member_use
+   info - 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss - lib\features\admin\screens\admin_notification_screen.dart:442:82 - deprecated_member_use
+   info - 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss - lib\features\admin\screens\admin_promos_screen.dart:184:41 - deprecated_member_use
+   info - 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss - lib\features\admin\screens\admin_promos_screen.dart:204:41 - deprecated_member_use
+   info - 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss - lib\features\admin\screens\admin_promos_screen.dart:231:67 - deprecated_member_use
+   info - 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss - lib\features\admin\screens\admin_promos_screen.dart:231:102 - deprecated_member_use
+   info - 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss - lib\features\admin\screens\admin_promos_screen.dart:287:41 - deprecated_member_use
+   info - 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss - lib\features\admin\screens\admin_promos_screen.dart:306:63 - deprecated_member_use
+   info - 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss - lib\features\admin\screens\admin_promos_screen.dart:319:47 - deprecated_member_use
+   info - 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss - lib\features\admin\screens\admin_promos_screen.dart:345:64 - deprecated_member_use
+   info - 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss - lib\features\admin\screens\admin_promos_screen.dart:357:87 - deprecated_member_use
+   info - 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss - lib\features\admin\screens\admin_promos_screen.dart:359:90 - deprecated_member_use
+   info - 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss - lib\features\admin\screens\admin_promos_screen.dart:388:73 - deprecated_member_use
+   info - 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss - lib\features\admin\screens\admin_promos_screen.dart:425:69 - deprecated_member_use
+   info - 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss - lib\features\admin\screens\admin_promos_screen.dart:443:61 - deprecated_member_use
+   info - 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss - lib\features\admin\screens\admin_promos_screen.dart:459:52 - deprecated_member_use
+warning - Unused import: 'package:flutter_animate/flutter_animate.dart' - lib\features\admin\screens\admin_provider_auth_screen.dart:4:8 - unused_import
+   info - Unnecessary use of multiple underscores - lib\features\admin\screens\admin_provider_recycle_bin_screen.dart:38:39 - unnecessary_underscores
+   info - Unnecessary use of multiple underscores - lib\features\admin\screens\admin_recycle_bin_screen.dart:37:39 - unnecessary_underscores
+   info - 'activeColor' is deprecated and shouldn't be used. Use activeThumbColor instead. This feature was deprecated after v3.31.0-2.0.pre - lib\features\admin\screens\admin_services_screen.dart:428:23 - deprecated_member_use
+warning - Unused import: 'package:flutter_animate/flutter_animate.dart' - lib\features\admin\screens\admin_user_auth_screen.dart:4:8 - unused_import
+   info - Unnecessary 'const' keyword - lib\features\admin\screens\admin_users_screen.dart:634:15 - unnecessary_const
+   info - Unnecessary 'const' keyword - lib\features\admin\screens\admin_users_screen.dart:635:15 - unnecessary_const
+warning - The declaration '_buildStatusChip' isn't referenced - lib\features\admin\screens\admin_withdrawals_screen.dart:243:10 - unused_element
+   info - Unnecessary braces in a string interpolation - lib\features\admin\screens\admin_withdrawals_screen.dart:287:53 - unnecessary_brace_in_string_interps
+  error - Missing concrete implementations of 'abstract class AuthRepository.loginWithEmail' and 'abstract class AuthRepository.loginWithGoogle' - lib\features\auth\data\repositories\mock_auth_repository.dart:7:7 - non_abstract_class_inherits_abstract_member
+  error - 'MockAuthRepository.register' ('Future<Result<UserModel>> Function(UserModel, String)') isn't a valid override of 'AuthRepository.register' ('Future<Result<UserModel>> Function(UserModel, String, {String role})') - lib\features\auth\data\repositories\mock_auth_repository.dart:59:29 - invalid_override
+   info - Don't invoke 'print' in production code - lib\features\auth\data\repositories\remote_auth_repository.dart:78:12 - avoid_print
+   info - Don't invoke 'print' in production code - lib\features\auth\data\repositories\remote_auth_repository.dart:80:12 - avoid_print
+   info - Don't invoke 'print' in production code - lib\features\auth\data\repositories\remote_auth_repository.dart:111:7 - avoid_print
+   info - Don't invoke 'print' in production code - lib\features\auth\data\repositories\remote_auth_repository.dart:115:7 - avoid_print
+   info - Don't invoke 'print' in production code - lib\features\auth\data\repositories\remote_auth_repository.dart:120:10 - avoid_print
+   info - Don't invoke 'print' in production code - lib\features\auth\data\repositories\remote_auth_repository.dart:122:10 - avoid_print
+   info - Don't invoke 'print' in production code - lib\features\auth\data\repositories\remote_auth_repository.dart:130:9 - avoid_print
+   info - Don't invoke 'print' in production code - lib\features\auth\data\repositories\remote_auth_repository.dart:131:9 - avoid_print
+   info - Don't invoke 'print' in production code - lib\features\auth\data\repositories\remote_auth_repository.dart:132:9 - avoid_print
+   info - Don't invoke 'print' in production code - lib\features\auth\data\repositories\remote_auth_repository.dart:133:9 - avoid_print
+   info - Don't invoke 'print' in production code - lib\features\auth\data\repositories\remote_auth_repository.dart:146:9 - avoid_print
+   info - Don't invoke 'print' in production code - lib\features\auth\data\repositories\remote_auth_repository.dart:149:9 - avoid_print
+   info - Don't invoke 'print' in production code - lib\features\auth\data\repositories\remote_auth_repository.dart:150:9 - avoid_print
+   info - Don't invoke 'print' in production code - lib\features\auth\data\repositories\remote_auth_repository.dart:237:11 - avoid_print
+warning - Unused import: '../../../../core/errors/failures.dart' - lib\features\auth\domain\repositories\auth_repository.dart:1:8 - unused_import
+warning - Unused import: '../../../../core/errors/failures.dart' - lib\features\auth\providers\auth_provider.dart:4:8 - unused_import
+   info - Don't invoke 'print' in production code - lib\features\auth\screens\login_screen.dart:76:63 - avoid_print
+   info - Don't use 'BuildContext's across async gaps - lib\features\auth\screens\login_screen.dart:78:46 - use_build_context_synchronously
+   info - Don't invoke 'print' in production code - lib\features\auth\screens\login_screen.dart:101:58 - avoid_print
+   info - Don't use 'BuildContext's across async gaps - lib\features\auth\screens\login_screen.dart:103:41 - use_build_context_synchronously
+   info - Don't invoke 'print' in production code - lib\features\auth\screens\login_screen.dart:118:58 - avoid_print
+   info - Don't use 'BuildContext's across async gaps - lib\features\auth\screens\login_screen.dart:120:41 - use_build_context_synchronously
+   info - Unnecessary use of multiple underscores - lib\features\auth\screens\login_screen.dart:453:33 - unnecessary_underscores
+   info - Unnecessary use of multiple underscores - lib\features\auth\screens\login_screen.dart:453:37 - unnecessary_underscores
+warning - The value of the field '_email' isn't used - lib\features\auth\screens\otp_screen.dart:26:11 - unused_field
+warning - Unnecessary type check; the result is always 'true' - lib\features\auth\screens\otp_screen.dart:39:9 - unnecessary_type_check
+   info - Don't invoke 'print' in production code - lib\features\auth\screens\otp_screen.dart:98:9 - avoid_print
+   info - Don't use 'BuildContext's across async gaps - lib\features\auth\screens\otp_screen.dart:103:41 - use_build_context_synchronously
+   info - Don't invoke 'print' in production code - lib\features\auth\screens\signup_screen.dart:108:64 - avoid_print
+   info - Don't use 'BuildContext's across async gaps - lib\features\auth\screens\signup_screen.dart:110:47 - use_build_context_synchronously
+   info - Don't invoke 'print' in production code - lib\features\auth\screens\signup_screen.dart:132:58 - avoid_print
+   info - Don't use 'BuildContext's across async gaps - lib\features\auth\screens\signup_screen.dart:134:41 - use_build_context_synchronously
+   info - Unnecessary use of multiple underscores - lib\features\auth\screens\signup_screen.dart:649:29 - unnecessary_underscores
+   info - Unnecessary use of multiple underscores - lib\features\auth\screens\signup_screen.dart:649:33 - unnecessary_underscores
+   info - The imported package 'intl' isn't a dependency of the importing package - lib\features\booking\booking_detail_screen.dart:11:8 - depend_on_referenced_packages
+   info - Don't use 'BuildContext's across async gaps, guarded by an unrelated 'mounted' check - lib\features\booking\booking_detail_screen.dart:483:34 - use_build_context_synchronously
+   info - Don't use 'BuildContext's across async gaps, guarded by an unrelated 'mounted' check - lib\features\booking\booking_detail_screen.dart:484:41 - use_build_context_synchronously
+   info - Don't use 'BuildContext's across async gaps, guarded by an unrelated 'mounted' check - lib\features\booking\booking_detail_screen.dart:488:41 - use_build_context_synchronously
+   info - Don't use 'BuildContext's across async gaps, guarded by an unrelated 'mounted' check - lib\features\booking\booking_detail_screen.dart:568:50 - use_build_context_synchronously
+   info - Don't use 'BuildContext's across async gaps, guarded by an unrelated 'mounted' check - lib\features\booking\booking_detail_screen.dart:570:48 - use_build_context_synchronously
+warning - The value of the local variable 'selected' isn't used - lib\features\booking\booking_screen.dart:282:15 - unused_local_variable
+warning - Dead code - lib\features\booking\booking_screen.dart:763:27 - dead_code
+warning - The left operand can't be null, so the right operand is never executed - lib\features\booking\booking_screen.dart:763:30 - dead_null_aware_expression
+warning - Unused import: '../../../../core/errors/failures.dart' - lib\features\booking\domain\repositories\booking_repository.dart:1:8 - unused_import
+warning - Unused import: '../../../auth/domain/repositories/auth_repository.dart' - lib\features\booking\domain\repositories\booking_repository.dart:3:8 - unused_import
+   info - The imported package 'intl' isn't a dependency of the importing package - lib\features\booking\my_bookings_screen.dart:10:8 - depend_on_referenced_packages
+warning - Unused import: '../../../../core/errors/failures.dart' - lib\features\booking\providers\booking_provider.dart:5:8 - unused_import
+warning - The value of the field '_providerData' isn't used - lib\features\booking\rate_provider_screen.dart:23:30 - unused_field
+warning - The value of the field '_serviceData' isn't used - lib\features\booking\rate_provider_screen.dart:28:30 - unused_field
+   info - Don't use 'BuildContext's across async gaps, guarded by an unrelated 'mounted' check - lib\features\booking\rate_provider_screen.dart:302:33 - use_build_context_synchronously
+   info - Don't use 'BuildContext's across async gaps, guarded by an unrelated 'mounted' check - lib\features\booking\rate_provider_screen.dart:303:40 - use_build_context_synchronously
+   info - Don't use 'BuildContext's across async gaps, guarded by an unrelated 'mounted' check - lib\features\booking\rate_provider_screen.dart:307:41 - use_build_context_synchronously
+   info - The imported package 'http_parser' isn't a dependency of the importing package - lib\features\chat\data\repositories\remote_chat_repository.dart:6:8 - depend_on_referenced_packages
+   info - Statements in an if should be enclosed in a block - lib\features\chat\data\repositories\remote_chat_repository.dart:57:66 - curly_braces_in_flow_control_structures
+   info - Statements in an if should be enclosed in a block - lib\features\chat\data\repositories\remote_chat_repository.dart:58:41 - curly_braces_in_flow_control_structures
+   info - Statements in an if should be enclosed in a block - lib\features\chat\data\repositories\remote_chat_repository.dart:59:70 - curly_braces_in_flow_control_structures
+   info - Statements in an if should be enclosed in a block - lib\features\chat\data\repositories\remote_chat_repository.dart:60:70 - curly_braces_in_flow_control_structures
+warning - Unused import: '../providers/chat_provider.dart' - lib\features\chat\screens\chat_list_screen.dart:8:8 - unused_import
+warning - Unused import: 'package:cloud_firestore/cloud_firestore.dart' - lib\features\chat\screens\chat_screen.dart:10:8 - unused_import
+   info - Unnecessary use of multiple underscores - lib\features\chat\screens\chat_screen.dart:287:36 - unnecessary_underscores
+   info - Unnecessary use of multiple underscores - lib\features\chat\screens\chat_screen.dart:287:39 - unnecessary_underscores
+   info - Unnecessary use of multiple underscores - lib\features\home\all_services_screen.dart:198:43 - unnecessary_underscores
+   info - Unnecessary use of multiple underscores - lib\features\home\all_services_screen.dart:198:47 - unnecessary_underscores
+warning - Unused import: '../../../../core/errors/failures.dart' - lib\features\home\data\repositories\mock_service_repository.dart:2:8 - unused_import
+warning - Unused import: '../../../../core/errors/failures.dart' - lib\features\home\domain\repositories\service_repository.dart:1:8 - unused_import
+warning - Unused import: '../../../auth/domain/repositories/auth_repository.dart' - lib\features\home\domain\repositories\service_repository.dart:3:8 - unused_import
+warning - Unused import: '../../../../core/errors/failures.dart' - lib\features\home\providers\service_provider.dart:4:8 - unused_import
+warning - Unused import: '../data/models/service_model.dart' - lib\features\home\screens\home_screen.dart:12:8 - unused_import
+warning - Unused import: 'package:home_technify/features/address/data/models/address_model.dart' - lib\features\home\screens\home_screen.dart:19:8 - unused_import
+warning - The value of the field '_locations' isn't used - lib\features\home\screens\home_screen.dart:40:22 - unused_field
+   info - Don't invoke 'print' in production code - lib\features\home\screens\home_screen.dart:119:8 - avoid_print
+   info - Don't invoke 'print' in production code - lib\features\home\screens\home_screen.dart:159:11 - avoid_print
+   info - Don't invoke 'print' in production code - lib\features\home\screens\home_screen.dart:160:11 - avoid_print
+   info - Don't invoke 'print' in production code - lib\features\home\screens\home_screen.dart:189:11 - avoid_print
+   info - 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss - lib\features\home\screens\home_screen.dart:226:48 - deprecated_member_use
+   info - Unnecessary use of multiple underscores - lib\features\home\screens\home_screen.dart:371:166 - unnecessary_underscores
+   info - Unnecessary use of multiple underscores - lib\features\home\screens\home_screen.dart:371:170 - unnecessary_underscores
+warning - Dead code - lib\features\home\screens\home_screen.dart:498:48 - dead_code
+warning - The left operand can't be null, so the right operand is never executed - lib\features\home\screens\home_screen.dart:498:51 - dead_null_aware_expression
+   info - Unnecessary use of multiple underscores - lib\features\home\widgets\job_posting_modal.dart:110:39 - unnecessary_underscores
+   info - Unnecessary use of multiple underscores - lib\features\home\widgets\job_posting_modal.dart:110:43 - unnecessary_underscores
+   info - Unnecessary use of multiple underscores - lib\features\home\widgets\service_card.dart:106:43 - unnecessary_underscores
+   info - Unnecessary use of multiple underscores - lib\features\home\widgets\service_card.dart:106:47 - unnecessary_underscores
+   info - The imported package 'http_parser' isn't a dependency of the importing package - lib\features\job\data\repositories\remote_job_repository.dart:6:8 - depend_on_referenced_packages
+   info - Statements in an if should be enclosed in a block - lib\features\job\data\repositories\remote_job_repository.dart:27:67 - curly_braces_in_flow_control_structures
+   info - Statements in an if should be enclosed in a block - lib\features\job\data\repositories\remote_job_repository.dart:28:73 - curly_braces_in_flow_control_structures
+   info - Statements in an if should be enclosed in a block - lib\features\job\data\repositories\remote_job_repository.dart:29:43 - curly_braces_in_flow_control_structures
+   info - Statements in an if should be enclosed in a block - lib\features\job\data\repositories\remote_job_repository.dart:30:101 - curly_braces_in_flow_control_structures
+   info - Use interpolation to compose strings and values - lib\features\job\data\repositories\remote_job_repository.dart:73:25 - prefer_interpolation_to_compose_strings
+   info - Statements in an if should be enclosed in a block - lib\features\job\data\repositories\remote_job_repository.dart:85:67 - curly_braces_in_flow_control_structures
+   info - Statements in an if should be enclosed in a block - lib\features\job\data\repositories\remote_job_repository.dart:86:73 - curly_braces_in_flow_control_structures
+   info - Statements in an if should be enclosed in a block - lib\features\job\data\repositories\remote_job_repository.dart:87:43 - curly_braces_in_flow_control_structures
+   info - Statements in an if should be enclosed in a block - lib\features\job\data\repositories\remote_job_repository.dart:88:101 - curly_braces_in_flow_control_structures
+warning - Unused import: 'dart:io' - lib\features\job\screens\my_jobs_screen.dart:1:8 - unused_import
+warning - Unused import: 'package:image_picker/image_picker.dart' - lib\features\job\screens\my_jobs_screen.dart:2:8 - unused_import
+warning - Unused import: 'package:url_launcher/url_launcher.dart' - lib\features\job\screens\my_jobs_screen.dart:5:8 - unused_import
+   info - Don't use 'BuildContext's across async gaps - lib\features\job\screens\my_jobs_screen.dart:222:32 - use_build_context_synchronously
+warning - The value of the local variable 'isVideo' isn't used - lib\features\job\screens\my_jobs_screen.dart:228:12 - unused_local_variable
+warning - The value of the field '_recordDuration' isn't used - lib\features\job\screens\post_job_screen.dart:50:7 - unused_field
+   info - Don't invoke 'print' in production code - lib\features\job\screens\post_job_screen.dart:300:7 - avoid_print
+   info - Don't invoke 'print' in production code - lib\features\job\screens\post_job_screen.dart:308:7 - avoid_print
+   info - Don't invoke 'print' in production code - lib\features\job\screens\post_job_screen.dart:314:7 - avoid_print
+warning - Unused import: 'package:flutter/material.dart' - lib\features\notifications\data\models\notification_model.dart:1:8 - unused_import
+   info - Don't invoke 'print' in production code - lib\features\notifications\data\repositories\remote_notification_repository.dart:79:7 - avoid_print
+   info - Don't invoke 'print' in production code - lib\features\notifications\data\repositories\remote_notification_repository.dart:81:7 - avoid_print
+   info - Don't invoke 'print' in production code - lib\features\notifications\providers\notification_provider.dart:30:8 - avoid_print
+   info - Don't invoke 'print' in production code - lib\features\notifications\providers\notification_provider.dart:62:5 - avoid_print
+   info - Don't invoke 'print' in production code - lib\features\notifications\providers\notification_provider.dart:63:5 - avoid_print
+   info - Don't invoke 'print' in production code - lib\features\notifications\providers\notification_provider.dart:71:7 - avoid_print
+   info - Don't invoke 'print' in production code - lib\features\notifications\providers\notification_provider.dart:73:7 - avoid_print
+   info - Don't invoke 'print' in production code - lib\features\notifications\providers\notification_provider.dart:74:7 - avoid_print
+   info - Don't invoke 'print' in production code - lib\features\profile\data\repositories\remote_profile_repository.dart:17:7 - avoid_print
+   info - Don't invoke 'print' in production code - lib\features\profile\data\repositories\remote_profile_repository.dart:31:7 - avoid_print
+   info - Don't invoke 'print' in production code - lib\features\profile\data\repositories\remote_profile_repository.dart:38:7 - avoid_print
+   info - Don't invoke 'print' in production code - lib\features\profile\data\repositories\remote_profile_repository.dart:39:7 - avoid_print
+   info - Don't invoke 'print' in production code - lib\features\profile\data\repositories\remote_profile_repository.dart:51:7 - avoid_print
+   info - Don't invoke 'print' in production code - lib\features\profile\data\repositories\remote_profile_repository.dart:65:7 - avoid_print
+   info - Don't invoke 'print' in production code - lib\features\profile\data\repositories\remote_profile_repository.dart:72:7 - avoid_print
+   info - Don't invoke 'print' in production code - lib\features\profile\data\repositories\remote_profile_repository.dart:73:7 - avoid_print
+   info - Don't invoke 'print' in production code - lib\features\profile\data\repositories\remote_profile_repository.dart:76:7 - avoid_print
+   info - Don't invoke 'print' in production code - lib\features\profile\data\repositories\remote_profile_repository.dart:81:7 - avoid_print
+   info - Don't invoke 'print' in production code - lib\features\profile\data\repositories\remote_profile_repository.dart:84:7 - avoid_print
+   info - Don't invoke 'print' in production code - lib\features\profile\data\repositories\remote_profile_repository.dart:85:7 - avoid_print
+   info - Don't invoke 'print' in production code - lib\features\profile\data\repositories\remote_profile_repository.dart:88:7 - avoid_print
+   info - Don't invoke 'print' in production code - lib\features\profile\data\repositories\remote_profile_repository.dart:94:7 - avoid_print
+   info - Don't invoke 'print' in production code - lib\features\profile\data\repositories\remote_profile_repository.dart:95:7 - avoid_print
+   info - Don't invoke 'print' in production code - lib\features\profile\data\repositories\remote_profile_repository.dart:99:7 - avoid_print
+   info - Don't invoke 'print' in production code - lib\features\profile\data\repositories\remote_profile_repository.dart:100:7 - avoid_print
+   info - Don't invoke 'print' in production code - lib\features\profile\data\repositories\remote_profile_repository.dart:101:7 - avoid_print
+warning - Unused import: 'package:home_technify/features/auth/data/models/user_model.dart' - lib\features\profile\edit_profile_screen.dart:9:8 - unused_import
+   info - Don't invoke 'print' in production code - lib\features\profile\edit_profile_screen.dart:43:5 - avoid_print
+   info - Don't invoke 'print' in production code - lib\features\profile\edit_profile_screen.dart:44:5 - avoid_print
+   info - Don't invoke 'print' in production code - lib\features\profile\edit_profile_screen.dart:473:11 - avoid_print
+   info - Don't invoke 'print' in production code - lib\features\profile\edit_profile_screen.dart:478:13 - avoid_print
+   info - Don't invoke 'print' in production code - lib\features\profile\edit_profile_screen.dart:486:14 - avoid_print
+   info - Don't invoke 'print' in production code - lib\features\profile\edit_profile_screen.dart:491:16 - avoid_print
+   info - Don't use 'BuildContext's across async gaps, guarded by an unrelated 'mounted' check - lib\features\profile\edit_profile_screen.dart:493:37 - use_build_context_synchronously
+   info - Don't invoke 'print' in production code - lib\features\profile\edit_profile_screen.dart:510:11 - avoid_print
+   info - Don't invoke 'print' in production code - lib\features\profile\edit_profile_screen.dart:512:11 - avoid_print
+   info - Don't use 'BuildContext's across async gaps, guarded by an unrelated 'mounted' check - lib\features\profile\edit_profile_screen.dart:517:35 - use_build_context_synchronously
+   info - Don't use 'BuildContext's across async gaps, guarded by an unrelated 'mounted' check - lib\features\profile\edit_profile_screen.dart:525:27 - use_build_context_synchronously
+   info - Don't invoke 'print' in production code - lib\features\profile\edit_profile_screen.dart:527:14 - avoid_print
+   info - Don't use 'BuildContext's across async gaps, guarded by an unrelated 'mounted' check - lib\features\profile\edit_profile_screen.dart:528:35 - use_build_context_synchronously
+   info - Don't use 'BuildContext's across async gaps, guarded by an unrelated 'mounted' check - lib\features\profile\edit_profile_screen.dart:534:41 - use_build_context_synchronously
+warning - The value of the local variable 'userName' isn't used - lib\features\profile\profile_screen.dart:62:11 - unused_local_variable
+warning - The value of the local variable 'userEmail' isn't used - lib\features\profile\profile_screen.dart:63:11 - unused_local_variable
+warning - Unused import: '../../../../core/utils/result.dart' - lib\features\profile\providers\profile_provider.dart:4:8 - unused_import
+  error - Missing concrete implementation of 'abstract class ProviderRepository.updateProfile' - lib\features\provider\data\repositories\remote_provider_repository.dart:7:7 - non_abstract_class_inherits_abstract_member
+warning - Dead code - lib\features\provider\data\repositories\remote_provider_repository.dart:36:3 - dead_code
+warning - The declaration 'updateProfile' isn't referenced - lib\features\provider\data\repositories\remote_provider_repository.dart:37:24 - unused_element
+  error - Expected to find '}' - lib\features\provider\data\repositories\remote_provider_repository.dart:46:1 - expected_token
+warning - Unused import: '../../auth/providers/auth_provider.dart' - lib\features\provider\screens\booking_request_screen.dart:11:8 - unused_import
+   info - Unnecessary use of multiple underscores - lib\features\provider\screens\job_post_detail_screen.dart:181:35 - unnecessary_underscores
+   info - Unnecessary use of multiple underscores - lib\features\provider\screens\job_post_detail_screen.dart:191:40 - unnecessary_underscores
+warning - The operand can't be 'null', so the condition is always 'false' - lib\features\provider\screens\job_post_detail_screen.dart:245:27 - unnecessary_null_comparison
+warning - The '!' will have no effect because the receiver can't be null - lib\features\provider\screens\job_post_detail_screen.dart:245:53 - unnecessary_non_null_assertion
+warning - The '!' will have no effect because the receiver can't be null - lib\features\provider\screens\job_post_detail_screen.dart:255:35 - unnecessary_non_null_assertion
+warning - Unused import: 'package:home_technify/core/services/marketplace_controller.dart' - lib\features\provider\screens\job_requests_screen.dart:9:8 - unused_import
+warning - Unused import: '../widgets/insufficient_funds_dialog.dart' - lib\features\provider\screens\job_requests_screen.dart:10:8 - unused_import
+warning - The value of the local variable 'mediaType' isn't used - lib\features\provider\screens\job_requests_screen.dart:165:11 - unused_local_variable
+  error - The getter 'customerName' isn't defined for the type 'BookingModel' - lib\features\provider\screens\job_requests_screen.dart:309:35 - undefined_getter
+  error - The getter 'serviceId' isn't defined for the type 'BookingModel' - lib\features\provider\screens\job_requests_screen.dart:313:35 - undefined_getter
+  error - The getter 'customerName' isn't defined for the type 'BookingModel' - lib\features\provider\screens\job_requests_screen.dart:356:41 - undefined_getter
+  error - The getter 'serviceId' isn't defined for the type 'BookingModel' - lib\features\provider\screens\job_requests_screen.dart:357:44 - undefined_getter
+  error - The getter 'customerName' isn't defined for the type 'BookingModel' - lib\features\provider\screens\job_requests_screen.dart:415:34 - undefined_getter
+  error - The getter 'serviceId' isn't defined for the type 'BookingModel' - lib\features\provider\screens\job_requests_screen.dart:417:35 - undefined_getter
+  error - The getter 'totalAmount' isn't defined for the type 'BookingModel' - lib\features\provider\screens\job_requests_screen.dart:424:39 - undefined_getter
+  error - The getter 'createdAt' isn't defined for the type 'BookingModel' - lib\features\provider\screens\job_requests_screen.dart:425:57 - undefined_getter
+  error - The getter 'customerName' isn't defined for the type 'BookingModel' - lib\features\provider\screens\provider_dashboard_screen.dart:424:34 - undefined_getter
+  error - The getter 'scheduledAt' isn't defined for the type 'BookingModel' - lib\features\provider\screens\provider_dashboard_screen.dart:425:54 - undefined_getter
+  error - The getter 'scheduledAt' isn't defined for the type 'BookingModel' - lib\features\provider\screens\provider_dashboard_screen.dart:426:54 - undefined_getter
+  error - The getter 'serviceId' isn't defined for the type 'BookingModel' - lib\features\provider\screens\provider_dashboard_screen.dart:474:33 - undefined_getter
+  error - The getter 'totalAmount' isn't defined for the type 'BookingModel' - lib\features\provider\screens\provider_dashboard_screen.dart:484:36 - undefined_getter
+warning - Unused import: '../../../core/utils/responsive.dart' - lib\features\provider\screens\provider_login_screen.dart:7:8 - unused_import
+  error - The body might complete normally, causing 'null' to be returned, but the return type, 'Widget', is a potentially non-nullable type - lib\features\provider\screens\provider_login_screen.dart:73:10 - body_might_complete_normally
+  error - Expected to find ';' - lib\features\provider\screens\provider_login_screen.dart:116:63 - expected_token
+  error - Expected an identifier - lib\features\provider\screens\provider_login_screen.dart:116:64 - missing_identifier
+  error - Unexpected text ';' - lib\features\provider\screens\provider_login_screen.dart:116:64 - unexpected_token
+  error - Expected to find ';' - lib\features\provider\screens\provider_login_screen.dart:118:47 - expected_token
+  error - Expected an identifier - lib\features\provider\screens\provider_login_screen.dart:118:48 - missing_identifier
+  error - Unexpected text ';' - lib\features\provider\screens\provider_login_screen.dart:118:48 - unexpected_token
+  error - Expected to find ';' - lib\features\provider\screens\provider_login_screen.dart:147:63 - expected_token
+  error - Expected an identifier - lib\features\provider\screens\provider_login_screen.dart:147:64 - missing_identifier
+  error - Unexpected text ';' - lib\features\provider\screens\provider_login_screen.dart:147:64 - unexpected_token
+  error - Expected to find ';' - lib\features\provider\screens\provider_login_screen.dart:149:47 - expected_token
+  error - Expected an identifier - lib\features\provider\screens\provider_login_screen.dart:149:48 - missing_identifier
+  error - Unexpected text ';' - lib\features\provider\screens\provider_login_screen.dart:149:48 - unexpected_token
+  error - Expected to find ';' - lib\features\provider\screens\provider_login_screen.dart:178:63 - expected_token
+  error - Expected an identifier - lib\features\provider\screens\provider_login_screen.dart:178:64 - missing_identifier
+  error - Expected to find ';' - lib\features\provider\screens\provider_login_screen.dart:178:64 - expected_token
+  error - Unexpected text ';' - lib\features\provider\screens\provider_login_screen.dart:178:64 - unexpected_token
+  error - Expected an identifier - lib\features\provider\screens\provider_login_screen.dart:179:11 - missing_identifier
+  error - Expected to find ';' - lib\features\provider\screens\provider_login_screen.dart:179:11 - expected_token
+  error - Unexpected text ';' - lib\features\provider\screens\provider_login_screen.dart:179:11 - unexpected_token
+  error - Expected an identifier - lib\features\provider\screens\provider_login_screen.dart:179:12 - missing_identifier
+  error - Expected to find ';' - lib\features\provider\screens\provider_login_screen.dart:179:12 - expected_token
+  error - Unexpected text ';' - lib\features\provider\screens\provider_login_screen.dart:179:12 - unexpected_token
+  error - Expected an identifier - lib\features\provider\screens\provider_login_screen.dart:180:9 - missing_identifier
+  error - Expected to find ';' - lib\features\provider\screens\provider_login_screen.dart:180:9 - expected_token
+  error - Unexpected text ';' - lib\features\provider\screens\provider_login_screen.dart:180:9 - unexpected_token
+  error - Expected an identifier - lib\features\provider\screens\provider_login_screen.dart:180:10 - missing_identifier
+  error - Expected to find ';' - lib\features\provider\screens\provider_login_screen.dart:180:10 - expected_token
+  error - Unexpected text ';' - lib\features\provider\screens\provider_login_screen.dart:180:10 - unexpected_token
+  error - Expected an identifier - lib\features\provider\screens\provider_login_screen.dart:181:7 - missing_identifier
+  error - Expected to find ';' - lib\features\provider\screens\provider_login_screen.dart:181:7 - expected_token
+  error - Unexpected text ';' - lib\features\provider\screens\provider_login_screen.dart:181:7 - unexpected_token
+  error - Expected an identifier - lib\features\provider\screens\provider_login_screen.dart:181:8 - missing_identifier
+  error - Expected to find ';' - lib\features\provider\screens\provider_login_screen.dart:181:8 - expected_token
+  error - Unexpected text ';' - lib\features\provider\screens\provider_login_screen.dart:181:8 - unexpected_token
+  error - Expected an identifier - lib\features\provider\screens\provider_login_screen.dart:182:5 - missing_identifier
+  error - Unexpected text ';' - lib\features\provider\screens\provider_login_screen.dart:182:5 - unexpected_token
+   info - Unnecessary empty statement - lib\features\provider\screens\provider_login_screen.dart:182:6 - empty_statements
+warning - The declaration '_buildLabel' isn't referenced - lib\features\provider\screens\provider_login_screen.dart:185:10 - unused_element
+warning - The declaration '_buildTextField' isn't referenced - lib\features\provider\screens\provider_login_screen.dart:196:10 - unused_element
+warning - The declaration '_buildPasswordField' isn't referenced - lib\features\provider\screens\provider_login_screen.dart:224:10 - unused_element
+   info - Don't use 'BuildContext's across async gaps - lib\features\provider\screens\provider_onboarding_screen.dart:241:34 - use_build_context_synchronously
+warning - Unused import: '../../job/providers/job_post_provider.dart' - lib\features\provider\screens\set_price_screen.dart:9:8 - unused_import
+warning - Unused import: 'package:provider/provider.dart' - lib\features\provider\screens\set_price_screen.dart:10:8 - unused_import
+   info - The private field _isSubmitting could be 'final' - lib\features\provider\screens\set_price_screen.dart:24:8 - prefer_final_fields
+   info - The private field _useSimulation could be 'final' - lib\features\provider_map\provider_map_screen.dart:46:8 - prefer_final_fields
+warning - The value of the field '_isLoadingLocation' isn't used - lib\features\provider_map\provider_map_screen.dart:51:8 - unused_field
+   info - Don't use 'BuildContext's across async gaps - lib\features\settings\settings_screen.dart:76:31 - use_build_context_synchronously
+   info - The member 'build' overrides an inherited member but isn't annotated with '@override' - lib\features\settings\settings_screen.dart:105:10 - annotate_overrides
+   info - Don't use 'BuildContext's across async gaps, guarded by an unrelated 'mounted' check - lib\features\settings\settings_screen.dart:430:40 - use_build_context_synchronously
+   info - Don't use 'BuildContext's across async gaps, guarded by an unrelated 'mounted' check - lib\features\settings\settings_screen.dart:434:40 - use_build_context_synchronously
+   info - Don't use 'BuildContext's across async gaps, guarded by an unrelated 'mounted' check - lib\features\settings\settings_screen.dart:468:54 - use_build_context_synchronously
+   info - Don't use 'BuildContext's across async gaps, guarded by an unrelated 'mounted' check - lib\features\settings\settings_screen.dart:470:41 - use_build_context_synchronously
+warning - Unused import: '../../core/services/firebase_auth_service.dart' - lib\features\splash\splash_screen.dart:7:8 - unused_import
+  error - The name 'BookingModel' is defined in the libraries 'package:home_technify/core/services/marketplace_controller.dart' and 'package:home_technify/features/booking/data/models/booking_model.dart' - lib\main.dart:266:54 - ambiguous_import
+  error - The name 'BookingModel' is defined in the libraries 'package:home_technify/core/services/marketplace_controller.dart' and 'package:home_technify/features/booking/data/models/booking_model.dart' - lib\main.dart:272:55 - ambiguous_import
+
+flutter : 287 issues found. (ran in 6.0s)
+At line:1 char:1
++ flutter analyze 2>&1 | Out-File 
+-FilePath full_analysis.txt -Encoding ...
++ ~~~~~~~~~~~~~~~~~~~~
+    + CategoryInfo          : 
+NotSpecified:     (287 issues found. (ran 
+in 6.0s):Strin    g) [], RemoteException
+    + FullyQualifiedErrorId : 
+NativeCommand    Error
+ 

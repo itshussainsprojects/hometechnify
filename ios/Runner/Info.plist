@@ -1,0 +1,80 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+	<key>CFBundleDevelopmentRegion</key>
+	<string>$(DEVELOPMENT_LANGUAGE)</string>
+	<key>CFBundleDisplayName</key>
+	<string>HomeTechnify</string>
+	<key>CFBundleExecutable</key>
+	<string>$(EXECUTABLE_NAME)</string>
+	<key>CFBundleIdentifier</key>
+	<string>$(PRODUCT_BUNDLE_IDENTIFIER)</string>
+	<key>CFBundleInfoDictionaryVersion</key>
+	<string>6.0</string>
+	<key>CFBundleName</key>
+	<string>HomeTechnify</string>
+	<key>CFBundlePackageType</key>
+	<string>APPL</string>
+	<key>CFBundleShortVersionString</key>
+	<string>$(FLUTTER_BUILD_NAME)</string>
+	<key>CFBundleSignature</key>
+	<string>????</string>
+	<key>CFBundleVersion</key>
+	<string>$(FLUTTER_BUILD_NUMBER)</string>
+	<key>LSRequiresIPhoneOS</key>
+	<true/>
+
+	<!-- Google Sign-In URL Scheme (REVERSED_CLIENT_ID from GoogleService-Info.plist) -->
+	<key>CFBundleURLTypes</key>
+	<array>
+		<dict>
+			<key>CFBundleTypeRole</key>
+			<string>Editor</string>
+			<key>CFBundleURLSchemes</key>
+			<array>
+				<string>com.googleusercontent.apps.444217288447-371k5l1mpu8q1fmtqnjn33nsnubv0ae6</string>
+			</array>
+		</dict>
+	</array>
+
+	<!-- Permissions -->
+	<key>NSLocationWhenInUseUsageDescription</key>
+	<string>HomeTechnify needs your location to find nearby service providers.</string>
+	<key>NSLocationAlwaysUsageDescription</key>
+	<string>HomeTechnify needs your location to show local services.</string>
+	<key>NSLocationAlwaysAndWhenInUseUsageDescription</key>
+	<string>HomeTechnify needs your location to find nearby service providers.</string>
+	<key>NSCameraUsageDescription</key>
+	<string>HomeTechnify needs camera access to upload photos and videos for your job posts.</string>
+	<key>NSMicrophoneUsageDescription</key>
+	<string>HomeTechnify needs microphone access to send voice messages in chat.</string>
+	<key>NSPhotoLibraryUsageDescription</key>
+	<string>HomeTechnify needs photo library access to upload images for your job posts.</string>
+	<key>NSPhotoLibraryAddUsageDescription</key>
+	<string>HomeTechnify needs permission to save photos.</string>
+	<key>NSContactsUsageDescription</key>
+	<string>HomeTechnify needs contacts access to help you find providers.</string>
+
+	<!-- UI -->
+	<key>UILaunchStoryboardName</key>
+	<string>LaunchScreen</string>
+	<key>UIMainStoryboardFile</key>
+	<string>Main</string>
+	<key>UISupportedInterfaceOrientations</key>
+	<array>
+		<string>UIInterfaceOrientationPortrait</string>
+	</array>
+	<key>UISupportedInterfaceOrientations~ipad</key>
+	<array>
+		<string>UIInterfaceOrientationPortrait</string>
+		<string>UIInterfaceOrientationPortraitUpsideDown</string>
+		<string>UIInterfaceOrientationLandscapeLeft</string>
+		<string>UIInterfaceOrientationLandscapeRight</string>
+	</array>
+	<key>CADisableMinimumFrameDurationOnPhone</key>
+	<true/>
+	<key>UIApplicationSupportsIndirectInputEvents</key>
+	<true/>
+</dict>
+</plist>

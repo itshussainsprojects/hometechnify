@@ -1,0 +1,379 @@
+On-Demand Home Services App – Complete System Documentation (In-Depth)
+1. Project Overview
+
+This project is an On-Demand Home Services Mobile Application designed to connect customers with nearby verified service providers such as plumbers, electricians, cleaners, AC technicians, carpenters, painters, and other home maintenance professionals.
+
+The application works on a real-time, location-based model, similar to platforms like Urban Company, Uber, Careem, and TaskRabbit, where users can instantly request services and choose from multiple available providers.
+
+The goal of this system is to:
+
+Reduce the time required to find reliable home service professionals
+
+Provide transparent pricing and verified providers
+
+Enable real-time communication and tracking
+
+Ensure secure payments and trust through ratings and reviews
+
+2. User Roles & Permissions
+
+The system consists of three primary roles, each with specific permissions and responsibilities.
+
+2.1 User (Customer)
+
+The user is the customer who requests home services.
+
+Key capabilities:
+
+Register/Login using mobile number & OTP
+
+Select services (plumber, electrician, etc.)
+
+Post jobs using text, image, voice, or video
+
+View nearby service providers on the map
+
+Compare providers based on rating, price, and experience
+
+Chat, call, and negotiate with providers
+
+Confirm booking and make payments
+
+Track booking status
+
+Provide feedback and ratings
+
+2.2 Service Provider
+
+A service provider is a professional offering services.
+
+Key capabilities:
+
+Register as provider
+
+Complete identity verification (CNIC + Selfie)
+
+Set service categories and availability
+
+Receive job requests
+
+Accept or reject bookings
+
+Communicate with users
+
+Navigate to user location
+
+Complete jobs
+
+Receive payments and earnings
+
+View ratings and reviews
+
+2.3 Admin (Web Panel)
+
+Admin controls the entire ecosystem.
+
+Key capabilities:
+
+Manage users and providers
+
+Verify provider documents
+
+Approve or reject providers
+
+Create and manage service categories
+
+Set pricing rules and commission
+
+Monitor bookings and payments
+
+Handle disputes and complaints
+
+View analytics and reports
+
+3. Complete App Flow
+
+The complete user journey is designed to be smooth and intuitive.
+
+App Launch Flow
+
+Splash Screen (Animated – 2 screens)
+
+Onboarding Screens (3 screens)
+
+Introduction (Skip option)
+
+Features explanation
+
+Role selection (User / Provider)
+
+Authentication Flow
+
+Login / Signup Screen
+
+OTP Verification
+
+Role-based redirection
+
+Provider-Only Flow
+
+Identity Verification (CNIC Front, CNIC Back, Selfie)
+
+Verification Processing
+
+Admin Approval
+
+Verification Success
+
+Main App Flow
+
+Location Permission
+
+Home Screen
+
+Service Selection
+
+Booking Flow
+
+Payment
+
+Feedback & Completion
+
+4. Authentication System
+
+The authentication system is OTP-based for maximum security and ease of use.
+
+Login
+
+User enters:
+
+Full Name
+
+Mobile Number
+
+System sends OTP to the mobile number
+
+OTP verification confirms identity
+
+Signup
+
+New users are redirected to signup
+
+Required fields:
+
+Full Name
+
+Mobile Number
+
+On successful registration, user is redirected to login
+
+Benefits of OTP authentication:
+
+No password management
+
+Reduced fraud
+
+Faster onboarding
+
+5. Provider Verification System
+
+To ensure trust and safety, providers must complete identity verification.
+
+Verification Steps
+
+Instruction Screen (requirements explained)
+
+CNIC Front Photo Upload
+
+CNIC Back Photo Upload
+
+Live Selfie Capture
+
+Verification Processing Screen
+
+Verification Success / Pending Approval
+
+Admin Review
+
+Admin manually reviews documents
+
+Approves or rejects provider
+
+Rejection includes reason
+
+6. Home Screen UI & Components
+
+The Home Screen is the core interaction point.
+
+Header Section
+
+User’s current location
+
+Notification bell (with red indicator)
+
+Main Content
+
+Search bar for services
+
+Location preview map
+
+Services grid (icons + names)
+
+Promotional banners
+
+Bottom Navigation Bar
+
+Home
+
+Notifications
+
+Bookings
+
+Profile
+
+Animated navigation enhances UX.
+
+7. Service Booking Flow
+Job Posting
+
+When a user selects a service (e.g., plumber), a bottom sheet appears allowing:
+
+Text description
+
+Image upload
+
+Voice note
+
+Short video
+
+Provider Discovery
+
+Map view shows nearby providers
+
+Providers displayed as circular profile icons
+
+Sorted by:
+
+Distance
+
+Rating
+
+Availability
+
+User can:
+
+Reject provider (carousel style)
+
+Book selected provider
+
+8. Provider Profile & Selection
+
+Provider profile includes:
+
+Profile photo
+
+Name & skill
+
+Rating & reviews
+
+Completed jobs
+
+Experience
+
+Gallery
+
+User clicks Book to continue.
+
+9. Chat, Call & Negotiation
+
+After booking:
+
+In-app chat starts
+
+Voice & video call available
+
+Price negotiation supported
+
+Final price auto-updates before checkout
+
+10. Checkout & Payment System
+Checkout Screen Includes
+
+Provider profile
+
+Booking date & time
+
+Service charges
+
+Traveling charges
+
+Total amount
+
+Address
+
+Promo code option
+
+Payment Methods
+
+JazzCash
+
+Easypaisa
+
+(Future: Cards & Wallet)
+
+11. Booking Completion & Feedback
+
+After successful payment:
+
+Payment success screen
+
+Booking received summary
+
+Job completion confirmation
+
+Feedback screen:
+
+Star rating
+
+Review comment
+
+User is redirected to Home.
+
+12. Provider App Flow
+Provider Dashboard
+
+Online/Offline toggle
+
+Job requests
+
+Earnings wallet
+
+Job Lifecycle
+
+Receive request
+
+Accept or reject
+
+Navigate to user
+
+Complete job
+
+Receive payment
+
+13. Admin Panel (Web Dashboard)
+
+Admin dashboard includes:
+
+User management
+
+Provider verification
+
+Service management
+
+Pricing & commission
+
+Payment monitoring
+
+Dispute resolution
+
+Analytics & reports

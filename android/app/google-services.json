@@ -1,0 +1,92 @@
+{
+  "project_info": {
+    "project_number": "444217288447",
+    "project_id": "hometechnify",
+    "storage_bucket": "hometechnify.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:444217288447:android:9066d692f2b70790230eca",
+        "android_client_info": {
+          "package_name": "com.example.home_technify"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "444217288447-p7cpb5jl4pcjn1rfkkdp12b60ejqa2oc.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.example.home_technify",
+            "certificate_hash": "9b44b8b8898b8ab66afa18b30993fa03e98fcd18"
+          }
+        },
+        {
+          "client_id": "444217288447-371k5l1mpu8q1fmtqnjn33nsnubv0ae6.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyDqs-JjGwwuAJ49hZkhCwQGsOFbgALw9Kw"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "444217288447-371k5l1mpu8q1fmtqnjn33nsnubv0ae6.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        }
+      }
+    },
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:444217288447:android:6cd67b106211be1b230eca",
+        "android_client_info": {
+          "package_name": "com.hometechnify.app"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "444217288447-2e4ubhr2rjnbv58leimmnlp2fio7p580.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.hometechnify.app",
+            "certificate_hash": "9b44b8b8898b8ab66afa18b30993fa03e98fcd18"
+          }
+        },
+        {
+          "client_id": "444217288447-il45lfh1unub7l2sinr7s0f3umssu410.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.hometechnify.app",
+            "certificate_hash": "b13d97e6e1b15aefc6e4d545805e0f095c060032"
+          }
+        },
+        {
+          "client_id": "444217288447-371k5l1mpu8q1fmtqnjn33nsnubv0ae6.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyDqs-JjGwwuAJ49hZkhCwQGsOFbgALw9Kw"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "444217288447-371k5l1mpu8q1fmtqnjn33nsnubv0ae6.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

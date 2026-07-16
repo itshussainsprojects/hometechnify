@@ -1,0 +1,35 @@
+{
+  "permissions": {
+    "allow": [
+      "mcp__code-review-graph__get_architecture_overview_tool",
+      "mcp__code-review-graph__list_communities_tool",
+      "mcp__code-review-graph__build_or_update_graph_tool",
+      "Bash(dart analyze *)",
+      "Bash(dir fix_contexts.dart /s)",
+      "Bash(where /r . fix_contexts.dart)",
+      "Bash(powershell -Command \"\\(Get-Content 'lib\\\\features\\\\provider_map\\\\provider_map_screen.dart'\\) -replace 'setState\\\\\\(\\\\\\(\\\\\\) => _isLoadingLocation = \\(true|false\\)\\\\\\);', '' -replace '\\\\s*_isLoadingLocation = \\(true|false\\);', '' | Set-Content 'lib\\\\features\\\\provider_map\\\\provider_map_screen.dart'\")",
+      "Bash(powershell -Command \"\\(Get-Content 'lib\\\\core\\\\services\\\\socket_service.dart'\\) -replace '\\\\bIO\\\\.', 'io.' | Set-Content 'lib\\\\core\\\\services\\\\socket_service.dart'\")",
+      "Bash(flutter devices *)",
+      "mcp__code-review-graph__semantic_search_nodes_tool",
+      "Read(//c/Users/Hassaan Ali/.claude/projects/c--Users-Hassaan-Ali-hometechnify/memory/**)",
+      "Bash(flutter analyze *)",
+      "Bash(keytool -version)",
+      "Bash(New-Item -ItemType Directory -Force \"c:\\\\Users\\\\Hassaan Ali\\\\hometechnify\\\\android\\\\app\\\\src\\\\main\\\\kotlin\\\\com\\\\hometechnify\\\\app\")",
+      "Bash(Out-Null)",
+      "Bash(Write-Output \"done\")",
+      "PowerShell(New-Item -ItemType Directory -Force \"c:\\\\Users\\\\Hassaan Ali\\\\hometechnify\\\\android\\\\app\\\\src\\\\main\\\\kotlin\\\\com\\\\hometechnify\\\\app\")",
+      "PowerShell(keytool -genkeypair -v -keystore $keystorePath -keyalg RSA -keysize 2048 -validity 10000 -alias hometechnify -storepass \"HomeTech2026!\" -keypass \"HomeTech2026!\" -dname \"CN=HomeTechnify, OU=App, O=HomeTechnify, L=Lahore, S=Punjab, C=PK\" 2>&1)",
+      "PowerShell($keystorePath = \"c:\\\\Users\\\\Hassaan Ali\\\\hometechnify\\\\android\\\\app\\\\hometechnify-release.jks\")",
+      "Bash(flutter build *)",
+      "Bash(Remove-Item \"c:\\\\Users\\\\Hassaan Ali\\\\hometechnify\\\\android\\\\app\\\\src\\\\main\\\\kotlin\\\\com\\\\example\\\\hometechnify\\\\MainActivity.kt\" -Force)",
+      "Bash(Remove-Item \"c:\\\\Users\\\\Hassaan Ali\\\\hometechnify\\\\android\\\\app\\\\src\\\\main\\\\kotlin\\\\com\\\\hometechnify\\\\home_technify\\\\MainActivity.kt\" -Force)",
+      "Bash(Write-Output \"Deleted\")",
+      "Bash(keytool -list -v -keystore \"c:\\\\Users\\\\Hassaan Ali\\\\hometechnify\\\\android\\\\app\\\\hometechnify-release.jks\" -alias hometechnify -storepass \"HomeTech2026!\")",
+      "Bash(keytool -list -v -keystore \"%USERPROFILE%\\\\.android\\\\debug.keystore\" -alias androiddebugkey -storepass android)",
+      "PowerShell(keytool -list -v -keystore \"$env:USERPROFILE\\\\.android\\\\debug.keystore\" -alias androiddebugkey -storepass android 2>&1 | Select-String \"SHA1|SHA-1|SHA256|MD5\")",
+      "PowerShell(keytool -list -v -keystore \"$env:USERPROFILE\\\\.android\\\\debug.keystore\" -alias androiddebugkey -storepass android 2>&1 | Select-String \"SHA1|SHA256\")",
+      "PowerShell(Rename-Item -Path \"c:\\\\Users\\\\Hassaan Ali\\\\hometechnify\\\\android\\\\app\\\\google-services .json\" -NewName \"google-services.json\" -Force)",
+      "Bash(ipconfig)"
+    ]
+  }
+}

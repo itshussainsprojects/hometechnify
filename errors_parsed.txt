@@ -1,0 +1,82 @@
+error - Expected to find ';' - fix_contexts.dart:30:16 - expected_token
+error - Unterminated string literal - fix_contexts.dart:30:49 - unterminated_string_literal
+error - Expected to find ';' - fix_contexts.dart:35:11 - expected_token
+error - Unterminated string literal - fix_contexts.dart:35:23 - unterminated_string_literal
+error - Expected to find ')' - fix_contexts.dart:36:3 - expected_token
+error - The method 'debugPrint' isn't defined for the type 'BackgroundService' - lib\core\services\background_service.dart:5:5 - undefined_method
+error - The method 'debugPrint' isn't defined for the type 'BackgroundService' - lib\core\services\background_service.dart:10:5 - undefined_method
+error - The method 'debugPrint' isn't defined for the type 'MapService' - lib\core\services\map_service.dart:9:7 - undefined_method
+error - The method 'debugPrint' isn't defined for the type 'MapService' - lib\core\services\map_service.dart:11:7 - undefined_method
+error - The method 'debugPrint' isn't defined for the type 'SupabaseService' - lib\core\services\supabase_service.dart:40:7 - undefined_method
+error - The method 'debugPrint' isn't defined for the type 'SupabaseService' - lib\core\services\supabase_service.dart:122:7 - undefined_method
+error - The method 'debugPrint' isn't defined for the type 'SupabaseService' - lib\core\services\supabase_service.dart:140:7 - undefined_method
+error - The method 'debugPrint' isn't defined for the type 'SupabaseService' - lib\core\services\supabase_service.dart:156:7 - undefined_method
+error - The method 'debugPrint' isn't defined for the type 'SupabaseService' - lib\core\services\supabase_service.dart:179:7 - undefined_method
+error - The method 'debugPrint' isn't defined for the type 'SupabaseService' - lib\core\services\supabase_service.dart:204:7 - undefined_method
+error - The method 'debugPrint' isn't defined for the type 'RemoteAuthRepository' - lib\features\auth\data\repositories\remote_auth_repository.dart:86:11 - undefined_method
+error - The method 'debugPrint' isn't defined for the type 'RemoteAuthRepository' - lib\features\auth\data\repositories\remote_auth_repository.dart:88:11 - undefined_method
+error - The method 'debugPrint' isn't defined for the type 'RemoteAuthRepository' - lib\features\auth\data\repositories\remote_auth_repository.dart:95:12 - undefined_method
+error - The method 'debugPrint' isn't defined for the type 'RemoteAuthRepository' - lib\features\auth\data\repositories\remote_auth_repository.dart:97:12 - undefined_method
+error - The method 'debugPrint' isn't defined for the type 'RemoteAuthRepository' - lib\features\auth\data\repositories\remote_auth_repository.dart:129:7 - undefined_method
+error - The method 'debugPrint' isn't defined for the type 'RemoteAuthRepository' - lib\features\auth\data\repositories\remote_auth_repository.dart:133:7 - undefined_method
+error - The method 'debugPrint' isn't defined for the type 'RemoteAuthRepository' - lib\features\auth\data\repositories\remote_auth_repository.dart:142:14 - undefined_method
+error - The method 'debugPrint' isn't defined for the type 'RemoteAuthRepository' - lib\features\auth\data\repositories\remote_auth_repository.dart:145:12 - undefined_method
+error - The method 'debugPrint' isn't defined for the type 'RemoteAuthRepository' - lib\features\auth\data\repositories\remote_auth_repository.dart:149:10 - undefined_method
+error - The method 'debugPrint' isn't defined for the type 'RemoteAuthRepository' - lib\features\auth\data\repositories\remote_auth_repository.dart:151:10 - undefined_method
+error - The method 'debugPrint' isn't defined for the type 'RemoteAuthRepository' - lib\features\auth\data\repositories\remote_auth_repository.dart:159:9 - undefined_method
+error - The method 'debugPrint' isn't defined for the type 'RemoteAuthRepository' - lib\features\auth\data\repositories\remote_auth_repository.dart:160:9 - undefined_method
+error - The method 'debugPrint' isn't defined for the type 'RemoteAuthRepository' - lib\features\auth\data\repositories\remote_auth_repository.dart:161:9 - undefined_method
+error - The method 'debugPrint' isn't defined for the type 'RemoteAuthRepository' - lib\features\auth\data\repositories\remote_auth_repository.dart:162:9 - undefined_method
+error - The method 'debugPrint' isn't defined for the type 'RemoteAuthRepository' - lib\features\auth\data\repositories\remote_auth_repository.dart:183:20 - undefined_method
+error - The method 'debugPrint' isn't defined for the type 'RemoteAuthRepository' - lib\features\auth\data\repositories\remote_auth_repository.dart:190:9 - undefined_method
+error - The method 'debugPrint' isn't defined for the type 'RemoteAuthRepository' - lib\features\auth\data\repositories\remote_auth_repository.dart:207:9 - undefined_method
+error - The method 'debugPrint' isn't defined for the type 'RemoteAuthRepository' - lib\features\auth\data\repositories\remote_auth_repository.dart:208:9 - undefined_method
+error - The method 'debugPrint' isn't defined for the type 'RemoteAuthRepository' - lib\features\auth\data\repositories\remote_auth_repository.dart:211:9 - undefined_method
+error - The method 'debugPrint' isn't defined for the type 'RemoteAuthRepository' - lib\features\auth\data\repositories\remote_auth_repository.dart:227:13 - undefined_method
+error - The method 'debugPrint' isn't defined for the type 'RemoteAuthRepository' - lib\features\auth\data\repositories\remote_auth_repository.dart:230:11 - undefined_method
+error - The method 'debugPrint' isn't defined for the type 'RemoteAuthRepository' - lib\features\auth\data\repositories\remote_auth_repository.dart:321:11 - undefined_method
+error - The method 'debugPrint' isn't defined for the type 'RemoteAuthRepository' - lib\features\auth\data\repositories\remote_auth_repository.dart:355:9 - undefined_method
+error - The method 'debugPrint' isn't defined for the type 'RemoteAuthRepository' - lib\features\auth\data\repositories\remote_auth_repository.dart:357:9 - undefined_method
+error - The named parameter 'createdAt' is required, but there's no corresponding argument - lib\features\booking\data\repositories\mock_booking_repository.dart:9:5 - missing_required_argument
+error - The named parameter 'customerId' is required, but there's no corresponding argument - lib\features\booking\data\repositories\mock_booking_repository.dart:9:5 - missing_required_argument
+error - The named parameter 'lat' is required, but there's no corresponding argument - lib\features\booking\data\repositories\mock_booking_repository.dart:9:5 - missing_required_argument
+error - The named parameter 'lng' is required, but there's no corresponding argument - lib\features\booking\data\repositories\mock_booking_repository.dart:9:5 - missing_required_argument
+error - The named parameter 'paymentStatus' is required, but there's no corresponding argument - lib\features\booking\data\repositories\mock_booking_repository.dart:9:5 - missing_required_argument
+error - The named parameter 'serviceId' is required, but there's no corresponding argument - lib\features\booking\data\repositories\mock_booking_repository.dart:9:5 - missing_required_argument
+error - The named parameter 'updatedAt' is required, but there's no corresponding argument - lib\features\booking\data\repositories\mock_booking_repository.dart:9:5 - missing_required_argument
+error - The named parameter 'userId' isn't defined - lib\features\booking\data\repositories\mock_booking_repository.dart:11:7 - undefined_named_parameter
+error - The named parameter 'userName' isn't defined - lib\features\booking\data\repositories\mock_booking_repository.dart:12:7 - undefined_named_parameter
+error - The named parameter 'ratingGiven' isn't defined - lib\features\booking\data\repositories\mock_booking_repository.dart:20:7 - undefined_named_parameter
+error - The named parameter 'review' isn't defined - lib\features\booking\data\repositories\mock_booking_repository.dart:21:7 - undefined_named_parameter
+error - The named parameter 'createdAt' is required, but there's no corresponding argument - lib\features\booking\data\repositories\mock_booking_repository.dart:23:5 - missing_required_argument
+error - The named parameter 'customerId' is required, but there's no corresponding argument - lib\features\booking\data\repositories\mock_booking_repository.dart:23:5 - missing_required_argument
+error - The named parameter 'lat' is required, but there's no corresponding argument - lib\features\booking\data\repositories\mock_booking_repository.dart:23:5 - missing_required_argument
+error - The named parameter 'lng' is required, but there's no corresponding argument - lib\features\booking\data\repositories\mock_booking_repository.dart:23:5 - missing_required_argument
+error - The named parameter 'paymentStatus' is required, but there's no corresponding argument - lib\features\booking\data\repositories\mock_booking_repository.dart:23:5 - missing_required_argument
+error - The named parameter 'serviceId' is required, but there's no corresponding argument - lib\features\booking\data\repositories\mock_booking_repository.dart:23:5 - missing_required_argument
+error - The named parameter 'updatedAt' is required, but there's no corresponding argument - lib\features\booking\data\repositories\mock_booking_repository.dart:23:5 - missing_required_argument
+error - The named parameter 'userId' isn't defined - lib\features\booking\data\repositories\mock_booking_repository.dart:25:7 - undefined_named_parameter
+error - The named parameter 'userName' isn't defined - lib\features\booking\data\repositories\mock_booking_repository.dart:26:7 - undefined_named_parameter
+error - The method 'ServiceInProgressScreen' isn't defined for the type '_TrackProviderScreenState' - lib\features\booking\track_provider_screen.dart:510:49 - undefined_method
+error - The argument type 'Object' can't be assigned to the parameter type 'String?'.  - lib\features\job\screens\post_job_screen.dart:315:18 - argument_type_not_assignable
+error - The method 'debugPrint' isn't defined for the type 'RemoteNotificationRepository' - lib\features\notifications\data\repositories\remote_notification_repository.dart:79:7 - undefined_method
+error - The method 'debugPrint' isn't defined for the type 'RemoteNotificationRepository' - lib\features\notifications\data\repositories\remote_notification_repository.dart:81:7 - undefined_method
+error - The method 'debugPrint' isn't defined for the type 'RemoteProfileRepository' - lib\features\profile\data\repositories\remote_profile_repository.dart:17:7 - undefined_method
+error - The method 'debugPrint' isn't defined for the type 'RemoteProfileRepository' - lib\features\profile\data\repositories\remote_profile_repository.dart:31:7 - undefined_method
+error - The method 'debugPrint' isn't defined for the type 'RemoteProfileRepository' - lib\features\profile\data\repositories\remote_profile_repository.dart:38:7 - undefined_method
+error - The method 'debugPrint' isn't defined for the type 'RemoteProfileRepository' - lib\features\profile\data\repositories\remote_profile_repository.dart:39:7 - undefined_method
+error - The method 'debugPrint' isn't defined for the type 'RemoteProfileRepository' - lib\features\profile\data\repositories\remote_profile_repository.dart:51:7 - undefined_method
+error - The method 'debugPrint' isn't defined for the type 'RemoteProfileRepository' - lib\features\profile\data\repositories\remote_profile_repository.dart:65:7 - undefined_method
+error - The method 'debugPrint' isn't defined for the type 'RemoteProfileRepository' - lib\features\profile\data\repositories\remote_profile_repository.dart:72:7 - undefined_method
+error - The method 'debugPrint' isn't defined for the type 'RemoteProfileRepository' - lib\features\profile\data\repositories\remote_profile_repository.dart:73:7 - undefined_method
+error - The method 'debugPrint' isn't defined for the type 'RemoteProfileRepository' - lib\features\profile\data\repositories\remote_profile_repository.dart:76:7 - undefined_method
+error - The method 'debugPrint' isn't defined for the type 'RemoteProfileRepository' - lib\features\profile\data\repositories\remote_profile_repository.dart:81:7 - undefined_method
+error - The method 'debugPrint' isn't defined for the type 'RemoteProfileRepository' - lib\features\profile\data\repositories\remote_profile_repository.dart:84:7 - undefined_method
+error - The method 'debugPrint' isn't defined for the type 'RemoteProfileRepository' - lib\features\profile\data\repositories\remote_profile_repository.dart:85:7 - undefined_method
+error - The method 'debugPrint' isn't defined for the type 'RemoteProfileRepository' - lib\features\profile\data\repositories\remote_profile_repository.dart:88:7 - undefined_method
+error - The method 'debugPrint' isn't defined for the type 'RemoteProfileRepository' - lib\features\profile\data\repositories\remote_profile_repository.dart:100:7 - undefined_method
+error - The method 'debugPrint' isn't defined for the type 'RemoteProfileRepository' - lib\features\profile\data\repositories\remote_profile_repository.dart:101:7 - undefined_method
+error - The method 'debugPrint' isn't defined for the type 'RemoteProfileRepository' - lib\features\profile\data\repositories\remote_profile_repository.dart:105:7 - undefined_method
+error - The method 'debugPrint' isn't defined for the type 'RemoteProfileRepository' - lib\features\profile\data\repositories\remote_profile_repository.dart:106:7 - undefined_method
+error - The method 'debugPrint' isn't defined for the type 'RemoteProfileRepository' - lib\features\profile\data\repositories\remote_profile_repository.dart:107:7 - undefined_method
+

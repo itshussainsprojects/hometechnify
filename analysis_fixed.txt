@@ -1,0 +1,7 @@
+Analyzing hometechnify...                                       
+
+  error - Undefined name 'isDesktop' - lib\features\admin\screens\admin_dashboard_screen.dart:406:53 - undefined_identifier
+  error - Expected to find ';' - lib\features\admin\screens\reviews_report_screen.dart:156:3 - expected_token
+  error - Expected to find ')' - lib\features\admin\screens\reviews_report_screen.dart:157:1 - expected_token
+  error - Expected to find '}' - lib\features\admin\screens\reviews_report_screen.dart:158:1 - expected_token
+

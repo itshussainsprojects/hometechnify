@@ -1,0 +1,332 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider  = "postgresql"
+  url       = env("DATABASE_URL")
+  directUrl = env("DIRECT_URL")
+}
+
+enum Role {
+  CUSTOMER
+  PROVIDER
+  ADMIN
+}
+
+enum BookingStatus {
+  PENDING
+  NEGOTIATING
+  ACCEPTED
+  ONGOING
+  COMPLETED
+  CANCELLED
+}
+
+model User {
+  id                       String         @id @default(uuid())
+  firebaseUid              String?        @unique // Link to Firebase Auth
+  email                    String         @unique
+  name                     String?
+  phone                    String?
+  profileImage             String?
+  fcmToken                 String? // Firebase Cloud Messaging Token
+  addresses                Address[]
+  role                     Role           @default(CUSTOMER)
+  is_verified              Boolean        @default(false)
+  is_blocked               Boolean        @default(false)
+  // Soft delete (recycle bin). Distinct from is_blocked: blocking is punitive
+  // and the account still exists; deleting hides it everywhere but keeps it
+  // restorable by an admin.
+  deleted_at               DateTime?
+  is_notifications_enabled Boolean        @default(true)
+  notifications            Notification[]
+  created_at               DateTime       @default(now())
+  updated_at               DateTime       @updatedAt
+
+  provider_profile     ProviderProfile?
+  bookings_as_customer Booking[]           @relation("CustomerBookings")
+  bookings_as_provider Booking[]           @relation("ProviderBookings")
+  reviews_written      Review[]            @relation("WrittenReviews")
+  reviews_received     Review[]            @relation("ReceivedReviews")
+  job_posts            JobPost[]
+  banner_requests      BannerRequest[]
+  transactions         Transaction[]
+  withdrawal_requests  WithdrawalRequest[]
+
+  // Every admin list filters by role AND hides soft-deleted rows.
+  @@index([role, deleted_at])
+}
+
+model WithdrawalRequest {
+  id             String   @id @default(uuid())
+  provider_id    String
+  provider       User     @relation(fields: [provider_id], references: [id])
+  amount         Float
+  payment_method String // EASYPAISA, JAZZCASH, BANK_TRANSFER
+  account_number String
+  account_title  String?
+  status         String   @default("PENDING") // PENDING, APPROVED, REJECTED
+  admin_note     String?
+  created_at     DateTime @default(now())
+  updated_at     DateTime @updatedAt
+
+  @@index([provider_id])
+  @@index([status])
+}
+
+model Promo {
+  id          String   @id @default(uuid())
+  title       String
+  subtitle    String?
+  code        String?  @unique
+  discount    Float    @default(0)
+  color_value Int      @default(4279107008)
+  is_active   Boolean  @default(true)
+  created_at  DateTime @default(now())
+  updated_at  DateTime @updatedAt
+}
+
+model BannerRequest {
+  id          String @id @default(uuid())
+  provider_id String
+  provider    User   @relation(fields: [provider_id], references: [id])
+
+  content      String
+  banner_image String?
+  voice_note   String?
+
+  payment_method String // EASYPAISA, JAZZCASH
+  account_number String
+  amount         Float
+
+  status String @default("PENDING") // PENDING, APPROVED, REJECTED
+
+  created_at DateTime @default(now())
+  updated_at DateTime @updatedAt
+}
+
+model Address {
+  id         String   @id @default(uuid())
+  user_id    String
+  user       User     @relation(fields: [user_id], references: [id])
+  label      String? // e.g., "Home", "Work"
+  address    String
+  lat        Float?
+  lng        Float?
+  created_at DateTime @default(now())
+}
+
+model ProviderProfile {
+  id                  String   @id @default(uuid())
+  user_id             String   @unique
+  user                User     @relation(fields: [user_id], references: [id])
+  service_category_id String
+  category            Category @relation(fields: [service_category_id], references: [id])
+  bio                 String?
+  hourly_rate         Float
+  rating              Float    @default(0.0)
+  is_online           Boolean  @default(false)
+  current_lat         Float?
+  current_lng         Float?
+
+  // Verification & Onboarding
+  experience  String? // e.g. "1-3 Years"
+  cnic_front  String?
+  cnic_back   String?
+  is_verified Boolean  @default(false)
+  services    String[] @default([])
+
+  // Live selfie verification (matched against CNIC by admin)
+  selfie_url      String?
+  selfie_verified Boolean @default(false)
+
+  // Service area / city (for area-by-area admin view + matching)
+  city String?
+
+  // Commission wallet (inDrive-style). Balance can go negative (owes commission).
+  wallet_balance Float @default(0)
+  jobs_completed Int   @default(0)
+
+  // Bank Details
+  bank_name      String?
+  account_title  String?
+  account_number String?
+
+  // Provider matching filters on all three of these on every job post.
+  @@index([is_online, is_verified])
+  @@index([service_category_id])
+}
+
+model Category {
+  id        String            @id @default(uuid())
+  name      String            @unique
+  icon_url  String?
+  services  Service[]
+  providers ProviderProfile[]
+}
+
+model Service {
+  id          String   @id @default(uuid())
+  category_id String
+  category    Category @relation(fields: [category_id], references: [id])
+  name        String
+  price       Float
+  description String?
+  icon_url    String? // uploaded icon shown to customers
+
+  // Smart Bidding — allowed bid range (nulls = no limit)
+  min_price Float?
+  max_price Float?
+
+  bookings Booking[]
+}
+
+model Booking {
+  id          String  @id @default(uuid())
+  customer_id String
+  customer    User    @relation("CustomerBookings", fields: [customer_id], references: [id])
+  provider_id String
+  provider    User    @relation("ProviderBookings", fields: [provider_id], references: [id])
+  service_id  String
+  service     Service @relation(fields: [service_id], references: [id])
+
+  status       BookingStatus @default(PENDING)
+  total_amount Float
+
+  scheduled_at DateTime
+  lat          Float
+  lng          Float
+  address      String
+  notes        String?
+
+  last_offer_by Role? // Tracks who made the last offer (PROVIDER or CUSTOMER)
+
+  job_post_id String?
+  job_post    JobPost? @relation(fields: [job_post_id], references: [id])
+
+  conversation_id String? // Link to Chat (Optional)
+
+  // Payment. These columns already existed in the database but were not in this
+  // schema, so Prisma refused to write them — the JazzCash/EasyPaisa callback
+  // would have thrown "Unknown argument paymentStatus" on the very first real
+  // payment. PENDING / PAID / FAILED / REFUNDED.
+  payment_status String? @default("PENDING")
+  payment_method String? // JAZZCASH, EASYPAISA, CASH
+
+  // ── Two-OTP security lock + proof-of-work ──
+  start_otp      String? // shown to customer; provider enters it to begin
+  completion_otp String? // shown to customer; provider enters it to finish
+  arrived_at     DateTime? // provider marked "arrived" (GPS proof)
+  started_at     DateTime? // start OTP verified -> work began
+  completed_at   DateTime? // completion OTP verified -> work done
+  before_photo   String? // mandatory photo before work starts
+  after_photo    String? // mandatory photo after work completes
+
+  // ── Reschedule proposal (must be accepted by the other side) ──
+  // NOTE: reschedule_proposed_at is the PROPOSED NEW TIME, not when the request
+  // was made. reschedule_requested_at is the latter — the expiry and the
+  // reminder are both measured from it.
+  reschedule_proposed_at  DateTime? // the proposed new date/time
+  reschedule_by           Role? // who proposed it (CUSTOMER / PROVIDER)
+  reschedule_requested_at DateTime? // when the request was made -> drives expiry
+  reschedule_reminded_at  DateTime? // when the other side was last nudged
+
+  created_at DateTime @default(now())
+  updated_at DateTime @updatedAt
+
+  review       Review?
+  transactions Transaction[]
+
+  // Every hot query filters on these. Without them Postgres full-scans Booking
+  // on each one — invisible at 12 rows, crippling at 12,000.
+  @@index([provider_id])
+  @@index([customer_id])
+  @@index([status])
+  @@index([provider_id, status]) // "is this provider already busy?"
+  @@index([reschedule_requested_at]) // the 15-minute reschedule sweep
+}
+
+model Review {
+  id         String   @id @default(uuid())
+  booking_id String   @unique
+  booking    Booking  @relation(fields: [booking_id], references: [id])
+  author_id  String
+  author     User     @relation("WrittenReviews", fields: [author_id], references: [id])
+  target_id  String
+  target     User     @relation("ReceivedReviews", fields: [target_id], references: [id])
+  rating     Int
+  comment    String?
+  created_at DateTime @default(now())
+}
+
+model JobPost {
+  id          String @id @default(uuid())
+  customer_id String
+  customer    User   @relation(fields: [customer_id], references: [id])
+
+  title       String
+  description String
+  budget      Float?
+  location    String
+  lat         Float? // job site coordinates (from customer's address/GPS)
+  lng         Float?
+  category    String @default("General") // Added for strict filtering
+  status      String @default("OPEN") // OPEN, IN_PROGRESS, COMPLETED
+
+  // Media attachments (URLs stored as JSON string or array if supported, simple String array is easier in Postgres)
+  mediaUrls String[] @default([])
+
+  bookings Booking[]
+
+  created_at DateTime @default(now())
+  updated_at DateTime @updatedAt
+
+  // The provider job feed is WHERE status='OPEN' on every single load.
+  @@index([status])
+  @@index([customer_id])
+}
+
+// Transaction Model for Payments & Withdrawals
+model Transaction {
+  id               String   @id @default(uuid())
+  user_id          String?
+  user             User?    @relation(fields: [user_id], references: [id])
+  booking_id       String?
+  booking          Booking? @relation(fields: [booking_id], references: [id], onDelete: Cascade)
+  type             String   @default("PAYMENT") // PAYMENT, WITHDRAWAL, TOPUP
+  transaction_ref  String   @unique // JazzCash/EasyPaisa transaction reference
+  amount           Float
+  payment_method   String // JAZZCASH, EASYPAISA, CASH, BANK_TRANSFER
+  status           String   @default("PENDING") // PENDING, SUCCESS, FAILED
+  response_code    String?
+  response_message String?
+  created_at       DateTime @default(now())
+  updated_at       DateTime @updatedAt
+
+  @@index([booking_id])
+  @@index([transaction_ref])
+  @@index([user_id])
+}
+
+// Simple key-value store for admin-configurable settings (e.g. rating threshold).
+model AppSetting {
+  key        String   @id
+  value      String
+  updated_at DateTime @updatedAt
+}
+
+model Notification {
+  id         String   @id @default(uuid())
+  user_id    String
+  user       User     @relation(fields: [user_id], references: [id])
+  title      String
+  body       String
+  type       String // BOOKING, SYSTEM, JOB, PROMOTION
+  is_read    Boolean  @default(false)
+  data       Json? // Optional metadata
+  created_at DateTime @default(now())
+
+  // Every notification list and unread badge filters by user.
+  @@index([user_id])
+}
