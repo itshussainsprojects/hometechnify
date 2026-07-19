@@ -234,7 +234,7 @@ const updateProfile = async (req, res) => {
         console.log(`Updating Profile for User ID: ${id}`);
         console.log('Update Data:', req.body);
 
-        const { bio, hourly_rate, service_category_id, experience, cnic_front, cnic_back, name, profileImage, services, bank_name, account_title, account_number, city } = req.body;
+        const { bio, hourly_rate, service_category_id, experience, cnic_front, cnic_back, selfie_url, name, profileImage, services, bank_name, account_title, account_number, city } = req.body;
 
         // 1. Update User Basic Info (Name, Image) if provided
         if (name || profileImage) {
@@ -272,6 +272,7 @@ const updateProfile = async (req, res) => {
                 experience,
                 cnic_front,
                 cnic_back,
+                selfie_url,
                 services,
                 bank_name,
                 account_title,
@@ -290,6 +291,7 @@ const updateProfile = async (req, res) => {
                 experience,
                 cnic_front,
                 cnic_back,
+                selfie_url,
                 services: services || [],
                 bank_name,
                 account_title,
