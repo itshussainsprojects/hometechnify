@@ -3,6 +3,7 @@ const prisma = require('../utils/prisma');
 const { runLimited } = require('../utils/prisma');
 const { getIO, broadcastToAll } = require('../services/socketService');
 const { sendNotification } = require('../services/notificationService');
+const { sendProviderVerifiedEmail, sendProviderRevokedEmail } = require('../services/emailService');
 
 // Real-time kick/unkick: tell the affected user's app instantly so it can
 // log out (blocked) or resume (unblocked) without waiting for the next API call.
@@ -275,7 +276,7 @@ const verifyProvider = async (req, res) => {
             prisma.user.update({
                 where: { id },
                 data: { is_verified: verify },
-                select: { id: true, name: true, is_verified: true },
+                select: { id: true, name: true, email: true, is_verified: true },
             }),
             prisma.providerProfile.updateMany({
                 where: { user_id: id },
@@ -284,6 +285,8 @@ const verifyProvider = async (req, res) => {
         ]);
 
         // Tell them — being let into the marketplace is the thing they are waiting for.
+        // In-app/push is instant; email is a backup for anyone not watching the
+        // app right then. Neither is allowed to fail the admin's action.
         try {
             await sendNotification(
                 id,
@@ -295,6 +298,14 @@ const verifyProvider = async (req, res) => {
                 { verified: String(verify) }
             );
         } catch (_) { /* never fail the admin action on a notification hiccup */ }
+
+        try {
+            if (verify) {
+                await sendProviderVerifiedEmail(user.email, user.name);
+            } else {
+                await sendProviderRevokedEmail(user.email, user.name);
+            }
+        } catch (_) { /* never fail the admin action on an email hiccup */ }
 
         res.json({ success: true, data: user });
     } catch (err) {
