@@ -1,9 +1,13 @@
 
 const express = require('express');
-const { syncUser, getMe, updateMe } = require('../controllers/authController');
+const { syncUser, getMe, updateMe, checkEmail } = require('../controllers/authController');
 const authMiddleware = require('../middleware/authMiddleware');
 
 const router = express.Router();
+
+// Public: lets a registration form warn about an email already used by a
+// different role before the user fills out the rest of the form.
+router.get('/check-email', checkEmail);
 
 // Sync Firebase User to Postgres
 // Uses authMiddleware (which skips DB check for this route, but verifies Token)

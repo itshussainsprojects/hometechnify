@@ -254,4 +254,32 @@ const deleteUser = async (req, res) => {
     }
 };
 
-module.exports = { syncUser, getMe, updateMe, deleteUser };
+// Lets the registration form warn a signing-up provider (or customer)
+// BEFORE they fill in the rest of a multi-step form, rather than finding out
+// only when Firebase Auth itself rejects the final submit with a generic
+// "email already in use". Public/no-auth by design — there is no session
+// yet at this point in the flow. Only existence + role is returned, never
+// name/phone/other PII, to keep the email-enumeration surface minimal.
+const checkEmail = async (req, res) => {
+    try {
+        const email = (req.query.email || '').trim().toLowerCase();
+        if (!email) {
+            return res.status(400).json({ success: false, message: 'email is required' });
+        }
+
+        const user = await prisma.user.findUnique({
+            where: { email },
+            select: { role: true },
+        });
+
+        res.status(200).json({
+            success: true,
+            data: { exists: !!user, role: user?.role || null },
+        });
+    } catch (error) {
+        console.error('Check Email Error:', error);
+        res.status(500).json({ success: false, message: error.message });
+    }
+};
+
+module.exports = { syncUser, getMe, updateMe, deleteUser, checkEmail };
