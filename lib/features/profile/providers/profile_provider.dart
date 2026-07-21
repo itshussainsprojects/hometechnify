@@ -55,13 +55,18 @@ class ProfileProvider extends ChangeNotifier {
     notifyListeners();
     final prefs = await SharedPreferences.getInstance();
     await prefs.setString('payment_method', method);
+    // This used to be device-local only — admin had no visibility into
+    // which payment method a customer picked, and it didn't survive a
+    // reinstall/new device.
+    await _profileRepository.updatePaymentPreference(paymentMethod: method);
   }
-  
+
   Future<void> updateWallet(String wallet) async {
     _selectedWallet = wallet;
     notifyListeners();
     final prefs = await SharedPreferences.getInstance();
     await prefs.setString('wallet', wallet);
+    await _profileRepository.updatePaymentPreference(wallet: wallet);
   }
   
   Future<void> setAppLocation(bool enabled) async {

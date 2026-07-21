@@ -133,6 +133,36 @@ const getUsers = async (req, res) => {
     }
 };
 
+// Which customers picked Cash vs Wallet (and which wallet). This was only
+// ever saved on the customer's own device (SharedPreferences) — admin had no
+// visibility into it at all until it started being synced to the backend.
+const getCustomerPaymentMethods = async (req, res) => {
+    try {
+        const { search } = req.query;
+        const where = { role: 'CUSTOMER', deleted_at: null };
+        if (search) {
+            where.OR = [
+                { name: { contains: search, mode: 'insensitive' } },
+                { email: { contains: search, mode: 'insensitive' } },
+                { phone: { contains: search, mode: 'insensitive' } },
+            ];
+        }
+
+        const customers = await prisma.user.findMany({
+            where,
+            select: {
+                id: true, name: true, email: true, phone: true, profileImage: true,
+                preferred_payment_method: true, preferred_wallet: true, updated_at: true,
+            },
+            orderBy: { updated_at: 'desc' },
+        });
+
+        res.json({ success: true, data: customers });
+    } catch (err) {
+        res.status(500).json({ success: false, message: err.message });
+    }
+};
+
 const blockUser = async (req, res) => {
     try {
         const { id } = req.params;
@@ -993,6 +1023,7 @@ const getFinanceStats = async (req, res) => {
 module.exports = {
     getDashboardStats,
     getUsers,
+    getCustomerPaymentMethods,
     blockUser,
     deleteUser,
     restoreUser,

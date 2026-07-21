@@ -3,6 +3,7 @@ const router = express.Router();
 const {
     getDashboardStats,
     getUsers,
+    getCustomerPaymentMethods,
     blockUser,
     deleteUser,
     restoreUser,
@@ -46,6 +47,7 @@ router.get('/finance', getFinanceStats);
 
 // Users
 router.get('/users', getUsers);
+router.get('/users/payment-methods', getCustomerPaymentMethods);
 router.put('/users/:id/block', blockUser);
 router.delete('/users/:id', deleteUser);
 router.put('/users/:id/restore', restoreUser);   // recycle bin -> restore

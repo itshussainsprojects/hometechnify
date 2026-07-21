@@ -43,6 +43,15 @@ class AdminApiService {
     return res.data['success'] == true;
   }
 
+  /// Which customers picked Cash vs Wallet, and which wallet — synced from
+  /// the customer app's own profile screen, not something admin sets here.
+  Future<List<dynamic>> fetchCustomerPaymentMethods({String? search}) async {
+    final params = <String, dynamic>{};
+    if (search != null && search.isNotEmpty) params['search'] = search;
+    final res = await _dio.get('/admin/users/payment-methods', queryParameters: params);
+    return res.data['data'] as List;
+  }
+
   /// Move a user to the recycle bin. Reversible via [restoreUser]; the account
   /// is hidden everywhere and loses API access until it is restored.
   Future<bool> deleteUser(String id) async {

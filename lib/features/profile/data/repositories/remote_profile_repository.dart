@@ -118,6 +118,24 @@ class RemoteProfileRepository {
     }
   }
 
+  /// Was only ever saved to the device's own SharedPreferences — admin had
+  /// no way to see which payment method a customer picked, and the choice
+  /// didn't survive a reinstall or a new device.
+  Future<Result<void>> updatePaymentPreference({
+    String? paymentMethod,
+    String? wallet,
+  }) async {
+    try {
+      await _apiService.dio.put('/auth/me', data: {
+        if (paymentMethod != null) 'preferred_payment_method': paymentMethod,
+        if (wallet != null) 'preferred_wallet': wallet,
+      });
+      return Result.success(null);
+    } catch (e) {
+      return Result.failure(ServerFailure(friendlyErrorMessage(e)));
+    }
+  }
+
   Future<Result<UserModel>> updateProfileImage(String userId, String imageUrl) async {
      try {
        // We can reuse updateProfile? No, updateProfile doesn't send profileImage in body currently.

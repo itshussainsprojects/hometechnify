@@ -22,6 +22,7 @@ import 'admin_user_auth_screen.dart';
 import 'admin_provider_auth_screen.dart';
 import 'admin_recycle_bin_screen.dart';
 import 'admin_provider_recycle_bin_screen.dart';
+import 'admin_customer_payment_screen.dart';
 
 class AdminDashboardScreen extends StatefulWidget {
   const AdminDashboardScreen({super.key});
@@ -53,6 +54,7 @@ class _AdminDashboardScreenState extends State<AdminDashboardScreen> {
     {'icon': Icons.my_location_rounded, 'label': 'Provider Radius (km)'},
     {'icon': Icons.percent_rounded, 'label': 'Commission (%)'},
     {'icon': Icons.badge_rounded, 'label': 'Provider Details'},
+    {'icon': Icons.payments_rounded, 'label': 'Customer Payment Select'},
   ];
 
   @override
@@ -292,6 +294,7 @@ class _AdminDashboardScreenState extends State<AdminDashboardScreen> {
       case 13: return const AdminRadiusScreen();
       case 14: return const AdminCommissionScreen();
       case 15: return const AdminProviderDetailsScreen();
+      case 16: return const AdminCustomerPaymentScreen();
       default: return _buildDashboardContent();
     }
   }

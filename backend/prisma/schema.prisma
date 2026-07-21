@@ -41,6 +41,12 @@ model User {
   deleted_at               DateTime?
   is_notifications_enabled Boolean        @default(true)
   notifications            Notification[]
+  // Customer's chosen payment method for booking a service — was only ever
+  // saved to the device's own SharedPreferences, never synced to the
+  // backend, so admin had no way to see it and it didn't survive a
+  // reinstall/new device.
+  preferred_payment_method String?        @default("cash") // 'cash' | 'wallet'
+  preferred_wallet         String?        @default("jazzcash") // 'jazzcash' | 'easypaisa'
   created_at               DateTime       @default(now())
   updated_at               DateTime       @updatedAt
 

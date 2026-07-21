@@ -1,6 +1,7 @@
 
 const prisma = require('../utils/prisma');
 const { sendAdminLoginEmail } = require('../services/emailService');
+const { broadcastToAll } = require('../services/socketService');
 
 const syncUser = async (req, res) => {
     try {
@@ -210,7 +211,7 @@ const getMe = async (req, res) => {
 const updateMe = async (req, res) => {
     try {
         const { uid } = req.firebaseUser;
-        const { name, phone, profileImage, fcmToken } = req.body;
+        const { name, phone, profileImage, fcmToken, preferred_payment_method, preferred_wallet } = req.body;
 
         console.log("=== UPDATE ME REQUEST ===");
         console.log("Body:", req.body);
@@ -223,10 +224,24 @@ const updateMe = async (req, res) => {
                 phone: phone || undefined,
                 profileImage: profileImage || undefined,
                 fcmToken: fcmToken || undefined,
+                preferred_payment_method: preferred_payment_method || undefined,
+                preferred_wallet: preferred_wallet || undefined,
             },
         });
 
         console.log("Updated user profileImage:", user.profileImage);
+
+        // Was only ever saved to the device's own SharedPreferences before —
+        // admin had no way to see which payment method a customer picked, and
+        // it never survived a reinstall/new device. The admin panel's
+        // Customer Payment Select screen listens for this to update live.
+        if (preferred_payment_method !== undefined || preferred_wallet !== undefined) {
+            broadcastToAll('customer_payment_updated', {
+                userId: user.id,
+                preferred_payment_method: user.preferred_payment_method,
+                preferred_wallet: user.preferred_wallet,
+            });
+        }
 
         res.status(200).json({ success: true, data: user });
     } catch (error) {
