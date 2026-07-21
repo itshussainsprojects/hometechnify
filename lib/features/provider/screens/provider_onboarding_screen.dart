@@ -303,6 +303,30 @@ class _ProviderOnboardingScreenState extends State<ProviderOnboardingScreen> {
           SnackBarHelper.showError(context, "Passwords do not match");
           return;
         }
+
+        // This email might already belong to a Customer or Admin account.
+        // Firebase Auth would eventually reject the duplicate too, but only
+        // at the very last "Complete Registration" tap — after Service
+        // Details AND CNIC upload were already filled in. Checking here, the
+        // moment they try to leave this step, catches it immediately.
+        final email = _emailController.text.trim();
+        setState(() => _isLoading = true);
+        try {
+          final res = await ApiService().dio.get('/auth/check-email', queryParameters: {'email': email});
+          final data = res.data['data'];
+          if (data['exists'] == true && data['role'] != null && data['role'] != 'PROVIDER') {
+            final existingRole = data['role'] == 'ADMIN' ? 'an Admin' : 'a Customer';
+            if (mounted) {
+              setState(() => _isLoading = false);
+              SnackBarHelper.showError(context,
+                  'This email is already registered as $existingRole account. Please use a different email.');
+            }
+            return;
+          }
+        } catch (e) {
+          debugPrint('check-email failed (non-fatal, Firebase will still catch true duplicates): $e');
+        }
+        if (mounted) setState(() => _isLoading = false);
       } else if (_currentStep == 1) {
         if (_selectedCategoryId == null || _selectedExperience == null) {
           SnackBarHelper.showError(context, "Please select your trade and experience");

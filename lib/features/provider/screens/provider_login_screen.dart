@@ -138,7 +138,20 @@ class _ProviderLoginScreenState extends State<ProviderLoginScreen> {
     final isVerySmall = size.height < 600;
     final horizontalPadding = Responsive.horizontalPadding(context);
 
-    return Scaffold(
+    return PopScope(
+      // Logout lands here via pushNamedAndRemoveUntil, which clears the whole
+      // stack — this becomes the root route with nothing left to pop. Without
+      // this, the system back button then has nowhere to go (Android exits
+      // the Activity on a bare Scaffold, which reads as a black-screen glitch
+      // rather than the app closing on purpose). Reached the normal way
+      // instead (Role Selection -> Provider), canPop is still true and back
+      // behaves exactly as before.
+      canPop: Navigator.canPop(context),
+      onPopInvokedWithResult: (didPop, result) {
+        if (didPop) return;
+        Navigator.pushNamedAndRemoveUntil(context, '/', (route) => false);
+      },
+      child: Scaffold(
       backgroundColor: AppColors.scaffoldBackground,
       body: SafeArea(
         child: SingleChildScrollView(
@@ -288,6 +301,7 @@ class _ProviderLoginScreenState extends State<ProviderLoginScreen> {
             ],
           ),
         ),
+      ),
       ),
     );
   }

@@ -3,6 +3,7 @@ import 'package:dio/dio.dart';
 import '../../domain/repositories/provider_repository.dart';
 import '../../data/models/provider_model.dart';
 import '../../../../core/services/api_service.dart';
+import '../../../../core/services/firebase_auth_service.dart';
 import '../../../../core/utils/result.dart';
 import '../../../../core/errors/failures.dart';
 
@@ -144,7 +145,26 @@ class RemoteProviderRepository implements ProviderRepository {
   @override
   Future<Result<void>> deleteAccount() async {
     try {
-      await _apiService.dio.delete('/providers/account');
+      // 1. Delete from Backend (Postgres)
+      try {
+        await _apiService.dio.delete('/providers/account');
+      } catch (e) {
+        // Proceed to Firebase delete anyway — otherwise a provider whose
+        // Postgres row is already gone (or fails for some other reason)
+        // keeps a live Firebase credential forever with no way back in to
+        // retry, since the app has no record of them anymore.
+      }
+
+      // 2. Delete from Firebase. This was missing entirely — the account
+      // "deleted successfully" toast fired while the person's Firebase Auth
+      // credential (their actual login) stayed alive, letting them log back
+      // in to a provider with no profile, or blocking re-registration with
+      // that same email.
+      String? error;
+      await FirebaseAuthService.deleteUser(onError: (e) => error = e);
+      if (error != null) {
+        return Result.failure(ServerFailure(error!));
+      }
       return Result.success(null);
     } catch (e) {
       return Result.failure(ServerFailure(friendlyErrorMessage(e)));

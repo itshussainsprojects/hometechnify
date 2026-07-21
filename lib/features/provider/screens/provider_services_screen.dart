@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:flutter_animate/flutter_animate.dart';
 import '../../../../core/constants/constants.dart';
+import '../../../../core/services/api_service.dart';
 import '../providers/provider_controller.dart';
 import '../../auth/providers/auth_provider.dart';
 
@@ -76,6 +77,118 @@ class _ProviderServicesScreenState extends State<ProviderServicesScreen> {
     });
   }
 
+  /// Was a separate "My Trade" card on the main Profile screen. Merged in
+  /// here since both screens showed/edited the same category field one tap
+  /// apart in the same "Service" section — this is the single place a
+  /// provider sets their trade, bio, experience, and services list.
+  Future<void> _showTradePicker() async {
+    final controller = context.read<ProviderController>();
+    final messenger = ScaffoldMessenger.of(context);
+
+    List<dynamic> categories;
+    try {
+      final res = await ApiService().dio.get('/categories');
+      categories = (res.data['data'] as List?) ?? [];
+    } catch (e) {
+      messenger.showSnackBar(SnackBar(
+        content: Text('Could not load the trade list: $e'),
+        backgroundColor: AppColors.error,
+      ));
+      return;
+    }
+    if (!mounted) return;
+
+    if (categories.isEmpty) {
+      messenger.showSnackBar(const SnackBar(
+        content: Text('No trades are available yet. Please contact support.'),
+        backgroundColor: AppColors.warning,
+      ));
+      return;
+    }
+
+    final current = controller.selectedProvider?.category;
+
+    final chosen = await showModalBottomSheet<Map<String, dynamic>>(
+      context: context,
+      backgroundColor: Colors.transparent,
+      builder: (_) => Container(
+        decoration: const BoxDecoration(
+          color: AppColors.white,
+          borderRadius: BorderRadius.vertical(top: Radius.circular(24)),
+        ),
+        padding: const EdgeInsets.fromLTRB(20, 12, 20, 24),
+        child: SafeArea(
+          top: false,
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Center(
+                child: Container(
+                  width: 40,
+                  height: 4,
+                  decoration: BoxDecoration(
+                    color: AppColors.grey300,
+                    borderRadius: BorderRadius.circular(2),
+                  ),
+                ),
+              ),
+              const SizedBox(height: 16),
+              const Text('Choose your trade',
+                  style: TextStyle(fontSize: 18, fontWeight: FontWeight.w800)),
+              const SizedBox(height: 4),
+              const Text(
+                'You will only be shown jobs in this trade.',
+                style: TextStyle(fontSize: 12, color: AppColors.textHint),
+              ),
+              const SizedBox(height: 16),
+              ...categories.map((c) {
+                final name = (c['name'] ?? '') as String;
+                final isCurrent = name == current;
+                return ListTile(
+                  contentPadding: EdgeInsets.zero,
+                  leading: Icon(
+                    isCurrent
+                        ? Icons.radio_button_checked_rounded
+                        : Icons.radio_button_unchecked_rounded,
+                    color: isCurrent ? AppColors.primaryBlue : AppColors.grey300,
+                  ),
+                  title: Text(name,
+                      style: TextStyle(
+                        fontWeight: isCurrent ? FontWeight.w800 : FontWeight.w600,
+                      )),
+                  onTap: () => Navigator.pop(context, c as Map<String, dynamic>),
+                );
+              }),
+            ],
+          ),
+        ),
+      ),
+    );
+
+    if (chosen == null || !mounted) return;
+    final name = chosen['name'] as String;
+    if (name == current) return;
+
+    final ok = await controller.updateProfile({'service_category_id': chosen['id']});
+    if (!mounted) return;
+
+    if (ok) {
+      final me = context.read<AuthProvider>().user;
+      if (me != null) await controller.fetchProviderDetails(me.id);
+      if (!mounted) return;
+      messenger.showSnackBar(SnackBar(
+        content: Text('Your trade is now $name — you will receive $name jobs.'),
+        backgroundColor: AppColors.success,
+      ));
+    } else {
+      messenger.showSnackBar(SnackBar(
+        content: Text(controller.errorMessage ?? 'Could not update your trade'),
+        backgroundColor: AppColors.error,
+      ));
+    }
+  }
+
   Future<void> _saveChanges() async {
     // Pricing is negotiation-based (per-job quotes), so no hourly rate here.
     final success = await context.read<ProviderController>().updateProfile({
@@ -109,7 +222,7 @@ class _ProviderServicesScreenState extends State<ProviderServicesScreen> {
     return Scaffold(
       backgroundColor: const Color(0xFFE8EDF4),
       appBar: AppBar(
-        title: const Text('My Services', style: TextStyle(fontWeight: FontWeight.bold)),
+        title: const Text('My Trade & Services', style: TextStyle(fontWeight: FontWeight.bold)),
         centerTitle: true,
         backgroundColor: Colors.transparent,
         elevation: 0,
@@ -130,8 +243,13 @@ class _ProviderServicesScreenState extends State<ProviderServicesScreen> {
         padding: const EdgeInsets.all(20),
         child: Column(
           children: [
-            // Category Card
-            Container(
+            // Trade / Category Card — tap to change. This used to be a
+            // separate read-only card here plus a whole separate "My Trade"
+            // card+picker on the main Profile screen, both editing the exact
+            // same service_category_id field via the same backend call.
+            GestureDetector(
+              onTap: _showTradePicker,
+              child: Container(
               padding: const EdgeInsets.all(20),
               decoration: BoxDecoration(
                 gradient: AppColors.primaryGradient,
@@ -160,7 +278,7 @@ class _ProviderServicesScreenState extends State<ProviderServicesScreen> {
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
                         const Text(
-                          'Active Category',
+                          'My Trade — tap to change',
                           style: TextStyle(color: Colors.white70, fontSize: 13),
                         ),
                         const SizedBox(height: 4),
@@ -171,7 +289,9 @@ class _ProviderServicesScreenState extends State<ProviderServicesScreen> {
                       ],
                     ),
                   ),
+                  const Icon(Icons.chevron_right_rounded, color: Colors.white70),
                 ],
+              ),
               ),
             ).animate().slideY(begin: 0.1, duration: 400.ms),
 

@@ -270,6 +270,19 @@ class _ProviderDashboardScreenState extends State<ProviderDashboardScreen> {
              context.read<BookingProvider>().fetchMyBookings(user.id);
           }
 
+          // The backend already emits this the instant a customer posts a
+          // job in this provider's trade/radius (notificationService.js's
+          // sendNotification) — it just wasn't being listened for here, so
+          // the "Nearby Jobs" list only ever updated on a manual pull-to-
+          // refresh or the next time this screen mounted.
+          if (data['type'] == 'job_post') {
+            final providerController = context.read<ProviderController>();
+            final category = providerController.selectedProvider?.category;
+            if (category != null) {
+              context.read<JobPostProvider>().fetchNearbyJobs(category: category);
+            }
+          }
+
           // A pending provider only ever sees this screen embedded (blurred,
           // non-interactive) underneath ProviderPendingScreen — so THIS
           // handler, not AuthProvider's, is the one actually listening when
@@ -394,13 +407,7 @@ class _ProviderDashboardScreenState extends State<ProviderDashboardScreen> {
               Expanded(
                 child: Builder(
                   builder: (context) {
-                    String address = _currentAddress ?? (user != null && user.addresses.isNotEmpty ? user.addresses.first : "Finding location...");
-                    // Custom fix for Gulshan Colony
-                    if (address.contains("Gulshan Colony")) {
-                      address = address.replaceAll("Lahore", "Taxila, Rawalpindi")
-                                       .replaceAll("Waqar", "")
-                                       .replaceAll("  ", " ").trim();
-                    }
+                    final address = _currentAddress ?? (user != null && user.addresses.isNotEmpty ? user.addresses.first : "Finding location...");
                     return Text(
                       address,
                       style: TextStyle(

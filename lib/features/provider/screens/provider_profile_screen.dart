@@ -5,7 +5,6 @@ import 'package:provider/provider.dart';
 import 'package:flutter_animate/flutter_animate.dart';
 import 'package:image_picker/image_picker.dart';
 import '../../../core/constants/constants.dart';
-import '../../../core/services/api_service.dart';
 import '../../../core/utils/responsive.dart';
 import '../../auth/providers/auth_provider.dart';
 import '../providers/provider_controller.dart';
@@ -22,196 +21,6 @@ class ProviderProfileScreen extends StatefulWidget {
 
 class _ProviderProfileScreenState extends State<ProviderProfileScreen> {
   bool _pushNotifications = true;
-
-  /// The provider's trade — the single thing that decides which jobs they see.
-  ///
-  /// Until now nothing in the app could set it. Onboarding threw the choice away
-  /// and the backend filed everyone under whatever category was first in the
-  /// table, so a provider who signed up as an electrician silently became a
-  /// plumber and only ever saw plumbing jobs. This is where they fix that.
-  Widget _buildTradeCard(bool isSmall) {
-    final provider = context.watch<ProviderController>().selectedProvider;
-    final trade = provider?.category;
-    final hasTrade = trade != null && trade.isNotEmpty && trade != 'Uncategorized';
-
-    return GestureDetector(
-      onTap: _showTradePicker,
-      child: Container(
-        padding: EdgeInsets.all(isSmall ? 14 : 16),
-        decoration: BoxDecoration(
-          color: AppColors.white,
-          borderRadius: BorderRadius.circular(16),
-          border: Border.all(
-            color: hasTrade ? AppColors.grey200 : AppColors.warning.withValues(alpha: 0.5),
-          ),
-          boxShadow: [
-            BoxShadow(
-              color: Colors.black.withValues(alpha: 0.04),
-              blurRadius: 10,
-              offset: const Offset(0, 4),
-            ),
-          ],
-        ),
-        child: Row(
-          children: [
-            Container(
-              width: 42,
-              height: 42,
-              decoration: BoxDecoration(
-                color: (hasTrade ? AppColors.primaryBlue : AppColors.warning)
-                    .withValues(alpha: 0.1),
-                borderRadius: BorderRadius.circular(12),
-              ),
-              child: Icon(
-                Icons.handyman_rounded,
-                size: 20,
-                color: hasTrade ? AppColors.primaryBlue : AppColors.warning,
-              ),
-            ),
-            const SizedBox(width: 14),
-            Expanded(
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  const Text('My Trade',
-                      style: TextStyle(fontSize: 12, color: AppColors.textSecondary)),
-                  const SizedBox(height: 2),
-                  Text(
-                    hasTrade ? trade : 'Not set',
-                    style: TextStyle(
-                      fontSize: isSmall ? 15 : 16,
-                      fontWeight: FontWeight.w800,
-                      color: hasTrade ? AppColors.textPrimary : AppColors.warning,
-                    ),
-                  ),
-                  const SizedBox(height: 2),
-                  Text(
-                    hasTrade
-                        ? 'You only receive $trade jobs'
-                        : 'Set your trade — you receive no jobs until you do',
-                    style: TextStyle(
-                      fontSize: 11,
-                      color: hasTrade ? AppColors.textHint : AppColors.warning,
-                    ),
-                  ),
-                ],
-              ),
-            ),
-            const Icon(Icons.chevron_right_rounded, color: AppColors.textSecondary),
-          ],
-        ),
-      ),
-    );
-  }
-
-  Future<void> _showTradePicker() async {
-    final controller = context.read<ProviderController>();
-    final messenger = ScaffoldMessenger.of(context);
-
-    List<dynamic> categories;
-    try {
-      final res = await ApiService().dio.get('/categories');
-      categories = (res.data['data'] as List?) ?? [];
-    } catch (e) {
-      messenger.showSnackBar(SnackBar(
-        content: Text('Could not load the trade list: $e'),
-        backgroundColor: AppColors.error,
-      ));
-      return;
-    }
-    if (!mounted) return;
-
-    if (categories.isEmpty) {
-      messenger.showSnackBar(const SnackBar(
-        content: Text('No trades are available yet. Please contact support.'),
-        backgroundColor: AppColors.warning,
-      ));
-      return;
-    }
-
-    final current = controller.selectedProvider?.category;
-
-    final chosen = await showModalBottomSheet<Map<String, dynamic>>(
-      context: context,
-      backgroundColor: Colors.transparent,
-      builder: (_) => Container(
-        decoration: const BoxDecoration(
-          color: AppColors.white,
-          borderRadius: BorderRadius.vertical(top: Radius.circular(24)),
-        ),
-        padding: const EdgeInsets.fromLTRB(20, 12, 20, 24),
-        child: SafeArea(
-          top: false,
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Center(
-                child: Container(
-                  width: 40,
-                  height: 4,
-                  decoration: BoxDecoration(
-                    color: AppColors.grey300,
-                    borderRadius: BorderRadius.circular(2),
-                  ),
-                ),
-              ),
-              const SizedBox(height: 16),
-              const Text('Choose your trade',
-                  style: TextStyle(fontSize: 18, fontWeight: FontWeight.w800)),
-              const SizedBox(height: 4),
-              const Text(
-                'You will only be shown jobs in this trade.',
-                style: TextStyle(fontSize: 12, color: AppColors.textHint),
-              ),
-              const SizedBox(height: 16),
-              ...categories.map((c) {
-                final name = (c['name'] ?? '') as String;
-                final isCurrent = name == current;
-                return ListTile(
-                  contentPadding: EdgeInsets.zero,
-                  leading: Icon(
-                    isCurrent
-                        ? Icons.radio_button_checked_rounded
-                        : Icons.radio_button_unchecked_rounded,
-                    color: isCurrent ? AppColors.primaryBlue : AppColors.grey300,
-                  ),
-                  title: Text(name,
-                      style: TextStyle(
-                        fontWeight: isCurrent ? FontWeight.w800 : FontWeight.w600,
-                      )),
-                  onTap: () => Navigator.pop(context, c as Map<String, dynamic>),
-                );
-              }),
-            ],
-          ),
-        ),
-      ),
-    );
-
-    if (chosen == null || !mounted) return;
-    final name = chosen['name'] as String;
-    if (name == current) return;
-
-    final ok = await controller.updateProfile({'service_category_id': chosen['id']});
-    if (!mounted) return;
-
-    if (ok) {
-      // Re-read the profile so the card shows the new trade immediately.
-      final me = context.read<AuthProvider>().user;
-      if (me != null) await controller.fetchProviderDetails(me.id);
-      if (!mounted) return;
-      messenger.showSnackBar(SnackBar(
-        content: Text('Your trade is now $name — you will receive $name jobs.'),
-        backgroundColor: AppColors.success,
-      ));
-    } else {
-      messenger.showSnackBar(SnackBar(
-        content: Text(controller.errorMessage ?? 'Could not update your trade'),
-        backgroundColor: AppColors.error,
-      ));
-    }
-  }
 
   Future<void> _deleteAccount() async {
     final success = await context.read<ProviderController>().deleteAccount();
@@ -697,7 +506,7 @@ class _ProviderProfileScreenState extends State<ProviderProfileScreen> {
   Widget _buildServiceMenu(double horizontalPadding, bool isSmall) {
     final menuItems = [
       {'icon': Icons.account_balance_wallet_outlined, 'title': 'Wallet History', 'route': '/provider/wallet-history'},
-      {'icon': Icons.grid_view_rounded, 'title': 'Services', 'route': '/provider/services'},
+      {'icon': Icons.grid_view_rounded, 'title': 'My Trade & Services', 'route': '/provider/services'},
       {'icon': Icons.campaign_rounded, 'title': 'Advertise Your Service', 'route': '/provider/advertise'},
     ];
 
@@ -713,8 +522,6 @@ class _ProviderProfileScreenState extends State<ProviderProfileScreen> {
               letterSpacing: 0.5,
             ),
           ),
-          const SizedBox(height: 14),
-          _buildTradeCard(isSmall),
           const SizedBox(height: 14),
           Container(
             decoration: BoxDecoration(

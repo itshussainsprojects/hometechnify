@@ -649,13 +649,28 @@ const requestWithdrawal = async (req, res) => {
 };
 
 // Delete Provider Account
+// Soft-delete, matching the admin panel's own delete-provider action
+// (adminController.deleteProvider) — NOT a hard prisma.user.delete(). A hard
+// delete hit a foreign-key constraint for almost any real provider: every
+// completed booking, every wallet top-up (each writes a Transaction row),
+// and every notification all reference this user, none of them cascading.
+// It also would have erased the CUSTOMER's side of shared booking history
+// just because the provider deleted their account. deleted_at is already
+// the established pattern — authMiddleware blocks login for it, and every
+// listing query already filters it out.
 const deleteAccount = async (req, res) => {
     try {
         const providerId = req.user.id;
 
         await prisma.$transaction([
-            prisma.providerProfile.deleteMany({ where: { user_id: providerId } }),
-            prisma.user.delete({ where: { id: providerId } })
+            prisma.user.update({
+                where: { id: providerId },
+                data: { deleted_at: new Date() },
+            }),
+            prisma.providerProfile.updateMany({
+                where: { user_id: providerId },
+                data: { is_online: false },
+            }),
         ]);
 
         res.json({ success: true, message: "Account deleted successfully" });

@@ -4,7 +4,6 @@ const { getProviderRadiusKm } = require('../utils/settings');
 const { validateBidPrice } = require('../utils/bidding');
 
 // ── Location-based matching ────────────────────────────────────────────
-const JOB_FEED_RADIUS_KM = 30;    // provider job feed shows jobs within this radius
 
 // Haversine distance in km between two coordinates
 const distanceKm = (lat1, lng1, lat2, lng2) => {
@@ -275,10 +274,16 @@ exports.getNearbyJobs = async (req, res) => {
         });
 
         // Location-based: sort by distance from the provider's current
-        // location and hide jobs beyond JOB_FEED_RADIUS_KM. Jobs without
-        // coordinates stay visible (at the end). If the provider has no
-        // location saved, the feed is unchanged.
+        // location and hide jobs beyond the admin-configured radius. Jobs
+        // without coordinates stay visible (at the end). If the provider has
+        // no location saved, the feed is unchanged.
+        //
+        // This used to hide anything past a hardcoded 30km regardless of what
+        // the admin set provider_radius_km to elsewhere in the app (customer's
+        // provider browse list, job-post notification fan-out) — an admin
+        // narrowing the radius to, say, 10km had no effect on this screen.
         if (profile?.current_lat != null && profile?.current_lng != null) {
+            const radiusKm = await getProviderRadiusKm();
             jobs = jobs
                 .map(j => ({
                     ...j,
@@ -286,7 +291,7 @@ exports.getNearbyJobs = async (req, res) => {
                         ? Math.round(distanceKm(profile.current_lat, profile.current_lng, j.lat, j.lng) * 10) / 10
                         : null,
                 }))
-                .filter(j => j.distance_km == null || j.distance_km <= JOB_FEED_RADIUS_KM)
+                .filter(j => j.distance_km == null || j.distance_km <= radiusKm)
                 .sort((a, b) => (a.distance_km ?? Infinity) - (b.distance_km ?? Infinity));
         }
         res.json(jobs);
