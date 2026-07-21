@@ -1,6 +1,7 @@
 // Premium Home Screen with Enhanced Services
 
 import 'dart:math' as math;
+import 'dart:ui' show ImageFilter;
 import 'package:flutter/material.dart';
 import 'package:flutter_animate/flutter_animate.dart';
 import '../../../core/constants/constants.dart';
@@ -680,6 +681,10 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin, 
     final currentNavIndex = navProvider.currentIndex;
 
     return Scaffold(
+      // The glass nav bar needs page content to run underneath it — without
+      // extendBody the Scaffold reserves an opaque strip (the "white band")
+      // behind the floating bar and the translucency shows nothing.
+      extendBody: true,
       body: AnimatedBuilder(
         animation: _tabSwitchController,
         builder: (context, child) {
@@ -1778,7 +1783,37 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin, 
           return Stack(
             clipBehavior: Clip.none,
             children: [
-              // The bar with its moving liquid notch
+              // The bar with its moving liquid notch — frosted glass:
+              // page content blurs through the bar shape, and the painter on
+              // top adds only the neumorphic shadow pair + edge highlight
+              // (no opaque fill, so the bar stays translucent).
+              Positioned(
+                left: 0,
+                right: 0,
+                bottom: 0,
+                height: navHeight,
+                child: ClipPath(
+                  clipper: _WaveNavClipper(
+                    notchCenterX: cx,
+                    notchRadius: dropSize / 2 + 7,
+                  ),
+                  child: BackdropFilter(
+                    filter: ImageFilter.blur(sigmaX: 14, sigmaY: 14),
+                    child: Container(
+                      decoration: BoxDecoration(
+                        gradient: LinearGradient(
+                          begin: Alignment.topLeft,
+                          end: Alignment.bottomRight,
+                          colors: [
+                            Colors.white.withValues(alpha: 0.62),
+                            NeuTheme.bg.withValues(alpha: 0.55),
+                          ],
+                        ),
+                      ),
+                    ),
+                  ),
+                ),
+              ),
               Positioned(
                 left: 0,
                 right: 0,
@@ -1813,17 +1848,22 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin, 
                                 ? MainAxisAlignment.end
                                 : MainAxisAlignment.center,
                             children: [
-                              // Icon hides under the droplet when selected
+                              // Icon hides under the droplet when selected.
+                              // Ink tones, not white — the bar is light glass
+                              // now and white simply vanished on it.
                               if (!isSelected)
                                 Icon(item.icon,
                                     size: isSmall ? 21 : 23,
-                                    color: Colors.white.withValues(alpha: 0.85)),
+                                    color: AppColors.textSecondary
+                                        .withValues(alpha: 0.9)),
                               SizedBox(height: isSelected ? 0 : 3),
                               Text(
                                 item.label,
                                 style: TextStyle(
-                                  color: Colors.white
-                                      .withValues(alpha: isSelected ? 1 : 0.75),
+                                  color: isSelected
+                                      ? AppColors.primaryBlue
+                                      : AppColors.textSecondary
+                                          .withValues(alpha: 0.85),
                                   fontSize: isSmall ? 9.5 : 10.5,
                                   fontWeight: isSelected
                                       ? FontWeight.w800
@@ -1861,6 +1901,13 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin, 
                         blurRadius: 14,
                         offset: const Offset(0, 5),
                       ),
+                      // Neumorphic top-left light kiss so the droplet sits in
+                      // the same soft-light world as the glass bar under it.
+                      BoxShadow(
+                        color: Colors.white.withValues(alpha: 0.85),
+                        blurRadius: 8,
+                        offset: const Offset(-2, -2),
+                      ),
                     ],
                   ),
                   child: AnimatedSwitcher(
@@ -1885,8 +1932,41 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin, 
   }
 }
 
-// Paints the nav bar pill with a circular "liquid" notch scooped out of the
-// top edge - the droplet button rides inside it.
+// Shared geometry for the nav pill with its liquid notch — the clipper cuts
+// the frosted-glass blur to this shape and the painter decorates the same
+// outline, so the two must never drift apart.
+Path _waveNavPath(Size size, double notchCenterX, double notchRadius) {
+  final rect = Offset.zero & size;
+  final bar = Path()
+    ..addRRect(RRect.fromRectAndRadius(rect, const Radius.circular(26)));
+  // Slightly widened oval reads as a wave dip rather than a hard bite.
+  final notch = Path()
+    ..addOval(Rect.fromCenter(
+      center: Offset(notchCenterX, 0),
+      width: notchRadius * 2.6,
+      height: notchRadius * 2,
+    ));
+  return Path.combine(PathOperation.difference, bar, notch);
+}
+
+// Clips the BackdropFilter blur to the bar shape — this is what makes the
+// bar itself translucent glass instead of a solid slab.
+class _WaveNavClipper extends CustomClipper<Path> {
+  final double notchCenterX;
+  final double notchRadius;
+  _WaveNavClipper({required this.notchCenterX, required this.notchRadius});
+
+  @override
+  Path getClip(Size size) => _waveNavPath(size, notchCenterX, notchRadius);
+
+  @override
+  bool shouldReclip(covariant _WaveNavClipper old) =>
+      old.notchCenterX != notchCenterX || old.notchRadius != notchRadius;
+}
+
+// Decorates the glass bar with the neumorphic shadow pair (dark below-right,
+// light above-left) and a bright top edge. Deliberately NO fill — the
+// translucent blur layer underneath provides the surface.
 class _WaveNavBarPainter extends CustomPainter {
   final double notchCenterX;
   final double notchRadius;
@@ -1894,35 +1974,32 @@ class _WaveNavBarPainter extends CustomPainter {
 
   @override
   void paint(Canvas canvas, Size size) {
-    final rect = Offset.zero & size;
-    final bar = Path()
-      ..addRRect(RRect.fromRectAndRadius(rect, const Radius.circular(26)));
-    // Slightly widened oval reads as a wave dip rather than a hard bite.
-    final notch = Path()
-      ..addOval(Rect.fromCenter(
-        center: Offset(notchCenterX, 0),
-        width: notchRadius * 2.6,
-        height: notchRadius * 2,
-      ));
-    final path = Path.combine(PathOperation.difference, bar, notch);
+    final path = _waveNavPath(size, notchCenterX, notchRadius);
 
-    // Soft brand glow under the bar
-    final shadowPaint = Paint()
-      ..color = AppColors.primaryBlue.withValues(alpha: 0.35)
-      ..maskFilter = const MaskFilter.blur(BlurStyle.normal, 12);
+    // Neumorphic dark shadow — soft, low, blue-grey like the rest of the app
+    final darkShadow = Paint()
+      ..color = const Color(0xFF9FB1C8).withValues(alpha: 0.55)
+      ..maskFilter = const MaskFilter.blur(BlurStyle.normal, 14);
     canvas.save();
-    canvas.translate(0, 7);
-    canvas.drawPath(path, shadowPaint);
+    canvas.translate(4, 7);
+    canvas.drawPath(path, darkShadow);
     canvas.restore();
 
-    // The bar itself
-    final paint = Paint()
-      ..shader = const LinearGradient(
-        begin: Alignment.topLeft,
-        end: Alignment.bottomRight,
-        colors: [AppColors.primaryBlue, AppColors.primaryDark],
-      ).createShader(rect);
-    canvas.drawPath(path, paint);
+    // Neumorphic light glow — lifts the bar off the content behind it
+    final lightGlow = Paint()
+      ..color = Colors.white.withValues(alpha: 0.85)
+      ..maskFilter = const MaskFilter.blur(BlurStyle.normal, 10);
+    canvas.save();
+    canvas.translate(-3, -4);
+    canvas.drawPath(path, lightGlow);
+    canvas.restore();
+
+    // Crisp glass edge — a hairline highlight along the outline
+    final edge = Paint()
+      ..style = PaintingStyle.stroke
+      ..strokeWidth = 1.2
+      ..color = Colors.white.withValues(alpha: 0.9);
+    canvas.drawPath(path, edge);
   }
 
   @override

@@ -217,7 +217,7 @@ class _ProviderProfileScreenState extends State<ProviderProfileScreen> {
     final success = await context.read<ProviderController>().deleteAccount();
     if (success && mounted) {
       context.read<AuthProvider>().logout();
-      Navigator.pushNamedAndRemoveUntil(context, '/login', (route) => false);
+      Navigator.pushNamedAndRemoveUntil(context, '/provider/login', (route) => false);
       ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('Account deleted successfully.')));
     } else {
       if(mounted) {
@@ -962,7 +962,7 @@ class _ProviderProfileScreenState extends State<ProviderProfileScreen> {
                   title: 'Logout',
                   onTap: () {
                     context.read<AuthProvider>().logout();
-                    Navigator.pushNamedAndRemoveUntil(context, '/login', (route) => false);
+                    Navigator.pushNamedAndRemoveUntil(context, '/provider/login', (route) => false);
                   },
                   isSmall: isSmall,
                   iconColor: AppColors.error,

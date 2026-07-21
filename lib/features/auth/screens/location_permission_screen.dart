@@ -13,13 +13,17 @@ class LocationPermissionScreen extends StatefulWidget {
 
 class _LocationPermissionScreenState extends State<LocationPermissionScreen> {
   void _allowLocation() {
-    // Request location permission and navigate to home
-    Navigator.pushReplacementNamed(context, '/home');
+    // Home requests the OS permission itself on load; this screen only
+    // decides where to go next.
+    Navigator.pushNamedAndRemoveUntil(context, '/home', (route) => false);
   }
 
   void _denyLocation() {
-    // Go back to login screen
-    Navigator.pushNamedAndRemoveUntil(context, '/login', (route) => false);
+    // Declining location must NOT end the session. This used to throw the
+    // freshly-registered user out to the login screen — account created,
+    // still signed in, but staring at "Welcome Back" as if registration
+    // had failed. Location is optional; home works fine without it.
+    Navigator.pushNamedAndRemoveUntil(context, '/home', (route) => false);
   }
 
   @override

@@ -5,6 +5,7 @@ import '../../../core/constants/constants.dart';
 import '../../../core/utils/responsive.dart';
 import '../../../core/utils/date_formatter.dart';
 import '../../../features/auth/providers/auth_provider.dart';
+import '../../../core/services/firebase_auth_service.dart';
 import '../../../features/booking/providers/booking_provider.dart';
 import '../../../features/job/providers/job_post_provider.dart';
 import 'package:home_technify/features/booking/data/models/booking_model.dart';
@@ -261,12 +262,30 @@ class _ProviderDashboardScreenState extends State<ProviderDashboardScreen> {
     // 2. Refresh Notifications
     SocketService().onNotification = (data) {
        if (mounted) {
-          // Ideally fetch notification count, but here we can just refresh stats 
-          // if notifications are tied to bookings. 
+          // Ideally fetch notification count, but here we can just refresh stats
+          // if notifications are tied to bookings.
           // For now, let's just refresh bookings as a broad catch-all
           final user = context.read<AuthProvider>().user;
           if (user != null) {
              context.read<BookingProvider>().fetchMyBookings(user.id);
+          }
+
+          // A pending provider only ever sees this screen embedded (blurred,
+          // non-interactive) underneath ProviderPendingScreen — so THIS
+          // handler, not AuthProvider's, is the one actually listening when
+          // admin approval lands. Refresh status and step out of the pending
+          // route the instant it comes through; no logout/login needed.
+          if (data['type'] == 'verification' &&
+              data['data']?['verified']?.toString() == 'true') {
+            final authProvider = context.read<AuthProvider>();
+            final navigator = Navigator.of(context);
+            authProvider.checkAuthStatus().then((_) {
+              if (mounted &&
+                  authProvider.user?.role == 'PROVIDER' &&
+                  authProvider.user?.status != 'pending_verification') {
+                navigator.pushReplacementNamed('/provider/dashboard');
+              }
+            });
           }
        }
     };
@@ -282,10 +301,17 @@ class _ProviderDashboardScreenState extends State<ProviderDashboardScreen> {
     // If user is null OR name is 'Provider' (placeholder), we are not ready.
     // Show loading instead of "Sample/Mock" data.
     if (user == null || user.name == 'Provider' || user.name.isEmpty) {
-        // Trigger fetch if we are stuck in this state (and not already loading)
-        if (authProvider.status != AuthStatus.loading) {
+        // Trigger fetch if we are stuck in this state (and not already loading).
+        // Only while actually signed in — this screen is embedded (blurred,
+        // behind AbsorbPointer) inside ProviderPendingScreen, and logging out
+        // from there sets user to null on THIS still-mounted widget. Calling
+        // checkAuthStatus() with no Firebase session just re-confirms "no
+        // user" forever; skipping it here avoids a pointless request during
+        // the moment logout is tearing this widget down.
+        if (authProvider.status != AuthStatus.loading &&
+            FirebaseAuthService.isAuthenticated()) {
            WidgetsBinding.instance.addPostFrameCallback((_) {
-              context.read<AuthProvider>().checkAuthStatus();
+              if (mounted) context.read<AuthProvider>().checkAuthStatus();
            });
         }
         

@@ -54,11 +54,23 @@ class _ProviderLoginScreenState extends State<ProviderLoginScreen> {
     setState(() => _isLoading = false);
 
     if (authProvider.status == AuthStatus.success) {
-      Navigator.pushReplacementNamed(context, '/provider/dashboard');
+      _routeAfterLogin(authProvider);
     } else {
       SnackBarHelper.showError(
           context, authProvider.errorMessage ?? 'Login failed');
     }
+  }
+
+  // A provider whose documents are still under admin review must land on the
+  // pending screen, not the dashboard. Cold app start already gates this
+  // (splash_screen checks user.status), but logging in is a separate path
+  // that skipped the same check — so logging out and back in was a way to
+  // walk straight past verification into the live dashboard.
+  void _routeAfterLogin(AuthProvider authProvider) {
+    final route = authProvider.user?.status == 'pending_verification'
+        ? '/provider/pending'
+        : '/provider/dashboard';
+    Navigator.pushReplacementNamed(context, route);
   }
 
   Future<void> _loginWithGoogle() async {
@@ -116,7 +128,7 @@ class _ProviderLoginScreenState extends State<ProviderLoginScreen> {
 
     if (!mounted) return;
     setState(() => _isLoading = false);
-    Navigator.pushReplacementNamed(context, '/provider/dashboard');
+    _routeAfterLogin(authProvider);
   }
 
   @override

@@ -64,7 +64,18 @@ class ApiService {
       staticBaseUrl.contains('192.168.') ||
       staticBaseUrl.contains('10.0.0.');
 
-  ApiService() {
+  // Singleton. ApiService() used to build a brand-new Dio on every call —
+  // and it's called from ~25 places — so every repository had its own
+  // connection pool and nearly every request opened a fresh TCP+TLS
+  // connection. Against a LAN backend that costs ~1ms and nobody noticed;
+  // against the hosted backend it's 3 round trips to Singapore per request
+  // (and a 15s hang if one handshake packet drops on flaky WiFi). One
+  // shared Dio means one warm keep-alive pool: the handshake happens once
+  // and every later request rides the open socket.
+  static final ApiService _instance = ApiService._internal();
+  factory ApiService() => _instance;
+
+  ApiService._internal() {
     _dio = Dio(BaseOptions(
       baseUrl: staticBaseUrl,
       // Fail fast. These were 120s, so an unreachable backend meant the login
@@ -112,11 +123,50 @@ class ApiService {
           return handler.next(e);
         }
 
-        // 401 = the Firebase token is no longer valid (expired, revoked, or the
-        // account is gone). Every subsequent request would 401 too. This used to
-        // only debugPrint, leaving the user stranded in an app where nothing
-        // worked and no screen ever said why.
+        // 401 handling. Three very different situations produce a 401, and
+        // only ONE of them means the session is actually dead:
+        //
+        // (a) USER_NOT_FOUND — the Firebase token is VALID but the DB row
+        //     isn't there yet. This happens in the seconds right after a
+        //     brand-new registration: the app's parallel launch requests
+        //     race the /auth/sync that creates the row. Signing out here
+        //     kicked every new customer back to the welcome screen the
+        //     moment they registered. The row is coming — wait and retry.
+        //
+        // (b) We knowingly sent the request WITHOUT a token because
+        //     getIdToken() timed out. The backend saying "No token
+        //     provided" tells us nothing about the session — signing out
+        //     here randomly logged out perfectly-valid users on slow
+        //     networks.
+        //
+        // (c) A real invalid/expired/revoked token on a request that DID
+        //     carry one — only this case signs out.
         if (status == 401) {
+          if (code == 'USER_NOT_FOUND') {
+            final syncAttempt =
+                (e.requestOptions.extra['userNotFoundRetry'] as int?) ?? 0;
+            if (syncAttempt < 2) {
+              try {
+                e.requestOptions.extra['userNotFoundRetry'] = syncAttempt + 1;
+                // Self-heal: if registration's own sync failed, the row will
+                // never appear on its own — create it now, with the same
+                // role the register flow intended.
+                await syncUser(role: _lastAttemptedRole);
+                await Future.delayed(const Duration(milliseconds: 500));
+                final response = await _dio.fetch(e.requestOptions);
+                return handler.resolve(response);
+              } catch (_) {/* fall through — surface the original error */}
+            }
+            return handler.next(e);
+          }
+
+          final sentToken =
+              e.requestOptions.headers.containsKey('Authorization');
+          if (!sentToken) {
+            debugPrint('401 on token-less request (token fetch timed out) — not signing out');
+            return handler.next(e);
+          }
+
           debugPrint('API Error 401: $data — session is dead, signing out');
           await _forceSignOut(route: '/login');
           return handler.next(e);
@@ -177,10 +227,17 @@ class ApiService {
   /// Firebase only fills displayName/phoneNumber for phone or Google auth, so on
   /// an email signup the phone the user typed would otherwise be dropped and
   /// never reach the database.
+  /// The role the app most recently TRIED to sync as. If that sync failed
+  /// (flaky network during registration) and a later request hits
+  /// USER_NOT_FOUND, the interceptor re-syncs with this same role — without
+  /// it, a registering provider would get silently re-created as a CUSTOMER.
+  static String? _lastAttemptedRole;
+
   Future<void> syncUser({String? fcmToken, String? role, String? name, String? phone}) async {
     try {
       final user = _auth.currentUser;
       if (user == null) return;
+      if (role != null) _lastAttemptedRole = role;
 
       final data = {
         'name': name ?? user.displayName,

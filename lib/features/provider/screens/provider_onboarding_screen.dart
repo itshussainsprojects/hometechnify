@@ -1,5 +1,6 @@
 // Provider Onboarding Screen - 3-Step Registration
 
+import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_animate/flutter_animate.dart';
@@ -14,6 +15,7 @@ import '../../../core/utils/responsive.dart';
 import '../../../core/services/firebase_auth_service.dart';
 import '../../../core/services/api_service.dart';
 import '../../../core/services/supabase_service.dart';
+import '../../../core/services/session_cache.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 
@@ -61,6 +63,35 @@ class _ProviderOnboardingScreenState extends State<ProviderOnboardingScreen> {
 
   final List<String> _experiences = ['Less than 1 year', '1-3 years', '3-5 years', '5+ years'];
 
+  /// Registration uploads real photos over a mobile connection — a slow
+  /// network can genuinely take the better part of a minute even after
+  /// parallelizing every upload. A single static spinner over that long
+  /// looks identical to a frozen app, so this cycles through what's
+  /// actually happening to make the wait read as progress, not a hang.
+  int _submitStageIndex = 0;
+  Timer? _submitStageTimer;
+  static const _submitStages = [
+    'Creating your account…',
+    'Uploading your documents…',
+    'Almost there…',
+  ];
+
+  void _startSubmitStageCycle() {
+    _submitStageIndex = 0;
+    _submitStageTimer?.cancel();
+    _submitStageTimer = Timer.periodic(const Duration(seconds: 6), (_) {
+      if (!mounted) return;
+      setState(() {
+        _submitStageIndex = (_submitStageIndex + 1) % _submitStages.length;
+      });
+    });
+  }
+
+  void _stopSubmitStageCycle() {
+    _submitStageTimer?.cancel();
+    _submitStageTimer = null;
+  }
+
   @override
   void initState() {
     super.initState();
@@ -90,6 +121,7 @@ class _ProviderOnboardingScreenState extends State<ProviderOnboardingScreen> {
 
   @override
   void dispose() {
+    _submitStageTimer?.cancel();
     _nameController.dispose();
     _phoneController.dispose();
     _emailController.dispose();
@@ -258,8 +290,17 @@ class _ProviderOnboardingScreenState extends State<ProviderOnboardingScreen> {
     if (_currentStep < 2) {
       // Validate steps
       if (_currentStep == 0) {
-        if (_nameController.text.isEmpty || _phoneController.text.isEmpty || _emailController.text.isEmpty || _passwordController.text.isEmpty) {
+        if (_nameController.text.isEmpty || _phoneController.text.isEmpty || _emailController.text.isEmpty || (!_isGoogleAuth && _passwordController.text.isEmpty)) {
           SnackBarHelper.showError(context, "Please fill all fields");
+          return;
+        }
+        // Google sign-in skips password entirely (there is no password to
+        // confirm) — this check only applies to the manual email/password path.
+        // It used to run only at final submit, after Service Details AND CNIC
+        // upload were already filled in — a mismatched password meant redoing
+        // two more steps just to find out.
+        if (!_isGoogleAuth && _passwordController.text != _confirmPasswordController.text) {
+          SnackBarHelper.showError(context, "Passwords do not match");
           return;
         }
       } else if (_currentStep == 1) {
@@ -318,6 +359,7 @@ class _ProviderOnboardingScreenState extends State<ProviderOnboardingScreen> {
 
     try {
       if (mounted) setState(() => _isLoading = true);
+      _startSubmitStageCycle();
       
       User? user;
       
@@ -333,6 +375,7 @@ class _ProviderOnboardingScreenState extends State<ProviderOnboardingScreen> {
           onError: (error) {
             if (mounted) {
               setState(() => _isLoading = false);
+              _stopSubmitStageCycle();
               SnackBarHelper.showError(context, error);
             }
           },
@@ -342,87 +385,77 @@ class _ProviderOnboardingScreenState extends State<ProviderOnboardingScreen> {
 
       if (user == null) {
         if (mounted) setState(() => _isLoading = false);
+        _stopSubmitStageCycle();
         return;
       }
 
-      // 2. Update Firebase user profile
-      String? profileUrl;
-      if (_uploadedDocs[3] && _uploadedPaths[3] != null) {
-         // Upload Profile Pic
-         profileUrl = await SupabaseService.uploadDocument(
-            file: File(_uploadedPaths[3]!),
-            fileName: 'profile.jpg',
-            folder: 'avatars',
-            userId: user.uid
-         );
-      }
-      
-      // Update Display Name & Photo
-      await user.updateDisplayName(_nameController.text.trim());
-      if (profileUrl != null) {
-        await user.updatePhotoURL(profileUrl);
-      }
-
-      // 3. Save to Firestore
+      // 2. Upload every selected image (profile pic + CNIC front/back/selfie)
+      // in one batch. These four uploads have no dependency on each other —
+      // they used to go one at a time (profile pic, THEN front, THEN back,
+      // THEN selfie), four sequential network round-trips stacked up before
+      // the "Verification Pending" dialog could ever appear. Concurrently,
+      // the whole batch costs as long as the single slowest upload.
       final userId = user.uid;
-      await FirebaseFirestore.instance.collection('users').doc(userId).set({
-          'uid': userId,
-          'name': _nameController.text.trim(),
-          'email': _emailController.text.trim(),
-          'phone': "+92${_phoneController.text.trim()}",
-          'role': 'PROVIDER',
-          'service': _selectedCategoryName,
-          'experience': _selectedExperience,
-          'profileImage': profileUrl ?? user.photoURL,
-          'status': 'pending_verification', // STRICTLY Pending
-          'createdAt': FieldValue.serverTimestamp(),
-      }, SetOptions(merge: true)); // Merge to avoid overwriting existing fields if any
+      final uploads = await Future.wait([
+        (_uploadedDocs[3] && _uploadedPaths[3] != null)
+            ? SupabaseService.uploadDocument(file: File(_uploadedPaths[3]!), fileName: 'profile.jpg', folder: 'avatars', userId: userId)
+            : Future.value(null),
+        (_uploadedDocs[0] && _uploadedPaths[0] != null)
+            ? SupabaseService.uploadCnicFront(image: File(_uploadedPaths[0]!), userId: userId)
+            : Future.value(null),
+        (_uploadedDocs[1] && _uploadedPaths[1] != null)
+            ? SupabaseService.uploadCnicBack(image: File(_uploadedPaths[1]!), userId: userId)
+            : Future.value(null),
+        (_uploadedDocs[2] && _uploadedPaths[2] != null)
+            ? SupabaseService.uploadSelfieWithCnic(image: File(_uploadedPaths[2]!), userId: userId)
+            : Future.value(null),
+      ]);
+      final profileUrl = uploads[0];
+      final cnicFrontUrl = uploads[1];
+      final cnicBackUrl = uploads[2];
+      final selfieUrl = uploads[3];
 
-      // 4. Upload Documents to Supabase Storage
-      String? cnicFrontUrl, cnicBackUrl, selfieUrl;
-      
-      if (_uploadedDocs[0] && _uploadedPaths[0] != null) {
-          cnicFrontUrl = await SupabaseService.uploadCnicFront(
-            image: File(_uploadedPaths[0]!),
-            userId: userId,
-          );
-      }
-        
-      if (_uploadedDocs[1] && _uploadedPaths[1] != null) {
-          cnicBackUrl = await SupabaseService.uploadCnicBack(
-            image: File(_uploadedPaths[1]!),
-            userId: userId,
-          );
-      }
-        
-      if (_uploadedDocs[2] && _uploadedPaths[2] != null) {
-          selfieUrl = await SupabaseService.uploadSelfieWithCnic(
-            image: File(_uploadedPaths[2]!),
-            userId: userId,
-          );
-      }
-
-      // 5. Submit Verification Request to Supabase
-      if (cnicFrontUrl != null && cnicBackUrl != null && selfieUrl != null) {
-          await SupabaseService.submitVerificationRequest(
-            providerId: userId,
-            name: _nameController.text.trim(),
-            email: _emailController.text.trim(),
-            phone: "+92${_phoneController.text.trim()}",
-            service: _selectedCategoryName ?? 'General Service',
-            experience: _selectedExperience ?? '1-3 years',
-            cnicFrontUrl: cnicFrontUrl,
-            cnicBackUrl: cnicBackUrl,
-            selfieUrl: selfieUrl,
-          );
-      }
-
-      // 6. Sync to Backend
-      try {
-        await ApiService().syncUser(role: 'PROVIDER');
-      } catch (e) {
-        debugPrint('Backend sync error: $e');
-      }
+      // 3-5. Every remaining write only depends on the uploaded URLs above,
+      // not on each other — Firebase Auth's own profile, the Firestore
+      // fallback doc, and the backend sync were firing off one after another
+      // for no reason, each one a separate network round-trip stacked onto
+      // the wait before the "Verification Pending" dialog could appear.
+      // Running them together costs as long as the slowest one instead of
+      // the sum of all three.
+      //
+      // The Supabase `provider_verifications` insert that used to run here
+      // has been removed: that table's anon role has no grant on the public
+      // schema at all (every insert returned "permission denied for schema
+      // public"), so it silently failed on every single registration and
+      // never reached anyone. The admin panel was already fixed to read
+      // verification documents straight off provider_profile (cnic_front /
+      // cnic_back / selfie_url, written by the updateProfile call below) —
+      // this call was dead weight that only added a guaranteed-to-fail
+      // network round-trip to the wait.
+      final currentUser = user;
+      await Future.wait([
+        () async {
+          await currentUser.updateDisplayName(_nameController.text.trim());
+          if (profileUrl != null) {
+            await currentUser.updatePhotoURL(profileUrl);
+          }
+        }(),
+        FirebaseFirestore.instance.collection('users').doc(userId).set({
+            'uid': userId,
+            'name': _nameController.text.trim(),
+            'email': _emailController.text.trim(),
+            'phone': "+92${_phoneController.text.trim()}",
+            'role': 'PROVIDER',
+            'service': _selectedCategoryName,
+            'experience': _selectedExperience,
+            'profileImage': profileUrl ?? user.photoURL,
+            'status': 'pending_verification', // STRICTLY Pending
+            'createdAt': FieldValue.serverTimestamp(),
+        }, SetOptions(merge: true)), // Merge to avoid overwriting existing fields if any
+        ApiService().syncUser(role: 'PROVIDER').catchError((e) {
+          debugPrint('Backend sync error: $e');
+        }),
+      ]);
 
       // 7. Update Provider Profile — including the TRADE they just picked.
       //
@@ -442,17 +475,31 @@ class _ProviderOnboardingScreenState extends State<ProviderOnboardingScreen> {
           'city': _cityController.text.trim(),
           'cnic_front': cnicFrontUrl ?? "",
           'cnic_back': cnicBackUrl ?? "",
+          'selfie_url': selfieUrl ?? "",
         });
       } catch(e) {
          debugPrint('Provider profile update error: $e');
       }
 
+      // SessionCache is what the splash screen's fast-path uses to decide
+      // "dashboard or pending" on the NEXT cold start, without waiting on a
+      // network round-trip. It is keyed to the device, not the account — if
+      // it's left holding whatever an earlier session on this device cached
+      // (e.g. an already-verified provider, or no provider at all), a brand
+      // new unverified registration would inherit that stale flag and the
+      // fast-path would send them straight to the live dashboard, skipping
+      // the verification gate entirely. Seed it correctly the moment the
+      // account is actually created.
+      await SessionCache.save('PROVIDER', providerPending: true);
+
       if (mounted) {
         setState(() => _isLoading = false);
+        _stopSubmitStageCycle();
         _showVerificationPendingDialog();
       }
 
     } catch (e) {
+      _stopSubmitStageCycle();
       if (mounted) {
         setState(() => _isLoading = false);
         SnackBarHelper.showError(context, "Registration Error: $e");
@@ -652,27 +699,82 @@ class _ProviderOnboardingScreenState extends State<ProviderOnboardingScreen> {
         title: const Text('Provider Registration', style: TextStyle(color: AppColors.textPrimary, fontWeight: FontWeight.w700)),
         centerTitle: true,
       ),
-      body: Column(
+      body: Stack(
         children: [
-          _buildProgressBar(horizontalPadding),
-          // Google Sign-In Option (only on first step)
-          if (_currentStep == 0) _buildGoogleSignInOption(horizontalPadding),
-          Expanded(
-            child: SingleChildScrollView(
-              physics: const BouncingScrollPhysics(),
-              padding: EdgeInsets.all(horizontalPadding),
-              child: AnimatedSwitcher(
-                duration: const Duration(milliseconds: 300),
-                child: _currentStep == 0
-                    ? _buildPersonalInfo()
-                    : _currentStep == 1
-                        ? _buildServiceInfo()
-                        : _buildVerification(),
+          Column(
+            children: [
+              _buildProgressBar(horizontalPadding),
+              // Google Sign-In Option (only on first step)
+              if (_currentStep == 0) _buildGoogleSignInOption(horizontalPadding),
+              Expanded(
+                child: SingleChildScrollView(
+                  physics: const BouncingScrollPhysics(),
+                  padding: EdgeInsets.all(horizontalPadding),
+                  child: AnimatedSwitcher(
+                    duration: const Duration(milliseconds: 300),
+                    child: _currentStep == 0
+                        ? _buildPersonalInfo()
+                        : _currentStep == 1
+                            ? _buildServiceInfo()
+                            : _buildVerification(),
+                  ),
+                ),
+              ),
+              _buildBottomButton(horizontalPadding),
+            ],
+          ),
+          // Real photo uploads over mobile data can genuinely take the
+          // better part of a minute — a plain spinner over that long looks
+          // identical to a frozen app. This blocks input and cycles through
+          // what's actually happening so the wait reads as progress.
+          if (_isLoading && _currentStep == 2) _buildSubmittingOverlay(),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildSubmittingOverlay() {
+    return Positioned.fill(
+      child: AbsorbPointer(
+        child: Container(
+          color: Colors.black.withValues(alpha: 0.55),
+          child: Center(
+            child: Container(
+              margin: const EdgeInsets.symmetric(horizontal: 40),
+              padding: const EdgeInsets.symmetric(horizontal: 28, vertical: 32),
+              decoration: BoxDecoration(
+                color: AppColors.white,
+                borderRadius: BorderRadius.circular(20),
+              ),
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  const SizedBox(
+                    width: 40,
+                    height: 40,
+                    child: CircularProgressIndicator(strokeWidth: 3),
+                  ),
+                  const SizedBox(height: 20),
+                  AnimatedSwitcher(
+                    duration: const Duration(milliseconds: 300),
+                    child: Text(
+                      _submitStages[_submitStageIndex],
+                      key: ValueKey(_submitStageIndex),
+                      style: const TextStyle(fontSize: 15, fontWeight: FontWeight.w700),
+                      textAlign: TextAlign.center,
+                    ),
+                  ),
+                  const SizedBox(height: 8),
+                  Text(
+                    'This can take a minute on a slow connection — please don\'t close the app.',
+                    style: TextStyle(fontSize: 12, color: AppColors.textSecondary),
+                    textAlign: TextAlign.center,
+                  ),
+                ],
               ),
             ),
           ),
-          _buildBottomButton(horizontalPadding),
-        ],
+        ),
       ),
     );
   }

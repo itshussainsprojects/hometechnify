@@ -27,6 +27,25 @@ class AuthProvider extends ChangeNotifier {
       }
       navigatorKey.currentState?.pushNamedAndRemoveUntil('/login', (r) => false);
     };
+
+    // Real-time provider verification: the backend emits this the instant an
+    // admin approves (or revokes) a provider's documents. A pending provider
+    // is confined to ProviderPendingScreen — it embeds the real dashboard
+    // behind a blurred, non-interactive overlay — so the only way out was
+    // logging out and back in for the status check to re-run. This refreshes
+    // the cached status and swaps to the dashboard the moment approval lands,
+    // with no logout required.
+    _socketService.onNotification = (payload) {
+      if (payload['type'] != 'verification') return;
+      final verified = payload['data']?['verified']?.toString() == 'true';
+      if (!verified) return;
+
+      checkAuthStatus().then((_) {
+        if (_user?.role == 'PROVIDER' && _user?.status != 'pending_verification') {
+          navigatorKey.currentState?.pushReplacementNamed('/provider/dashboard');
+        }
+      });
+    };
   }
 
   UserModel? _user;

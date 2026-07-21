@@ -113,7 +113,11 @@ class _ProfileScreenState extends State<ProfileScreen> {
                       ], size),
                       const SizedBox(height: 20),
                       _buildLogoutButton(context, size),
-                      const SizedBox(height: 32),
+                      // The floating glass nav bar overlays the body (Scaffold
+                      // uses extendBody so the blur has content to show through),
+                      // so the last item in every tab needs to clear its height
+                      // itself — otherwise it renders underneath the bar.
+                      SizedBox(height: MediaQuery.of(context).padding.bottom + (size.height < 700 ? 100 : 112)),
                     ],
                   ),
                 ),

@@ -28,6 +28,7 @@ class _SplashScreenState extends State<SplashScreen>
 
   bool _navigated = false;
   bool _animReady = false;
+  String? _fastPathRoute;
 
   /// A user with a persisted Firebase session is coming back, not arriving.
   /// Firebase keeps that session on disk, so this is a local, instant check —
@@ -57,9 +58,13 @@ class _SplashScreenState extends State<SplashScreen>
 
       if (_isReturningUser) {
         _fastPathToDashboard();
-        // Fallback: if there was no cached role, still navigate once the check
-        // resolves rather than sitting on the splash.
-        _authFuture!.whenComplete(_tryNavigate);
+        // If there was no cached role, _tryNavigate still opens the right
+        // screen once the check resolves. If the fast path DID fire, this
+        // instead verifies it: SessionCache is device-wide, not per-account,
+        // so a fresh registration on a device that last cached a different
+        // role/status inherits that stale flag — the fast path would then
+        // send them to the wrong screen before the real check ever ran.
+        _authFuture!.whenComplete(_verifyFastPathOrNavigate);
       }
     });
 
@@ -84,6 +89,7 @@ class _SplashScreenState extends State<SplashScreen>
     if (route == null || _navigated || !mounted) return;
 
     _navigated = true;
+    _fastPathRoute = route;
     Navigator.pushReplacementNamed(context, route);
   }
 
@@ -91,6 +97,35 @@ class _SplashScreenState extends State<SplashScreen>
     if (_navigated || !mounted) return;
     _navigated = true;
     _navigateBasedOnSession();
+  }
+
+  /// Runs once the real /auth/me check resolves. If the fast path already
+  /// navigated on cached data, this compares that route against what the live
+  /// data actually says and corrects course if they disagree — the one case
+  /// that matters is a provider whose device-wide cache said "not pending"
+  /// (or nothing) while the live status says otherwise.
+  void _verifyFastPathOrNavigate() {
+    if (!_navigated) {
+      _tryNavigate();
+      return;
+    }
+    if (_fastPathRoute == null || !mounted) return;
+
+    final authProvider = context.read<AuthProvider>();
+    if (authProvider.status != AuthStatus.success || authProvider.user == null) return;
+    final user = authProvider.user!;
+
+    final correctRoute = switch (user.role) {
+      'PROVIDER' => user.status == 'pending_verification' ? '/provider/pending' : '/provider/dashboard',
+      'ADMIN' => '/admin/dashboard',
+      'CUSTOMER' => '/home',
+      _ => null,
+    };
+
+    if (correctRoute != null && correctRoute != _fastPathRoute) {
+      debugPrint('⚠️ Fast-path route ($_fastPathRoute) disagreed with live status — correcting to $correctRoute');
+      Navigator.pushReplacementNamed(context, correctRoute);
+    }
   }
 
   void _navigateBasedOnSession() async {

@@ -163,6 +163,13 @@ class RemoteAuthRepository implements AuthRepository {
           ? DateTime.parse(data['created_at'])
           : DateTime.now(),
       role: data['role'] ?? 'CUSTOMER',
+      // /auth/me computes this server-side ('pending_verification' for an
+      // unverified provider) — it was never read here, so UserModel's
+      // 'active' default won every single login regardless of what the
+      // backend actually sent. That's the one field every pending/blur-gate
+      // check in the app (login routing, splash fast-path correction) reads,
+      // so its absence silently defeated all of them.
+      status: data['status'] ?? 'active',
     );
   }
 
