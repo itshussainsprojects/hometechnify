@@ -12,6 +12,7 @@ import '../../../core/utils/service_visuals.dart';
 import '../../../core/services/favorites_service.dart';
 import '../../../core/services/firebase_auth_service.dart';
 import '../../../core/services/api_service.dart';
+import '../../../core/services/socket_service.dart';
 import '../widgets/service_card.dart';
 import 'package:provider/provider.dart';
 import '../providers/service_provider.dart';
@@ -109,6 +110,12 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin, 
       _profileProvider = context.read<ProfileProvider>();
       _lastLocationEnabled = _profileProvider!.appLocationEnabled;
       _profileProvider!.addListener(_onProfileChanged);
+
+      // Admin promo change — this used to only ever appear on a fresh
+      // HomeScreen widget instance (the fetch was memoized in _promosCache
+      // for the widget's whole lifetime, and nothing invalidated it), so a
+      // promo created/edited/deleted was invisible until the app restarted.
+      SocketService().onPromosUpdated = _onPromosUpdated;
       if(mounted) {
           context.read<ServiceProvider>().loadServices();
       }
@@ -358,11 +365,17 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin, 
     WidgetsBinding.instance.removeObserver(this);
     _notifProvider?.removeListener(_onNotificationsChanged);
     _profileProvider?.removeListener(_onProfileChanged);
+    SocketService().onPromosUpdated = null;
     _searchController.dispose();
     _bannerPageController.dispose();
     _tabSwitchController.dispose();
     _ctaPulseController.dispose();
     super.dispose();
+  }
+
+  void _onPromosUpdated() {
+    if (!mounted) return;
+    setState(() => _promosCache = null);
   }
 
   void _onNavTap(int index) {

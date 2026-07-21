@@ -1,104 +1,153 @@
-// Account Blocked Screen - Premium Design
+// Account Blocked Screen — shown the instant admin blocks this account
+// (real-time via Socket.IO, not just the next failed API call), and also
+// reachable as a fallback if a 403 slips through first.
+import 'dart:ui';
 import 'package:flutter/material.dart';
 import 'package:flutter_animate/flutter_animate.dart';
+import 'package:url_launcher/url_launcher.dart';
 import '../../../core/constants/constants.dart';
 
 class AccountBlockedScreen extends StatelessWidget {
-  const AccountBlockedScreen({super.key});
+  /// 'CUSTOMER' | 'PROVIDER' | null — decides which login screen "Logout"
+  /// sends them to. Captured by AuthProvider before logout() wipes the role.
+  final String? role;
+
+  const AccountBlockedScreen({super.key, this.role});
+
+  void _logout(BuildContext context) {
+    final loginRoute = role == 'PROVIDER' ? '/provider/login' : '/login';
+    Navigator.pushNamedAndRemoveUntil(context, loginRoute, (route) => false);
+  }
+
+  Future<void> _call(BuildContext context) async {
+    final uri = Uri.parse('tel:03719267771');
+    if (await canLaunchUrl(uri)) await launchUrl(uri);
+  }
+
+  Future<void> _email(BuildContext context) async {
+    final uri = Uri.parse('mailto:info.hometechnify@gmail.com');
+    if (await canLaunchUrl(uri)) await launchUrl(uri);
+  }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: Colors.white,
-      body: SafeArea(
-        child: Padding(
-          padding: const EdgeInsets.symmetric(horizontal: 32),
-          child: Column(
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: [
-              // Illustration
-              Container(
-                width: 140,
-                height: 140,
-                decoration: BoxDecoration(
-                  color: AppColors.error.withValues(alpha: 0.1),
-                  shape: BoxShape.circle,
+      body: Stack(
+        children: [
+          // A blocked account has no legitimate reason to see its own real
+          // data behind this — unlike the pending-verification screen, this
+          // is a plain brand-gradient backdrop, blurred, not the live app.
+          Positioned.fill(
+            child: Container(
+              decoration: BoxDecoration(
+                gradient: LinearGradient(
+                  begin: Alignment.topLeft,
+                  end: Alignment.bottomRight,
+                  colors: [
+                    AppColors.primaryBlue.withValues(alpha: 0.35),
+                    Colors.black.withValues(alpha: 0.6),
+                  ],
                 ),
-                child: Center(
-                  child: Icon(
-                    Icons.lock_person_rounded,
-                    size: 72,
-                    color: AppColors.error,
-                  ),
-                ),
-              ).animate().scale(delay: 200.ms, duration: 600.ms, curve: Curves.easeOutBack),
-              
-              const SizedBox(height: 48),
-              
-              const Text(
-                'Account Blocked',
-                style: TextStyle(
-                  fontSize: 28,
-                  fontWeight: FontWeight.w900,
-                  color: AppColors.textPrimary,
-                  letterSpacing: -0.5,
-                ),
-              ).animate().fadeIn(delay: 400.ms).slideY(begin: 0.2, end: 0),
-              
-              const SizedBox(height: 16),
-              
-              Text(
-                'Your account has been restricted by the administrator. You no longer have access to features and bookings.',
-                textAlign: TextAlign.center,
-                style: TextStyle(
-                  fontSize: 16,
-                  color: AppColors.textSecondary,
-                  height: 1.6,
-                ),
-              ).animate().fadeIn(delay: 600.ms).slideY(begin: 0.2, end: 0),
-              
-              const SizedBox(height: 48),
-              
-              // Action Buttons
-              SizedBox(
-                width: double.infinity,
-                child: ElevatedButton.icon(
-                  onPressed: () {
-                    // Simulated support contact
-                    ScaffoldMessenger.of(context).showSnackBar(
-                      const SnackBar(content: Text('Connecting to support...')),
-                    );
-                  },
-                  icon: const Icon(Icons.support_agent_rounded, color: Colors.white),
-                  label: const Text('CONTACT SUPPORT', style: TextStyle(fontWeight: FontWeight.bold, letterSpacing: 0.5)),
-                  style: ElevatedButton.styleFrom(
-                    backgroundColor: AppColors.primaryBlue,
-                    padding: const EdgeInsets.symmetric(vertical: 16),
-                    shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
-                    elevation: 4,
-                  ),
-                ),
-              ).animate().fadeIn(delay: 800.ms).slideY(begin: 0.2, end: 0),
-              
-              const SizedBox(height: 16),
-              
-              TextButton(
-                onPressed: () {
-                  // Logout if necessary
-                  Navigator.pushNamedAndRemoveUntil(context, '/onboarding', (route) => false);
-                },
-                child: const Text(
-                  'LOGOUT FROM DEVICE',
-                  style: TextStyle(
-                    color: AppColors.error,
-                    fontWeight: FontWeight.w800,
-                    fontSize: 13,
-                  ),
-                ),
-              ).animate().fadeIn(delay: 1000.ms),
-            ],
+              ),
+            ),
           ),
-        ),
+          Positioned.fill(
+            child: BackdropFilter(
+              filter: ImageFilter.blur(sigmaX: 20, sigmaY: 20),
+              child: Container(color: Colors.black.withValues(alpha: 0.25)),
+            ),
+          ),
+          SafeArea(
+            child: Center(
+              child: Padding(
+                padding: const EdgeInsets.all(24.0),
+                child: Container(
+                  padding: const EdgeInsets.all(28),
+                  decoration: BoxDecoration(
+                    color: AppColors.white,
+                    borderRadius: BorderRadius.circular(24),
+                    boxShadow: [
+                      BoxShadow(
+                        color: Colors.black.withValues(alpha: 0.3),
+                        blurRadius: 30,
+                        offset: const Offset(0, 12),
+                      ),
+                    ],
+                  ),
+                  child: Column(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      Container(
+                        width: 90,
+                        height: 90,
+                        decoration: BoxDecoration(
+                          color: AppColors.error.withValues(alpha: 0.1),
+                          shape: BoxShape.circle,
+                        ),
+                        child: Icon(Icons.lock_person_rounded, size: 48, color: AppColors.error),
+                      ).animate().scale(delay: 100.ms, duration: 500.ms, curve: Curves.easeOutBack),
+                      const SizedBox(height: 24),
+                      const Text(
+                        'Account Blocked',
+                        style: TextStyle(fontSize: 22, fontWeight: FontWeight.w900, color: AppColors.textPrimary),
+                        textAlign: TextAlign.center,
+                      ),
+                      const SizedBox(height: 14),
+                      Text(
+                        'The HomeTechnify team has blocked your account. Please contact our helpline for more details.',
+                        textAlign: TextAlign.center,
+                        style: TextStyle(fontSize: 15, color: AppColors.textSecondary, height: 1.5),
+                      ),
+                      const SizedBox(height: 28),
+                      Row(
+                        children: [
+                          Expanded(
+                            child: OutlinedButton.icon(
+                              onPressed: () => _call(context),
+                              icon: const Icon(Icons.call_rounded, size: 18),
+                              label: const Text('Call'),
+                              style: OutlinedButton.styleFrom(
+                                foregroundColor: AppColors.primaryBlue,
+                                side: BorderSide(color: AppColors.primaryBlue),
+                                padding: const EdgeInsets.symmetric(vertical: 14),
+                                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+                              ),
+                            ),
+                          ),
+                          const SizedBox(width: 12),
+                          Expanded(
+                            child: OutlinedButton.icon(
+                              onPressed: () => _email(context),
+                              icon: const Icon(Icons.email_rounded, size: 18),
+                              label: const Text('Email'),
+                              style: OutlinedButton.styleFrom(
+                                foregroundColor: AppColors.primaryBlue,
+                                side: BorderSide(color: AppColors.primaryBlue),
+                                padding: const EdgeInsets.symmetric(vertical: 14),
+                                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+                              ),
+                            ),
+                          ),
+                        ],
+                      ),
+                      const SizedBox(height: 12),
+                      SizedBox(
+                        width: double.infinity,
+                        child: TextButton(
+                          onPressed: () => _logout(context),
+                          child: Text(
+                            'Logout',
+                            style: TextStyle(color: AppColors.error, fontWeight: FontWeight.w800, fontSize: 13),
+                          ),
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+              ),
+            ),
+          ),
+        ],
       ),
     );
   }

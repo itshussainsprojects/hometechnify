@@ -534,7 +534,7 @@ class RouteGenerator {
         page = const AdminProviderRecycleBinScreen();
         break;
       case '/account-blocked':
-        page = const AccountBlockedScreen();
+        page = AccountBlockedScreen(role: argumentsMap?['role'] as String?);
         break;
               case '/negotiation-map':
             final args = settings.arguments as Map<String, dynamic>;

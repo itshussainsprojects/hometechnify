@@ -1,4 +1,5 @@
 const { randomUUID } = require('crypto');
+const admin = require('../config/firebase');
 const prisma = require('../utils/prisma');
 const { runLimited } = require('../utils/prisma');
 const { getIO, broadcastToAll } = require('../services/socketService');
@@ -703,6 +704,20 @@ const updateWithdrawal = async (req, res) => {
             });
         }
 
+        // The provider previously only found out by manually checking their
+        // wallet history — nothing told them the outcome of their own request.
+        try {
+            await sendNotification(
+                withdrawal.provider_id,
+                action === 'APPROVED' ? 'Withdrawal Approved' : 'Withdrawal Rejected',
+                action === 'APPROVED'
+                    ? `Your withdrawal of Rs. ${withdrawal.amount} has been approved and processed.`
+                    : `Your withdrawal request was rejected.${admin_note ? ` Reason: ${admin_note}` : ''}`,
+                'withdrawal',
+                { withdrawalId: withdrawal.id, status: action }
+            );
+        } catch (_) { /* never fail the admin action on a notification hiccup */ }
+
         res.json({ success: true, data: withdrawal });
     } catch (err) {
         res.status(500).json({ success: false, message: err.message });
@@ -802,6 +817,11 @@ const createPromo = async (req, res) => {
         const promo = await prisma.promo.create({
             data: { title, subtitle, code, discount: parseFloat(discount || 0), color_value: parseInt(color_value || 0xFF1565C0), is_active: is_active !== false },
         });
+        // Nothing told a running customer app a promo changed — home_screen.dart
+        // memoizes its promo fetch for the life of the widget state, so a new
+        // promo was invisible until the app was fully restarted. This is what
+        // that listener refetches on (see home_screen.dart's onPromosUpdated).
+        broadcastToAll('promos_updated', {});
         res.status(201).json({ success: true, data: promo });
     } catch (err) {
         res.status(500).json({ success: false, message: err.message });
@@ -823,6 +843,7 @@ const updatePromo = async (req, res) => {
                 ...(is_active !== undefined && { is_active }),
             },
         });
+        broadcastToAll('promos_updated', {});
         res.json({ success: true, data: promo });
     } catch (err) {
         res.status(500).json({ success: false, message: err.message });
@@ -833,6 +854,7 @@ const deletePromo = async (req, res) => {
     try {
         const { id } = req.params;
         await prisma.promo.delete({ where: { id } });
+        broadcastToAll('promos_updated', {});
         res.json({ success: true, message: 'Promo deleted' });
     } catch (err) {
         res.status(500).json({ success: false, message: err.message });
@@ -883,10 +905,43 @@ const sendAdminNotification = async (req, res) => {
             await prisma.notification.createMany({ data: notifData });
         }
 
+        // This used to stop at the DB row — an admin broadcast never
+        // actually pushed to a device. It silently did nothing until (or
+        // unless) the recipient happened to open their notifications screen
+        // and it polled the DB. Real-time in-app (matches every other
+        // notification path) plus an actual FCM push, chunked to the
+        // 500-token limit like the existing broadcast helper does.
+        let pushSuccessCount = 0;
+        try {
+            const io = getIO();
+            for (const u of targetUsers) {
+                if (io) {
+                    io.to(`user:${u.id}`).emit('notification', {
+                        title, body, type: 'SYSTEM', data: { source: 'admin' },
+                    });
+                }
+            }
+
+            const tokens = targetUsers.map(u => u.fcmToken).filter(Boolean);
+            const stringData = { type: 'SYSTEM', source: 'admin', click_action: 'FLUTTER_NOTIFICATION_CLICK' };
+            for (let i = 0; i < tokens.length; i += 500) {
+                const batch = tokens.slice(i, i + 500);
+                const response = await admin.messaging().sendEachForMulticast({
+                    tokens: batch,
+                    notification: { title, body },
+                    data: stringData,
+                });
+                pushSuccessCount += response.successCount;
+            }
+        } catch (pushError) {
+            console.error('Admin broadcast push failed (DB rows still saved):', pushError.message);
+        }
+
         res.json({
             success: true,
-            message: `Notification saved for ${notifData.length} users`,
+            message: `Notification sent to ${notifData.length} users (${pushSuccessCount} push delivered)`,
             sent_count: notifData.length,
+            push_success_count: pushSuccessCount,
         });
     } catch (err) {
         res.status(500).json({ success: false, message: err.message });

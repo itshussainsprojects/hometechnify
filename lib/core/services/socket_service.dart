@@ -26,6 +26,8 @@ class SocketService {
   Function(Map<String, dynamic>)? onPlatformSettingsUpdated;
   // Commission deducted after a completed job — wallet balance changed.
   Function(Map<String, dynamic>)? onWalletUpdated;
+  // Admin created/edited/deleted a promo — home screen refetches.
+  void Function()? onPromosUpdated;
 
   bool get isConnected => _isConnected;
 
@@ -151,6 +153,12 @@ class SocketService {
     _socket!.on('wallet_updated', (data) {
       debugPrint('💰 Wallet updated: $data');
       onWalletUpdated?.call(Map<String, dynamic>.from(data as Map));
+    });
+
+    // Admin promo change — was a global io.emit() nothing listened for.
+    _socket!.on('promos_updated', (_) {
+      debugPrint('🏷️ Promos updated');
+      onPromosUpdated?.call();
     });
 
     // User status (online/offline)

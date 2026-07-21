@@ -13,19 +13,22 @@ class AuthProvider extends ChangeNotifier {
 
   AuthProvider(this._authRepository) {
     // Real-time admin block: the backend emits 'account_blocked' to this
-    // user's socket room the moment admin blocks them — kick to login
-    // instantly instead of waiting for the next (403) API call.
+    // user's socket room the moment admin blocks them. This used to just
+    // show a SnackBar and force straight to the CUSTOMER '/login' route —
+    // for a blocked PROVIDER that's the wrong login screen entirely, and
+    // neither role saw the blurred "blocked" screen or the real helpline;
+    // AccountBlockedScreen existed but was only ever reached via a stray
+    // 403. Capture the role BEFORE logout() wipes it, so the blocked
+    // screen's own Logout button can still send them to the right place.
     _socketService.onAccountBlocked = (data) {
-      debugPrint('🚫 Blocked by admin — forcing logout');
+      debugPrint('🚫 Blocked by admin');
+      final blockedRole = _user?.role;
       logout();
-      final ctx = navigatorKey.currentContext;
-      if (ctx != null) {
-        ScaffoldMessenger.of(ctx).showSnackBar(SnackBar(
-          content: Text(data['message']?.toString() ?? 'Your account has been blocked by admin.'),
-          backgroundColor: Colors.red,
-        ));
-      }
-      navigatorKey.currentState?.pushNamedAndRemoveUntil('/login', (r) => false);
+      navigatorKey.currentState?.pushNamedAndRemoveUntil(
+        '/account-blocked',
+        (r) => false,
+        arguments: {'role': blockedRole},
+      );
     };
 
     // Real-time provider verification: the backend emits this the instant an

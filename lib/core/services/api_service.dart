@@ -3,6 +3,7 @@ import 'package:dio/dio.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/foundation.dart'; // For kReleaseMode
 import '../../main.dart' show navigatorKey;
+import 'session_cache.dart';
 
 class ApiService {
   late final Dio _dio;
@@ -208,13 +209,17 @@ class ApiService {
   Future<void> _forceSignOut({required String route}) async {
     if (_signingOut) return;
     _signingOut = true;
+    // Read before signing out — the blocked screen's own Logout button needs
+    // to know whether to send a PROVIDER back to '/provider/login' instead
+    // of the customer '/login', and this is gone the instant the session is.
+    final role = route == '/account-blocked' ? await SessionCache.role() : null;
     try {
       await FirebaseAuth.instance.signOut();
     } catch (_) {/* already signed out */}
 
     final nav = navigatorKey.currentState;
     if (nav != null) {
-      nav.pushNamedAndRemoveUntil(route, (r) => false);
+      nav.pushNamedAndRemoveUntil(route, (r) => false, arguments: {'role': role});
     }
     _signingOut = false;
   }
