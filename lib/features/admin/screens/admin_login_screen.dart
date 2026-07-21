@@ -5,6 +5,7 @@ import 'package:flutter_animate/flutter_animate.dart';
 import 'package:provider/provider.dart';
 import '../../auth/providers/auth_provider.dart';
 import '../../../core/constants/constants.dart';
+import '../../../core/services/api_service.dart';
 
 class AdminLoginScreen extends StatefulWidget {
   const AdminLoginScreen({super.key});
@@ -46,6 +47,14 @@ class _AdminLoginScreenState extends State<AdminLoginScreen> {
 
     if (authProvider.status == AuthStatus.success) {
       if (authProvider.user?.role == 'ADMIN') {
+        // Fire-and-forget: a "thanks for logging in" security notice. Never
+        // blocks navigation, and a failed send must never look like a
+        // failed login.
+        // ignore: unawaited_futures
+        ApiService().dio.post('/auth/notify-login').then(
+          (_) {},
+          onError: (e) => debugPrint('Admin login notification email skipped: $e'),
+        );
         Navigator.pushReplacementNamed(context, '/admin/dashboard');
       } else {
         // Not an admin

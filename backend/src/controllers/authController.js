@@ -1,5 +1,6 @@
 
 const prisma = require('../utils/prisma');
+const { sendAdminLoginEmail } = require('../services/emailService');
 
 const syncUser = async (req, res) => {
     try {
@@ -282,4 +283,25 @@ const checkEmail = async (req, res) => {
     }
 };
 
-module.exports = { syncUser, getMe, updateMe, deleteUser, checkEmail };
+// Called once, right when the Admin Login screen confirms a successful
+// sign-in — not on every app open/session check (getMe runs on those too,
+// and would spam an email every time the admin panel is just reopened).
+const notifyAdminLogin = async (req, res) => {
+    try {
+        const { uid } = req.firebaseUser;
+        const user = await prisma.user.findUnique({ where: { firebaseUid: uid } });
+
+        if (!user || user.role !== 'ADMIN') {
+            return res.status(403).json({ success: false, message: 'Not an admin account' });
+        }
+
+        await sendAdminLoginEmail(user.email);
+        res.status(200).json({ success: true });
+    } catch (error) {
+        console.error('Notify Admin Login Error:', error);
+        // Never let an email hiccup surface as a login failure to the admin.
+        res.status(200).json({ success: false, message: error.message });
+    }
+};
+
+module.exports = { syncUser, getMe, updateMe, deleteUser, checkEmail, notifyAdminLogin };

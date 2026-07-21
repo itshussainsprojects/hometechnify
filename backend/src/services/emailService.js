@@ -68,8 +68,26 @@ const sendProviderRevokedEmail = async (to, name) => {
     );
 };
 
+const sendAdminLoginEmail = async (to) => {
+    const when = new Date().toLocaleString('en-US', { timeZone: 'Asia/Karachi', dateStyle: 'medium', timeStyle: 'short' });
+    return sendEmail(
+        to,
+        'Thanks for logging in to HomeTechnify Admin',
+        `
+        <div style="font-family: Arial, sans-serif; max-width: 480px; margin: 0 auto;">
+          <h2 style="color: #0B72D8;">Thanks for logging in!</h2>
+          <p>Your HomeTechnify Admin Panel account was just signed in to.</p>
+          <p style="color: #667085; font-size: 13px;">${when} (Pakistan time)</p>
+          <p>If this wasn't you, please change your password immediately.</p>
+          <p style="color: #667085; font-size: 13px; margin-top: 32px;">— The HomeTechnify Team</p>
+        </div>
+        `
+    );
+};
+
 module.exports = {
     sendEmail,
     sendProviderVerifiedEmail,
     sendProviderRevokedEmail,
+    sendAdminLoginEmail,
 };
