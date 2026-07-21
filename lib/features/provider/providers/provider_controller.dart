@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'dart:io';
 import 'package:flutter/foundation.dart';
 import 'package:geolocator/geolocator.dart';
@@ -88,10 +89,13 @@ class ProviderController extends ChangeNotifier {
       _isAvailable = result.data ?? value;
       // Keep the cached stats in sync so later reads agree with the toggle.
       _dashboardStats['isAvailable'] = _isAvailable;
-      // Fire-and-forget: send the current GPS position after going
-      // Available. Never blocks or affects the toggle itself.
       if (_isAvailable) {
+        // Fire-and-forget: send the current GPS position after going
+        // Available. Never blocks or affects the toggle itself.
         _pushLocationInBackground();
+        _startLocationRefresh();
+      } else {
+        _stopLocationRefresh();
       }
     } else {
       _isAvailable = previous; // roll back
@@ -111,6 +115,32 @@ class ProviderController extends ChangeNotifier {
   bool _locationBlocked = false;
   bool get locationBlocked => _locationBlocked;
 
+  // Location used to be captured once, at the exact moment the toggle went
+  // Available, and never again — a provider who stayed Available while
+  // actually moving around (a van, a different job site) kept matching
+  // against wherever they were when they first flipped the switch, possibly
+  // hours or a full day earlier. This re-captures on an interval for as long
+  // as they stay Available, so "nearest first" reflects where they actually
+  // are, not just where they were at toggle time.
+  Timer? _locationRefreshTimer;
+
+  void _startLocationRefresh() {
+    // Idempotent — this is also called every time dashboard stats hydrate
+    // isAvailable as true (not just from the toggle itself), and restarting
+    // an already-running timer on every stats poll would mean it never
+    // survives long enough to actually fire.
+    if (_locationRefreshTimer != null) return;
+    _locationRefreshTimer = Timer.periodic(
+      const Duration(minutes: 3),
+      (_) => _pushLocationInBackground(),
+    );
+  }
+
+  void _stopLocationRefresh() {
+    _locationRefreshTimer?.cancel();
+    _locationRefreshTimer = null;
+  }
+
   Future<void> _pushLocationInBackground() async {
     try {
       var perm = await Geolocator.checkPermission();
@@ -123,10 +153,14 @@ class ProviderController extends ChangeNotifier {
         notifyListeners();
         return;
       }
+      // 'high' instead of the previous 'medium' — matching is by distance
+      // against a configurable radius as small as a few km, so a loose GPS
+      // fix can misplace a provider across that boundary and drop them from
+      // (or wrongly include them in) a customer's nearby list.
       final pos = await Geolocator.getCurrentPosition(
         locationSettings:
-            const LocationSettings(accuracy: LocationAccuracy.medium),
-      ).timeout(const Duration(seconds: 10));
+            const LocationSettings(accuracy: LocationAccuracy.high),
+      ).timeout(const Duration(seconds: 15));
       await _repository.updateMyLocation(pos.latitude, pos.longitude);
       _locationBlocked = false;
       notifyListeners();
@@ -137,9 +171,25 @@ class ProviderController extends ChangeNotifier {
     }
   }
 
+  @override
+  void dispose() {
+    _stopLocationRefresh();
+    super.dispose();
+  }
+
   /// Hydrate availability from a loaded value (e.g. dashboard stats / profile).
+  /// A provider who was already Available before the app was closed needs the
+  /// refresh cycle restarted here too — otherwise it only ever started from
+  /// the toggle itself, and a cold-started app would sit Available with a
+  /// location that only ever updates again if they flip the switch off/on.
   void setAvailabilityLocal(bool value) {
     _isAvailable = value;
+    if (value) {
+      _pushLocationInBackground();
+      _startLocationRefresh();
+    } else {
+      _stopLocationRefresh();
+    }
     notifyListeners();
   }
 
@@ -275,6 +325,15 @@ class ProviderController extends ChangeNotifier {
           stampBefore == _availabilityStamp &&
           _dashboardStats.containsKey('isAvailable')) {
         _isAvailable = _dashboardStats['isAvailable'] == true;
+        // A provider who was already Available before the app was closed
+        // needs the location-refresh cycle restarted here — otherwise it
+        // only ever started from the toggle itself, and this is the actual
+        // code path that runs the moment the dashboard loads.
+        if (_isAvailable) {
+          _startLocationRefresh();
+        } else {
+          _stopLocationRefresh();
+        }
       } else {
         // Preserve the toggle's truth in the cached stats.
         _dashboardStats['isAvailable'] = _isAvailable;
