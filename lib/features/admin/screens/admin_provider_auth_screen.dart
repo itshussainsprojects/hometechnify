@@ -225,39 +225,60 @@ class _AdminProviderAuthScreenState extends State<AdminProviderAuthScreen> {
         ],
       );
 
-  Widget _buildControls() => Row(
-        children: [
-          Expanded(
-            child: TextField(
-              controller: _searchCtrl,
-              onSubmitted: (_) => _load(),
-              decoration: InputDecoration(
-                hintText: 'Search by name, email or phone',
-                prefixIcon: const Icon(Icons.search_rounded, size: 20),
-                isDense: true,
-                border: OutlineInputBorder(borderRadius: BorderRadius.circular(12)),
-                suffixIcon: IconButton(
-                  icon: const Icon(Icons.arrow_forward_rounded, size: 18),
-                  onPressed: _load,
-                ),
-              ),
-            ),
+  Widget _buildSearchField() => TextField(
+        controller: _searchCtrl,
+        onSubmitted: (_) => _load(),
+        decoration: InputDecoration(
+          hintText: 'Search by name, email or phone',
+          prefixIcon: const Icon(Icons.search_rounded, size: 20),
+          isDense: true,
+          border: OutlineInputBorder(borderRadius: BorderRadius.circular(12)),
+          suffixIcon: IconButton(
+            icon: const Icon(Icons.arrow_forward_rounded, size: 18),
+            onPressed: _load,
           ),
-          const SizedBox(width: 8),
-          ..._filters.entries.map((e) => Padding(
-                padding: const EdgeInsets.only(left: 6),
-                child: ChoiceChip(
-                  label: Text(e.value),
-                  selected: _status == e.key,
-                  onSelected: (_) {
-                    setState(() => _status = e.key);
-                    _load();
-                  },
-                ),
+        ),
+      );
+
+  Widget _buildFilterChips() => Wrap(
+        spacing: 6,
+        runSpacing: 8,
+        crossAxisAlignment: WrapCrossAlignment.center,
+        children: [
+          ..._filters.entries.map((e) => ChoiceChip(
+                label: Text(e.value),
+                selected: _status == e.key,
+                onSelected: (_) {
+                  setState(() => _status = e.key);
+                  _load();
+                },
               )),
           IconButton(icon: const Icon(Icons.refresh_rounded), onPressed: _load),
         ],
       );
+
+  // A single Row (search + 4 chips + refresh) squeezed hard below desktop
+  // width. On a narrow admin window, stack the search field above a wrapping
+  // row of chips instead of forcing everything onto one line.
+  Widget _buildControls() => LayoutBuilder(builder: (context, constraints) {
+        if (constraints.maxWidth >= 700) {
+          return Row(
+            children: [
+              Expanded(child: _buildSearchField()),
+              const SizedBox(width: 8),
+              _buildFilterChips(),
+            ],
+          );
+        }
+        return Column(
+          crossAxisAlignment: CrossAxisAlignment.stretch,
+          children: [
+            _buildSearchField(),
+            const SizedBox(height: 12),
+            _buildFilterChips(),
+          ],
+        );
+      });
 
   Widget _buildProviderCard(Map<String, dynamic> p) {
     final profile = (p['provider_profile'] as Map<String, dynamic>?) ?? {};
@@ -354,33 +375,64 @@ class _AdminProviderAuthScreenState extends State<AdminProviderAuthScreen> {
               ],
             ),
           ),
-          TextButton(
-            onPressed: () => _setTrade(p),
-            child: Text('Set Trade',
-                style: TextStyle(
-                    color: hasTrade ? AppColors.primaryBlue : AppColors.error,
-                    fontWeight: hasTrade ? FontWeight.w500 : FontWeight.w800)),
-          ),
-          TextButton(
-            onPressed: () => _run(
-              () => adminApiService.verifyProvider(p['id'] as String, verify: !verified),
-              verified ? 'Verification removed' : 'Verified — they can now receive jobs',
-            ),
-            child: Text(verified ? 'Unverify' : 'Verify',
-                style: TextStyle(color: verified ? AppColors.warning : AppColors.success)),
-          ),
-          TextButton(
-            onPressed: () => _run(
-              () => adminApiService.blockProvider(p['id'] as String, block: !blocked),
-              blocked ? 'Unblocked' : 'Blocked',
-            ),
-            child: Text(blocked ? 'Unblock' : 'Block',
-                style: TextStyle(color: blocked ? AppColors.success : AppColors.warning)),
-          ),
-          IconButton(
-            tooltip: 'Move to recycle bin',
-            icon: const Icon(Icons.delete_outline_rounded, size: 20, color: AppColors.error),
-            onPressed: () => _delete(p),
+          // Set Trade + Verify/Unverify + Block/Unblock + Delete side by side
+          // next to a name/status column with no fixed width overflowed hard
+          // on a narrow admin window. One icon regardless of width.
+          PopupMenuButton<String>(
+            icon: Icon(Icons.more_vert_rounded, color: AppColors.textSecondary),
+            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+            onSelected: (action) {
+              if (action == 'trade') _setTrade(p);
+              if (action == 'verify') {
+                _run(
+                  () => adminApiService.verifyProvider(p['id'] as String, verify: !verified),
+                  verified ? 'Verification removed' : 'Verified — they can now receive jobs',
+                );
+              }
+              if (action == 'block') {
+                _run(
+                  () => adminApiService.blockProvider(p['id'] as String, block: !blocked),
+                  blocked ? 'Unblocked' : 'Blocked',
+                );
+              }
+              if (action == 'delete') _delete(p);
+            },
+            itemBuilder: (_) => [
+              PopupMenuItem(
+                value: 'trade',
+                child: Row(children: [
+                  Icon(Icons.category_rounded, color: hasTrade ? AppColors.primaryBlue : AppColors.error, size: 18),
+                  const SizedBox(width: 8),
+                  const Text('Set Trade'),
+                ]),
+              ),
+              PopupMenuItem(
+                value: 'verify',
+                child: Row(children: [
+                  Icon(verified ? Icons.close_rounded : Icons.verified_rounded,
+                      color: verified ? AppColors.warning : AppColors.success, size: 18),
+                  const SizedBox(width: 8),
+                  Text(verified ? 'Unverify' : 'Verify'),
+                ]),
+              ),
+              PopupMenuItem(
+                value: 'block',
+                child: Row(children: [
+                  Icon(blocked ? Icons.lock_open_rounded : Icons.block_rounded,
+                      color: blocked ? AppColors.success : AppColors.warning, size: 18),
+                  const SizedBox(width: 8),
+                  Text(blocked ? 'Unblock' : 'Block'),
+                ]),
+              ),
+              const PopupMenuItem(
+                value: 'delete',
+                child: Row(children: [
+                  Icon(Icons.delete_outline_rounded, color: AppColors.error, size: 18),
+                  SizedBox(width: 8),
+                  Text('Move to recycle bin'),
+                ]),
+              ),
+            ],
           ),
         ],
       ),

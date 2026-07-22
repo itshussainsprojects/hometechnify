@@ -168,39 +168,60 @@ class _AdminUserAuthScreenState extends State<AdminUserAuthScreen> {
         ],
       );
 
-  Widget _buildControls() => Row(
-        children: [
-          Expanded(
-            child: TextField(
-              controller: _searchCtrl,
-              onSubmitted: (_) => _load(),
-              decoration: InputDecoration(
-                hintText: 'Search by name, email or phone',
-                prefixIcon: const Icon(Icons.search_rounded, size: 20),
-                isDense: true,
-                border: OutlineInputBorder(borderRadius: BorderRadius.circular(12)),
-                suffixIcon: IconButton(
-                  icon: const Icon(Icons.arrow_forward_rounded, size: 18),
-                  onPressed: _load,
-                ),
-              ),
-            ),
+  Widget _buildSearchField() => TextField(
+        controller: _searchCtrl,
+        onSubmitted: (_) => _load(),
+        decoration: InputDecoration(
+          hintText: 'Search by name, email or phone',
+          prefixIcon: const Icon(Icons.search_rounded, size: 20),
+          isDense: true,
+          border: OutlineInputBorder(borderRadius: BorderRadius.circular(12)),
+          suffixIcon: IconButton(
+            icon: const Icon(Icons.arrow_forward_rounded, size: 18),
+            onPressed: _load,
           ),
-          const SizedBox(width: 12),
-          ..._filters.entries.map((e) => Padding(
-                padding: const EdgeInsets.only(left: 8),
-                child: ChoiceChip(
-                  label: Text(e.value),
-                  selected: _status == e.key,
-                  onSelected: (_) {
-                    setState(() => _status = e.key);
-                    _load();
-                  },
-                ),
+        ),
+      );
+
+  Widget _buildFilterChips() => Wrap(
+        spacing: 8,
+        runSpacing: 8,
+        crossAxisAlignment: WrapCrossAlignment.center,
+        children: [
+          ..._filters.entries.map((e) => ChoiceChip(
+                label: Text(e.value),
+                selected: _status == e.key,
+                onSelected: (_) {
+                  setState(() => _status = e.key);
+                  _load();
+                },
               )),
           IconButton(icon: const Icon(Icons.refresh_rounded), onPressed: _load),
         ],
       );
+
+  // A single Row (search + 3 chips + refresh) squeezed hard below desktop
+  // width. On a narrow admin window, stack the search field above a wrapping
+  // row of chips instead of forcing everything onto one line.
+  Widget _buildControls() => LayoutBuilder(builder: (context, constraints) {
+        if (constraints.maxWidth >= 700) {
+          return Row(
+            children: [
+              Expanded(child: _buildSearchField()),
+              const SizedBox(width: 12),
+              _buildFilterChips(),
+            ],
+          );
+        }
+        return Column(
+          crossAxisAlignment: CrossAxisAlignment.stretch,
+          children: [
+            _buildSearchField(),
+            const SizedBox(height: 12),
+            _buildFilterChips(),
+          ],
+        );
+      });
 
   Widget _buildUserCard(Map<String, dynamic> user) {
     final blocked = user['is_blocked'] == true;
@@ -269,15 +290,35 @@ class _AdminUserAuthScreenState extends State<AdminUserAuthScreen> {
               ],
             ),
           ),
-          TextButton(
-            onPressed: () => _setBlocked(user, !blocked),
-            child: Text(blocked ? 'Unblock' : 'Block',
-                style: TextStyle(color: blocked ? AppColors.success : AppColors.warning)),
-          ),
-          IconButton(
-            tooltip: 'Move to recycle bin',
-            icon: const Icon(Icons.delete_outline_rounded, size: 20, color: AppColors.error),
-            onPressed: () => _delete(user),
+          // A Block TextButton + Delete IconButton side by side, next to a
+          // name/email column with no fixed width, overflowed on a narrow
+          // admin window. One icon regardless of width.
+          PopupMenuButton<String>(
+            icon: Icon(Icons.more_vert_rounded, color: AppColors.textSecondary),
+            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+            onSelected: (action) {
+              if (action == 'block') _setBlocked(user, !blocked);
+              if (action == 'delete') _delete(user);
+            },
+            itemBuilder: (_) => [
+              PopupMenuItem(
+                value: 'block',
+                child: Row(children: [
+                  Icon(blocked ? Icons.lock_open_rounded : Icons.block_rounded,
+                      color: blocked ? AppColors.success : AppColors.warning, size: 18),
+                  const SizedBox(width: 8),
+                  Text(blocked ? 'Unblock' : 'Block'),
+                ]),
+              ),
+              const PopupMenuItem(
+                value: 'delete',
+                child: Row(children: [
+                  Icon(Icons.delete_outline_rounded, color: AppColors.error, size: 18),
+                  SizedBox(width: 8),
+                  Text('Move to recycle bin'),
+                ]),
+              ),
+            ],
           ),
         ],
       ),
