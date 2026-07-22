@@ -112,6 +112,16 @@ class AuthProvider extends ChangeNotifier {
       }
       _status = AuthStatus.success;
       _cacheSession();
+
+      // Every other successful-auth path (loginWithEmail/verifyOtp/
+      // signInWithGoogle) connects the socket here, but a plain app reopen
+      // for an already-logged-in user only ever goes through
+      // checkAuthStatus() — this was the one path that never connected it.
+      // Without it, that session had no live socket at all until the next
+      // explicit login, so real-time events (account_blocked, promos, etc.)
+      // never arrived — only the next REST call's 403 fallback would catch it.
+      _socketService.connect(_user!.id, userName: _user!.name);
+      debugPrint('🔌 Socket connected for user: ${_user!.id} (${_user!.name})');
     } else {
       _user = null;
       _status = AuthStatus.idle;
