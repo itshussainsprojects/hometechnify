@@ -173,12 +173,24 @@ class _AdminUsersScreenState extends State<AdminUsersScreen> {
     );
   }
 
+  /// Automatic engagement score from booking volume alone — distinct from
+  /// `rating` (the average of reviews a provider left this customer). Purely
+  /// computed from data already on screen, so it updates itself the moment
+  /// a new booking lands; admin never sets or maintains it.
+  double _engagementRating(int bookingCount) {
+    if (bookingCount >= 15) return 5.0;
+    if (bookingCount >= 8) return 4.5;
+    if (bookingCount >= 3) return 3.5;
+    return 2.5;
+  }
+
   Widget _buildUserCard(Map<String, dynamic> user, int index) {
     final isBlocked = user['is_blocked'] == true;
     final bookingCount = (user['_count']?['bookings_as_customer'] as int?) ?? 0;
     final joinDate = DateTime.tryParse(user['created_at'] ?? '') ?? DateTime.now();
     final totalSpent = (user['total_spent'] as num?)?.toDouble() ?? 0;
     final rating = (user['rating'] as num?)?.toDouble() ?? 0;
+    final engagementRating = _engagementRating(bookingCount);
 
     return Container(
       margin: const EdgeInsets.only(bottom: 12),
@@ -226,6 +238,19 @@ class _AdminUsersScreenState extends State<AdminUsersScreen> {
                 if (rating > 0)
                   _chip(rating.toStringAsFixed(1), Icons.star_rounded, AppColors.warning),
                 _chip('Joined ${_formatDate(joinDate)}', Icons.calendar_today_outlined, AppColors.textSecondary),
+              ],
+            ),
+            const SizedBox(height: 8),
+            Text('RATING OF CUSTOMER', style: TextStyle(fontSize: 9, fontWeight: FontWeight.w800, color: AppColors.textHint, letterSpacing: 0.5)),
+            const SizedBox(height: 3),
+            Row(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                Icon(Icons.star_rounded, size: 14, color: Colors.amber),
+                const SizedBox(width: 3),
+                Text(engagementRating.toStringAsFixed(1), style: const TextStyle(fontSize: 13, fontWeight: FontWeight.w800)),
+                const SizedBox(width: 6),
+                Text('($bookingCount bookings)', style: TextStyle(fontSize: 10, color: AppColors.textHint)),
               ],
             ),
           ])),
