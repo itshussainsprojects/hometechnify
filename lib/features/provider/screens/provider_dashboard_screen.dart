@@ -302,6 +302,18 @@ class _ProviderDashboardScreenState extends State<ProviderDashboardScreen> {
           }
        }
     };
+
+    // 3. A customer just rated this provider — refresh so the dashboard's
+    // rating stat updates live instead of waiting for the next manual pull
+    // or app reopen.
+    SocketService().onProviderRatingUpdated = (data) {
+       if (mounted) {
+          final user = context.read<AuthProvider>().user;
+          if (user != null && data['providerId'] == user.id) {
+             context.read<ProviderController>().fetchDashboardStats();
+          }
+       }
+    };
   }
 
   @override

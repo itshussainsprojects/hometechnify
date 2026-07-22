@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_animate/flutter_animate.dart';
 import '../../../core/constants/constants.dart';
 import '../../../core/services/admin_api_service.dart';
+import '../../../core/services/socket_service.dart';
 
 class AdminProvidersScreen extends StatefulWidget {
   const AdminProvidersScreen({super.key});
@@ -28,6 +29,11 @@ class _AdminProvidersScreenState extends State<AdminProvidersScreen> {
   void initState() {
     super.initState();
     _load();
+    // A customer just rated a provider — refetch so the rating/flag shown on
+    // the card updates live instead of waiting for a manual refresh.
+    SocketService().onProviderRatingUpdated = (_) {
+      if (mounted) _load();
+    };
   }
 
   @override

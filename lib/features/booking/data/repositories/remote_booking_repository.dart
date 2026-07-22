@@ -110,13 +110,21 @@ class RemoteBookingRepository implements BookingRepository {
   @override
   Future<Result<BookingModel>> rateBooking(String bookingId, double rating, String review) async {
     try {
-      final response = await _apiService.dio.post(
-        '/bookings/$bookingId/review',
+      // The review system lives at POST /reviews (reviewRoutes.js), not
+      // /bookings/:id/review — that route never existed, so every rating
+      // submission 404'd silently. It also expects bookingId IN the body
+      // and the comment field named 'comment', and it returns the created
+      // Review row, not a Booking, so BookingModel.fromJson(data) on its
+      // response would have thrown even once the URL was fixed.
+      await _apiService.dio.post(
+        '/reviews',
         data: {
-          'rating': rating,
-          'review': review,
+          'bookingId': bookingId,
+          'rating': rating.round(),
+          'comment': review,
         },
       );
+      final response = await _apiService.dio.get('/bookings/$bookingId');
       final data = response.data['data'];
       return Result.success(BookingModel.fromJson(data));
     } catch (e) {

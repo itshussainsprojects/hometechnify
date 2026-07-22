@@ -9,6 +9,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_animate/flutter_animate.dart';
 import '../../../core/constants/constants.dart';
 import '../../../core/services/admin_api_service.dart';
+import '../../../core/services/socket_service.dart';
 
 class AdminRatingsScreen extends StatefulWidget {
   const AdminRatingsScreen({super.key});
@@ -26,6 +27,11 @@ class _AdminRatingsScreenState extends State<AdminRatingsScreen> {
   void initState() {
     super.initState();
     _load();
+    // A customer just rated a provider — refetch so the new average and
+    // red/good flag show up without waiting for a manual pull-to-refresh.
+    SocketService().onProviderRatingUpdated = (_) {
+      if (mounted) _load();
+    };
   }
 
   Future<void> _load() async {

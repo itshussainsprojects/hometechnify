@@ -31,6 +31,10 @@ class SocketService {
   // A customer changed their payment method — admin's Customer Payment
   // Select screen updates that row live.
   Function(Map<String, dynamic>)? onCustomerPaymentUpdated;
+  // A customer just rated a provider — the provider's own app, the admin
+  // Ratings/Providers screens, and anyone currently browsing that provider's
+  // listing all update the number live instead of on next refetch.
+  Function(Map<String, dynamic>)? onProviderRatingUpdated;
 
   bool get isConnected => _isConnected;
 
@@ -168,6 +172,12 @@ class SocketService {
     _socket!.on('customer_payment_updated', (data) {
       debugPrint('💳 Customer payment updated: $data');
       onCustomerPaymentUpdated?.call(Map<String, dynamic>.from(data as Map));
+    });
+
+    // A provider's rating average just changed.
+    _socket!.on('provider_rating_updated', (data) {
+      debugPrint('⭐ Provider rating updated: $data');
+      onProviderRatingUpdated?.call(Map<String, dynamic>.from(data as Map));
     });
 
     // User status (online/offline)

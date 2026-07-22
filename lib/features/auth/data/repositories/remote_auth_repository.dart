@@ -170,6 +170,14 @@ class RemoteAuthRepository implements AuthRepository {
       // check in the app (login routing, splash fast-path correction) reads,
       // so its absence silently defeated all of them.
       status: data['status'] ?? 'active',
+      // Same story: /auth/me computes these (real completed-booking spend,
+      // count, review average) but they were never read into the UserModel
+      // that AuthProvider holds — only RemoteProfileRepository's separate
+      // fetch mapped them, so anything reading AuthProvider.user directly
+      // instead of ProfileProvider silently saw 0 regardless of real activity.
+      totalBookings: data['bookings_count'] ?? 0,
+      totalSpent: (data['total_spent'] ?? 0).toDouble(),
+      rating: (data['rating'] ?? 0).toDouble(),
     );
   }
 

@@ -2,6 +2,7 @@
 
 const prisma = require('../utils/prisma');
 const { sendNotification } = require('../services/notificationService');
+const { broadcastToAll } = require('../services/socketService');
 
 // Get reviews for a provider
 const getProviderReviews = async (req, res) => {
@@ -119,11 +120,25 @@ const createReview = async (req, res) => {
         });
 
         const newAvg = allReviews.reduce((sum, r) => sum + r.rating, 0) / allReviews.length;
+        const roundedAvg = Math.round(newAvg * 10) / 10;
 
-        await prisma.providerProfile.updateMany({
+        const profileUpdate = await prisma.providerProfile.updateMany({
             where: { user_id: targetId },
-            data: { rating: Math.round(newAvg * 10) / 10 }
+            data: { rating: roundedAvg }
         });
+
+        // Only a PROVIDER has a provider_profile row, so this only matches
+        // when a customer rated a provider (not the reverse). Live-push the
+        // new average so the provider's own app, the customer browsing their
+        // listing, and the admin Ratings/Providers screens all update without
+        // waiting for their next manual refetch.
+        if (profileUpdate.count > 0) {
+            broadcastToAll('provider_rating_updated', {
+                providerId: targetId,
+                rating: roundedAvg,
+                reviewCount: allReviews.length,
+            });
+        }
 
         // Notify the provider
         try {
