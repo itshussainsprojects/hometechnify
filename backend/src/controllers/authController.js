@@ -15,6 +15,28 @@ const syncUser = async (req, res) => {
             where: { firebaseUid: uid },
         });
 
+        // Firebase can issue a DIFFERENT uid for the same email when someone
+        // signs in with a different provider (e.g. email/password vs Google)
+        // and "one account per email" isn't linked in the Firebase console —
+        // most commonly after a fresh install wipes the cached session and
+        // they happen to sign back in a different way. Without this, the
+        // lookup above finds nothing, so this falls into the create branch
+        // below and dies on the email's unique constraint (the old row still
+        // owns it) — the account is then permanently stuck getting
+        // USER_NOT_FOUND on every request, with no path to recovery. Treat a
+        // same-email match as the same person and re-link their row to the
+        // new uid instead of trying to create a second one.
+        if (!user && email) {
+            const existingByEmail = await prisma.user.findUnique({ where: { email } });
+            if (existingByEmail) {
+                user = await prisma.user.update({
+                    where: { id: existingByEmail.id },
+                    data: { firebaseUid: uid },
+                });
+                console.log(`🔗 Re-linked ${user.email} to a new Firebase sign-in identity (uid: ${uid})`);
+            }
+        }
+
         if (!user) {
             // Create new user.
             // SECURITY: never trust a client-supplied ADMIN role. Only CUSTOMER
