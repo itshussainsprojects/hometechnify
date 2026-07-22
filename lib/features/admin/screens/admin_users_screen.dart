@@ -177,6 +177,8 @@ class _AdminUsersScreenState extends State<AdminUsersScreen> {
     final isBlocked = user['is_blocked'] == true;
     final bookingCount = (user['_count']?['bookings_as_customer'] as int?) ?? 0;
     final joinDate = DateTime.tryParse(user['created_at'] ?? '') ?? DateTime.now();
+    final totalSpent = (user['total_spent'] as num?)?.toDouble() ?? 0;
+    final rating = (user['rating'] as num?)?.toDouble() ?? 0;
 
     return Container(
       margin: const EdgeInsets.only(bottom: 12),
@@ -220,6 +222,9 @@ class _AdminUsersScreenState extends State<AdminUsersScreen> {
               runSpacing: 4,
               children: [
                 _chip('$bookingCount bookings', Icons.event_note_outlined, AppColors.primaryBlue),
+                _chip('Rs. ${totalSpent.toStringAsFixed(0)} spent', Icons.account_balance_wallet_outlined, AppColors.success),
+                if (rating > 0)
+                  _chip(rating.toStringAsFixed(1), Icons.star_rounded, AppColors.warning),
                 _chip('Joined ${_formatDate(joinDate)}', Icons.calendar_today_outlined, AppColors.textSecondary),
               ],
             ),

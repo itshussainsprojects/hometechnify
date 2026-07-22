@@ -201,7 +201,33 @@ const getMe = async (req, res) => {
             }
         }
 
-        res.status(200).json({ success: true, data: { ...user, status } });
+        // total_spent / rating / bookings_count were never computed here at
+        // all — the app's own UserModel.fromJson reads these keys, so every
+        // customer's profile screen showed a flat 0 for all three regardless
+        // of real activity. These aren't columns on User; they're derived
+        // from Booking/Review every time (cheap for a single profile fetch).
+        let bookingsCount = 0, totalSpent = 0, rating = 0;
+        if (user.role === 'CUSTOMER') {
+            const [count, spentAgg, ratingAgg] = await Promise.all([
+                prisma.booking.count({ where: { customer_id: user.id } }),
+                prisma.booking.aggregate({
+                    where: { customer_id: user.id, status: 'COMPLETED' },
+                    _sum: { total_amount: true },
+                }),
+                prisma.review.aggregate({
+                    where: { target_id: user.id },
+                    _avg: { rating: true },
+                }),
+            ]);
+            bookingsCount = count;
+            totalSpent = spentAgg._sum.total_amount || 0;
+            rating = ratingAgg._avg.rating || 0;
+        }
+
+        res.status(200).json({
+            success: true,
+            data: { ...user, status, bookings_count: bookingsCount, total_spent: totalSpent, rating },
+        });
     } catch (error) {
         console.error('Get Me Error:', error);
         res.status(500).json({ success: false, message: error.message });

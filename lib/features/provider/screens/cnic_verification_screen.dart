@@ -9,6 +9,7 @@ import '../../../core/utils/responsive.dart';
 import '../../../core/services/supabase_service.dart';
 import '../../../core/utils/snackbar_helper.dart';
 import '../../auth/providers/auth_provider.dart';
+import '../providers/provider_controller.dart';
 
 class CnicVerificationScreen extends StatefulWidget {
   const CnicVerificationScreen({super.key});
@@ -150,9 +151,16 @@ class _CnicVerificationScreenState extends State<CnicVerificationScreen> {
     try {
       if (mounted) SnackBarHelper.showInfo(context, 'Uploading documents...');
 
-      final cnicFrontUrl = await SupabaseService.uploadCnicFront(image: File(_imagePaths[0]!), userId: user.id);
-      final cnicBackUrl  = await SupabaseService.uploadCnicBack(image: File(_imagePaths[1]!), userId: user.id);
-      final selfieUrl    = await SupabaseService.uploadSelfieWithCnic(image: File(_imagePaths[2]!), userId: user.id);
+      // Uploaded concurrently, not one at a time — see uploadDocument's own
+      // fix note for why the "unique" filename now also carries a base name.
+      final uploads = await Future.wait([
+        SupabaseService.uploadCnicFront(image: File(_imagePaths[0]!), userId: user.id),
+        SupabaseService.uploadCnicBack(image: File(_imagePaths[1]!), userId: user.id),
+        SupabaseService.uploadSelfieWithCnic(image: File(_imagePaths[2]!), userId: user.id),
+      ]);
+      final cnicFrontUrl = uploads[0];
+      final cnicBackUrl = uploads[1];
+      final selfieUrl = uploads[2];
 
       if (cnicFrontUrl == null || cnicBackUrl == null || selfieUrl == null) {
         if (mounted) SnackBarHelper.showError(context, 'Upload failed. Check internet connection.');
@@ -160,17 +168,19 @@ class _CnicVerificationScreenState extends State<CnicVerificationScreen> {
         return;
       }
 
-      final success = await SupabaseService.submitVerificationRequest(
-        providerId: user.id,
-        name: user.name,
-        email: user.email,
-        phone: user.phone,
-        service: '',
-        experience: '',
-        cnicFrontUrl: cnicFrontUrl,
-        cnicBackUrl: cnicBackUrl,
-        selfieUrl: selfieUrl,
-      );
+      // This used to only try SupabaseService.submitVerificationRequest — an
+      // insert into a Supabase table whose anon role has no grant on the
+      // public schema at all, so it silently failed on every submission and
+      // the documents these providers uploaded never reached the backend's
+      // provider_profile row admin actually reviews from. Saving through the
+      // real backend endpoint is what makes them show up for verification.
+      if (!mounted) return;
+      final providerController = context.read<ProviderController>();
+      final success = await providerController.updateProfile({
+        'cnic_front': cnicFrontUrl,
+        'cnic_back': cnicBackUrl,
+        'selfie_url': selfieUrl,
+      });
 
       if (!mounted) return;
       if (success) {

@@ -23,8 +23,20 @@ class SupabaseService {
     String? userId,
   }) async {
     try {
+      // The base name (e.g. 'cnic_front' vs 'cnic_back') used to be thrown
+      // away here — only the extension was kept, so the "unique" name was
+      // just userId + a millisecond timestamp. Registration uploads CNIC
+      // front/back/selfie concurrently (Future.wait), and two of those calls
+      // landing in the same millisecond is common enough in practice — they
+      // then collide on the exact same storage path in the same folder, and
+      // Supabase rejects the second write, silently leaving that document
+      // empty (this is why CNIC Back would intermittently end up missing
+      // while Front and Selfie saved fine). Including the base name makes
+      // front/back/selfie paths structurally distinct, so they can never
+      // collide with each other regardless of timing.
       final extension = path.extension(fileName);
-      final uniqueName = '${userId ?? 'user'}_${DateTime.now().millisecondsSinceEpoch}$extension';
+      final baseName = path.basenameWithoutExtension(fileName);
+      final uniqueName = '${userId ?? 'user'}_${baseName}_${DateTime.now().millisecondsSinceEpoch}$extension';
       final filePath = '$folder/$uniqueName';
       
       await _supabase.storage
@@ -109,138 +121,4 @@ class SupabaseService {
     );
   }
   
-  // ============== PROVIDER VERIFICATION ==============
-  
-  /// Submit provider verification request
-  static Future<bool> submitVerificationRequest({
-    required String providerId,
-    required String name,
-    required String email,
-    required String phone,
-    required String service,
-    required String experience,
-    required String cnicFrontUrl,
-    required String cnicBackUrl,
-    required String selfieUrl,
-  }) async {
-    try {
-      final data = {
-        'provider_id': providerId,
-        'name': name,
-        'email': email,
-        'phone': phone,
-        'service': service,
-        'experience': experience,
-        'cnic_front_url': cnicFrontUrl,
-        'cnic_back_url': cnicBackUrl,
-        'selfie_with_cnic_url': selfieUrl,
-        'status': 'pending', // pending, approved, rejected
-        'submitted_at': DateTime.now().toIso8601String(),
-        'reviewed_at': null,
-        'reviewed_by': null,
-        'rejection_reason': null,
-      };
-      
-      await _supabase
-          .from('provider_verifications')
-          .insert(data);
-          
-      return true;
-    } catch (e) {
-      debugPrint('Verification submission error: $e');
-      return false;
-    }
-  }
-  
-  /// Get verification status for provider
-  static Future<Map<String, dynamic>?> getVerificationStatus(String providerId) async {
-    try {
-      final response = await _supabase
-          .from('provider_verifications')
-          .select('*')
-          .eq('provider_id', providerId)
-          .order('submitted_at', ascending: false)
-          .limit(1)
-          .single();
-          
-      return response;
-    } catch (e) {
-      debugPrint('Get verification status error: $e');
-      return null;
-    }
-  }
-  
-  /// Get all pending verifications (for admin)
-  static Future<List<Map<String, dynamic>>> getPendingVerifications() async {
-    try {
-      final response = await _supabase
-          .from('provider_verifications')
-          .select('*')
-          .eq('status', 'pending')
-          .order('submitted_at');
-          
-      return response;
-    } catch (e) {
-      debugPrint('Get pending verifications error: $e');
-      return [];
-    }
-  }
-  
-  /// Approve provider verification
-  static Future<bool> approveVerification({
-    required String providerId,
-    required String adminId,
-  }) async {
-    try {
-      await _supabase
-          .from('provider_verifications')
-          .update({
-            'status': 'approved',
-            'reviewed_at': DateTime.now().toIso8601String(),
-            'reviewed_by': adminId,
-          })
-          .eq('provider_id', providerId)
-          .eq('status', 'pending');
-          
-      return true;
-    } catch (e) {
-      debugPrint('Approve verification error: $e');
-      return false;
-    }
-  }
-  
-  /// Reject provider verification
-  static Future<bool> rejectVerification({
-    required String providerId,
-    required String adminId,
-    required String reason,
-  }) async {
-    try {
-      await _supabase
-          .from('provider_verifications')
-          .update({
-            'status': 'rejected',
-            'reviewed_at': DateTime.now().toIso8601String(),
-            'reviewed_by': adminId,
-            'rejection_reason': reason,
-          })
-          .eq('provider_id', providerId)
-          .eq('status', 'pending');
-          
-      return true;
-    } catch (e) {
-      debugPrint('Reject verification error: $e');
-      return false;
-    }
-  }
-  
-  // ============== REALTIME UPDATES ==============
-  
-  /// Listen for verification status changes
-  static Stream<List<Map<String, dynamic>>> verificationStatusChanges() {
-    return _supabase
-        .from('provider_verifications')
-        .stream(primaryKey: ['provider_id'])
-        .eq('status', 'approved');
-  }
 }

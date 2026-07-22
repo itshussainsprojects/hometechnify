@@ -127,7 +127,33 @@ const getUsers = async (req, res) => {
             prisma.user.count({ where }),
         ]);
 
-        res.json({ success: true, data: users, total, page: parseInt(page) });
+        // How much each customer has spent and their rating — this page's
+        // own profile screen computes both, but admin had no visibility into
+        // either. One grouped query per metric for the whole page, not one
+        // query per customer.
+        const ids = users.map(u => u.id);
+        const [spentByUser, ratingByUser] = ids.length ? await Promise.all([
+            prisma.booking.groupBy({
+                by: ['customer_id'],
+                where: { customer_id: { in: ids }, status: 'COMPLETED' },
+                _sum: { total_amount: true },
+            }),
+            prisma.review.groupBy({
+                by: ['target_id'],
+                where: { target_id: { in: ids } },
+                _avg: { rating: true },
+            }),
+        ]) : [[], []];
+        const spentMap = Object.fromEntries(spentByUser.map(s => [s.customer_id, s._sum.total_amount || 0]));
+        const ratingMap = Object.fromEntries(ratingByUser.map(r => [r.target_id, r._avg.rating || 0]));
+
+        const enriched = users.map(u => ({
+            ...u,
+            total_spent: spentMap[u.id] || 0,
+            rating: ratingMap[u.id] || 0,
+        }));
+
+        res.json({ success: true, data: enriched, total, page: parseInt(page) });
     } catch (err) {
         res.status(500).json({ success: false, message: err.message });
     }
