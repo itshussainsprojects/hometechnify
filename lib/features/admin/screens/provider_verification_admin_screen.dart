@@ -250,15 +250,22 @@ class _ProviderVerificationAdminScreenState
           const Text('Submitted documents',
               style: TextStyle(fontSize: 12, fontWeight: FontWeight.w700)),
           const SizedBox(height: 8),
-          Row(
-            children: [
-              _doc('CNIC Front', profile['cnic_front'] as String?),
-              const SizedBox(width: 10),
-              _doc('CNIC Back', profile['cnic_back'] as String?),
-              const SizedBox(width: 10),
-              _doc('Live Selfie', profile['selfie_url'] as String?),
-            ],
-          ),
+          // A fixed 3-wide Row squeezed on a narrow admin window; Wrap lets
+          // the tiles drop to 2 (or 1) per line instead of compressing.
+          LayoutBuilder(builder: (context, constraints) {
+            const spacing = 10.0;
+            final perRow = constraints.maxWidth < 360 ? 2 : 3;
+            final tileWidth = (constraints.maxWidth - spacing * (perRow - 1)) / perRow;
+            return Wrap(
+              spacing: spacing,
+              runSpacing: spacing,
+              children: [
+                SizedBox(width: tileWidth, child: _doc('CNIC Front', profile['cnic_front'] as String?)),
+                SizedBox(width: tileWidth, child: _doc('CNIC Back', profile['cnic_back'] as String?)),
+                SizedBox(width: tileWidth, child: _doc('Live Selfie', profile['selfie_url'] as String?)),
+              ],
+            );
+          }),
           const SizedBox(height: 8),
           const Text('Tap a document to open it full size. Check the selfie matches the CNIC photo.',
               style: TextStyle(fontSize: 11, color: AppColors.textHint)),
@@ -301,8 +308,7 @@ class _ProviderVerificationAdminScreenState
 
   Widget _doc(String label, String? url) {
     final has = _has(url);
-    return Expanded(
-      child: GestureDetector(
+    return GestureDetector(
         onTap: has ? () => _openImage(url!, label) : null,
         child: Column(
           children: [
@@ -336,8 +342,7 @@ class _ProviderVerificationAdminScreenState
             ),
           ],
         ),
-      ),
-    );
+      );
   }
 
   Widget _buildEmpty() => ListView(

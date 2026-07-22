@@ -6,6 +6,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_animate/flutter_animate.dart';
 import 'package:url_launcher/url_launcher.dart';
 import '../../../core/constants/constants.dart';
+import '../../../core/theme/neu_theme.dart';
 
 class AccountBlockedScreen extends StatelessWidget {
   /// 'CUSTOMER' | 'PROVIDER' | null — decides which login screen "Logout"
@@ -63,28 +64,15 @@ class AccountBlockedScreen extends StatelessWidget {
                 padding: const EdgeInsets.all(24.0),
                 child: Container(
                   padding: const EdgeInsets.all(28),
-                  decoration: BoxDecoration(
-                    color: AppColors.white,
-                    borderRadius: BorderRadius.circular(24),
-                    boxShadow: [
-                      BoxShadow(
-                        color: Colors.black.withValues(alpha: 0.3),
-                        blurRadius: 30,
-                        offset: const Offset(0, 12),
-                      ),
-                    ],
-                  ),
+                  decoration: NeuTheme.raised(radius: 28),
                   child: Column(
                     mainAxisSize: MainAxisSize.min,
                     children: [
                       Container(
                         width: 90,
                         height: 90,
-                        decoration: BoxDecoration(
-                          color: AppColors.error.withValues(alpha: 0.1),
-                          shape: BoxShape.circle,
-                        ),
-                        child: Icon(Icons.lock_person_rounded, size: 48, color: AppColors.error),
+                        decoration: NeuTheme.circle(),
+                        child: Icon(Icons.lock_person_rounded, size: 44, color: AppColors.error),
                       ).animate().scale(delay: 100.ms, duration: 500.ms, curve: Curves.easeOutBack),
                       const SizedBox(height: 24),
                       const Text(
@@ -98,47 +86,38 @@ class AccountBlockedScreen extends StatelessWidget {
                         textAlign: TextAlign.center,
                         style: TextStyle(fontSize: 15, color: AppColors.textSecondary, height: 1.5),
                       ),
+                      const SizedBox(height: 16),
+                      Container(
+                        padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
+                        decoration: NeuTheme.inset(radius: 12),
+                        child: Row(
+                          mainAxisSize: MainAxisSize.min,
+                          children: [
+                            Icon(Icons.email_outlined, size: 16, color: AppColors.primaryBlue),
+                            const SizedBox(width: 8),
+                            Text(
+                              'info.hometechnify@gmail.com',
+                              style: TextStyle(fontSize: 13, fontWeight: FontWeight.w700, color: AppColors.primaryBlue),
+                            ),
+                          ],
+                        ),
+                      ),
                       const SizedBox(height: 28),
                       Row(
                         children: [
-                          Expanded(
-                            child: OutlinedButton.icon(
-                              onPressed: () => _call(context),
-                              icon: const Icon(Icons.call_rounded, size: 18),
-                              label: const Text('Call'),
-                              style: OutlinedButton.styleFrom(
-                                foregroundColor: AppColors.primaryBlue,
-                                side: BorderSide(color: AppColors.primaryBlue),
-                                padding: const EdgeInsets.symmetric(vertical: 14),
-                                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
-                              ),
-                            ),
-                          ),
-                          const SizedBox(width: 12),
-                          Expanded(
-                            child: OutlinedButton.icon(
-                              onPressed: () => _email(context),
-                              icon: const Icon(Icons.email_rounded, size: 18),
-                              label: const Text('Email'),
-                              style: OutlinedButton.styleFrom(
-                                foregroundColor: AppColors.primaryBlue,
-                                side: BorderSide(color: AppColors.primaryBlue),
-                                padding: const EdgeInsets.symmetric(vertical: 14),
-                                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
-                              ),
-                            ),
-                          ),
+                          Expanded(child: _NeuActionButton(icon: Icons.call_rounded, label: 'Call', onTap: () => _call(context))),
+                          const SizedBox(width: 16),
+                          Expanded(child: _NeuActionButton(icon: Icons.email_rounded, label: 'Email', onTap: () => _email(context))),
                         ],
                       ),
-                      const SizedBox(height: 12),
+                      const SizedBox(height: 20),
                       SizedBox(
                         width: double.infinity,
-                        child: TextButton(
-                          onPressed: () => _logout(context),
-                          child: Text(
-                            'Logout',
-                            style: TextStyle(color: AppColors.error, fontWeight: FontWeight.w800, fontSize: 13),
-                          ),
+                        child: _NeuActionButton(
+                          icon: Icons.logout_rounded,
+                          label: 'Logout',
+                          color: AppColors.error,
+                          onTap: () => _logout(context),
                         ),
                       ),
                     ],
@@ -148,6 +127,47 @@ class AccountBlockedScreen extends StatelessWidget {
             ),
           ),
         ],
+      ),
+    );
+  }
+}
+
+/// A tappable neumorphic pill: raised at rest, presses in on tap.
+class _NeuActionButton extends StatefulWidget {
+  final IconData icon;
+  final String label;
+  final VoidCallback onTap;
+  final Color? color;
+
+  const _NeuActionButton({required this.icon, required this.label, required this.onTap, this.color});
+
+  @override
+  State<_NeuActionButton> createState() => _NeuActionButtonState();
+}
+
+class _NeuActionButtonState extends State<_NeuActionButton> {
+  bool _pressed = false;
+
+  @override
+  Widget build(BuildContext context) {
+    final color = widget.color ?? AppColors.primaryBlue;
+    return GestureDetector(
+      onTapDown: (_) => setState(() => _pressed = true),
+      onTapCancel: () => setState(() => _pressed = false),
+      onTapUp: (_) => setState(() => _pressed = false),
+      onTap: widget.onTap,
+      child: AnimatedContainer(
+        duration: const Duration(milliseconds: 120),
+        padding: const EdgeInsets.symmetric(vertical: 14),
+        decoration: _pressed ? NeuTheme.inset(radius: 14) : NeuTheme.sm(radius: 14),
+        child: Row(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            Icon(widget.icon, size: 18, color: color),
+            const SizedBox(width: 8),
+            Text(widget.label, style: TextStyle(color: color, fontWeight: FontWeight.w800, fontSize: 13)),
+          ],
+        ),
       ),
     );
   }

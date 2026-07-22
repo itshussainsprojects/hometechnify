@@ -17,6 +17,10 @@ class _AdminProvidersScreenState extends State<AdminProvidersScreen> {
   String _search = '';
   final TextEditingController _searchController = TextEditingController();
   Map<String, dynamic>? _selectedProvider;
+  // Tracks whether the narrow-screen details sheet is open, so a block/
+  // delete/verify action can close it explicitly instead of leaving it open
+  // over now-stale data.
+  bool _detailSheetOpen = false;
 
   final _filters = ['all', 'verified', 'unverified', 'blocked'];
 
@@ -79,8 +83,20 @@ class _AdminProvidersScreenState extends State<AdminProvidersScreen> {
     if (confirm == true) {
       final ok = await adminApiService.blockProvider(id, block: !isBlocked);
       if (!mounted) return;
-      if (ok) { _showSuccess('Provider ${isBlocked ? "unblocked" : "blocked"}'); _load(); setState(() => _selectedProvider = null); }
+      if (ok) {
+        _showSuccess('Provider ${isBlocked ? "unblocked" : "blocked"}');
+        _load();
+        setState(() => _selectedProvider = null);
+        _closeSheetIfOpen();
+      }
     }
+  }
+
+  // The narrow-screen detail sheet is a separate route — resetting
+  // _selectedProvider alone doesn't dismiss it, so it would sit open showing
+  // the pre-action (now stale) state until manually swiped away.
+  void _closeSheetIfOpen() {
+    if (_detailSheetOpen && mounted) Navigator.of(context).pop();
   }
 
   Future<void> _delete(String id, String name) async {
@@ -98,7 +114,10 @@ class _AdminProvidersScreenState extends State<AdminProvidersScreen> {
     if (confirm == true) {
       await adminApiService.deleteProvider(id);
       if (!mounted) return;
-      _showSuccess('Provider deleted'); _load(); setState(() => _selectedProvider = null);
+      _showSuccess('Provider deleted');
+      _load();
+      setState(() => _selectedProvider = null);
+      _closeSheetIfOpen();
     }
   }
 
@@ -112,6 +131,29 @@ class _AdminProvidersScreenState extends State<AdminProvidersScreen> {
           Expanded(flex: 3, child: _buildDetailPanel()),
       ],
     );
+  }
+
+  // On a wide window the side panel shows inline. Below that width there's no
+  // room for it, so it just silently never appeared — verify/block/delete for
+  // a provider were completely unreachable from a narrower admin window. Open
+  // the same detail panel as a full-height sheet instead.
+  void _openDetails(Map<String, dynamic> p) {
+    setState(() => _selectedProvider = p);
+    final isWide = MediaQuery.of(context).size.width >= 900;
+    if (isWide) return;
+    _detailSheetOpen = true;
+    showModalBottomSheet(
+      context: context,
+      isScrollControlled: true,
+      backgroundColor: Colors.transparent,
+      builder: (sheetContext) => FractionallySizedBox(
+        heightFactor: 0.92,
+        child: _buildDetailPanel(onClose: () => Navigator.of(sheetContext).pop()),
+      ),
+    ).then((_) {
+      _detailSheetOpen = false;
+      if (mounted) setState(() => _selectedProvider = null);
+    });
   }
 
   Widget _buildList() {
@@ -182,7 +224,7 @@ class _AdminProvidersScreenState extends State<AdminProvidersScreen> {
     final isSelected = _selectedProvider?['id'] == p['id'];
 
     return GestureDetector(
-      onTap: () => setState(() => _selectedProvider = p),
+      onTap: () => _openDetails(p),
       child: Container(
         margin: const EdgeInsets.only(bottom: 12),
         decoration: BoxDecoration(
@@ -273,6 +315,36 @@ class _AdminProvidersScreenState extends State<AdminProvidersScreen> {
                 onPressed: () => _verify(p['id'], p['name'] ?? '', isVerified),
                 tooltip: isVerified ? 'Revoke Verification' : 'Verify',
               ),
+              // Block/Delete used to live only in the detail panel, which only
+              // renders on wide windows — on a narrower admin view there was no
+              // way to reach them at all. Same quick menu as the Users screen,
+              // reachable regardless of window width.
+              PopupMenuButton<String>(
+                icon: Icon(Icons.more_vert_rounded, color: AppColors.textSecondary),
+                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+                onSelected: (action) {
+                  if (action == 'block') _block(p['id'], p['name'] ?? '', isBlocked);
+                  if (action == 'delete') _delete(p['id'], p['name'] ?? '');
+                },
+                itemBuilder: (_) => [
+                  PopupMenuItem(
+                    value: 'block',
+                    child: Row(children: [
+                      Icon(isBlocked ? Icons.lock_open_rounded : Icons.block_rounded, color: isBlocked ? AppColors.success : AppColors.warning, size: 18),
+                      const SizedBox(width: 8),
+                      Text(isBlocked ? 'Unblock' : 'Block'),
+                    ]),
+                  ),
+                  PopupMenuItem(
+                    value: 'delete',
+                    child: Row(children: [
+                      Icon(Icons.delete_outline_rounded, color: AppColors.error, size: 18),
+                      const SizedBox(width: 8),
+                      const Text('Delete'),
+                    ]),
+                  ),
+                ],
+              ),
             ]),
           ]),
         ),
@@ -288,7 +360,7 @@ class _AdminProvidersScreenState extends State<AdminProvidersScreen> {
     );
   }
 
-  Widget _buildDetailPanel() {
+  Widget _buildDetailPanel({VoidCallback? onClose}) {
     final p = _selectedProvider!;
     final isVerified = p['is_verified'] == true;
     final isBlocked = p['is_blocked'] == true;
@@ -305,7 +377,10 @@ class _AdminProvidersScreenState extends State<AdminProvidersScreen> {
           Row(children: [
             const Text('Provider Details', style: TextStyle(fontSize: 18, fontWeight: FontWeight.w800)),
             const Spacer(),
-            IconButton(icon: const Icon(Icons.close_rounded), onPressed: () => setState(() => _selectedProvider = null)),
+            IconButton(
+              icon: const Icon(Icons.close_rounded),
+              onPressed: onClose ?? () => setState(() => _selectedProvider = null),
+            ),
           ]),
           const SizedBox(height: 20),
           // Profile header
