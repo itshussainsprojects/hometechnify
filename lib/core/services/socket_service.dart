@@ -35,6 +35,12 @@ class SocketService {
   // Ratings/Providers screens, and anyone currently browsing that provider's
   // listing all update the number live instead of on next refetch.
   Function(Map<String, dynamic>)? onProviderRatingUpdated;
+  // A provider toggled Available/Not Available — admin's Providers screen
+  // updates that status live instead of on next manual refresh.
+  Function(Map<String, dynamic>)? onProviderAvailabilityUpdated;
+  // A provider updated their own profile (bank details, category, CNIC/
+  // selfie docs, city, etc.) — admin's Providers screen picks it up live.
+  Function(Map<String, dynamic>)? onProviderProfileUpdated;
 
   bool get isConnected => _isConnected;
 
@@ -178,6 +184,18 @@ class SocketService {
     _socket!.on('provider_rating_updated', (data) {
       debugPrint('⭐ Provider rating updated: $data');
       onProviderRatingUpdated?.call(Map<String, dynamic>.from(data as Map));
+    });
+
+    // A provider toggled Available/Not Available.
+    _socket!.on('provider_availability_updated', (data) {
+      debugPrint('🟢 Provider availability updated: $data');
+      onProviderAvailabilityUpdated?.call(Map<String, dynamic>.from(data as Map));
+    });
+
+    // A provider updated their own profile (bank details, category, docs...).
+    _socket!.on('provider_profile_updated', (data) {
+      debugPrint('📝 Provider profile updated: $data');
+      onProviderProfileUpdated?.call(Map<String, dynamic>.from(data as Map));
     });
 
     // User status (online/offline)

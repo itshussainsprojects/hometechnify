@@ -34,6 +34,16 @@ class _AdminProvidersScreenState extends State<AdminProvidersScreen> {
     SocketService().onProviderRatingUpdated = (_) {
       if (mounted) _load();
     };
+    // A provider toggled Available/Not Available — same, no manual refresh
+    // needed to see it change.
+    SocketService().onProviderAvailabilityUpdated = (_) {
+      if (mounted) _load();
+    };
+    // A provider updated their own profile — bank details, category, CNIC/
+    // selfie docs, etc. — same, refresh live.
+    SocketService().onProviderProfileUpdated = (_) {
+      if (mounted) _load();
+    };
   }
 
   @override
@@ -373,6 +383,7 @@ class _AdminProvidersScreenState extends State<AdminProvidersScreen> {
     final profile = p['provider_profile'] as Map<String, dynamic>?;
     final cnicFront = profile?['cnic_front'] as String?;
     final cnicBack = profile?['cnic_back'] as String?;
+    final selfieUrl = profile?['selfie_url'] as String?;
 
     return Container(
       margin: const EdgeInsets.all(20),
@@ -409,19 +420,33 @@ class _AdminProvidersScreenState extends State<AdminProvidersScreen> {
             _infoRow('Category', profile['category']?['name'] ?? 'N/A', Icons.category_rounded),
             _infoRow('Availability', profile['is_online'] == true ? 'Available' : 'Not Available', Icons.power_settings_new_rounded),
             _infoRow('Rating', '${profile['rating'] ?? 0}', Icons.star_rounded),
-            _infoRow('Hourly Rate', 'Rs. ${profile['hourly_rate'] ?? 0}', Icons.monetization_on_rounded),
+            // Pricing here is per-job/negotiated at booking time, not a fixed
+            // hourly rate the provider sets — this field is unused by that
+            // flow and only confused admins into thinking it meant something.
             _infoRow('Bank', profile['bank_name'] ?? 'N/A', Icons.account_balance_rounded),
             _infoRow('Account #', profile['account_number'] ?? 'N/A', Icons.credit_card_rounded),
             const Divider(height: 32),
           ],
-          // CNIC Images
-          const Text('CNIC Documents', style: TextStyle(fontWeight: FontWeight.w800, fontSize: 15)),
+          // Verification documents
+          const Text('Verification Documents', style: TextStyle(fontWeight: FontWeight.w800, fontSize: 15)),
           const SizedBox(height: 12),
-          Row(children: [
-            Expanded(child: _buildDocImage('CNIC Front', cnicFront)),
-            const SizedBox(width: 12),
-            Expanded(child: _buildDocImage('CNIC Back', cnicBack)),
-          ]),
+          // A fixed 3-wide Row squeezes hard in the narrow-screen sheet this
+          // panel also renders inside — same width-aware wrap used on the
+          // Verify Documents screen.
+          LayoutBuilder(builder: (context, constraints) {
+            const spacing = 12.0;
+            final perRow = constraints.maxWidth < 360 ? 2 : 3;
+            final tileWidth = (constraints.maxWidth - spacing * (perRow - 1)) / perRow;
+            return Wrap(
+              spacing: spacing,
+              runSpacing: spacing,
+              children: [
+                SizedBox(width: tileWidth, child: _buildDocImage('CNIC Front', cnicFront)),
+                SizedBox(width: tileWidth, child: _buildDocImage('CNIC Back', cnicBack)),
+                SizedBox(width: tileWidth, child: _buildDocImage('Selfie', selfieUrl)),
+              ],
+            );
+          }),
           const SizedBox(height: 24),
           // Action buttons
           Row(children: [

@@ -13,6 +13,7 @@ import 'package:flutter_animate/flutter_animate.dart';
 import 'package:intl/intl.dart';
 import '../../../core/constants/constants.dart';
 import '../../../core/services/admin_api_service.dart';
+import '../../../core/services/socket_service.dart';
 import 'package:home_technify/core/utils/snackbar_helper.dart';
 
 class ProviderVerificationAdminScreen extends StatefulWidget {
@@ -34,6 +35,11 @@ class _ProviderVerificationAdminScreenState
   void initState() {
     super.initState();
     _load();
+    // A provider resubmitted/updated their CNIC or selfie — refetch so it
+    // shows up here live instead of on the next manual refresh.
+    SocketService().onProviderProfileUpdated = (_) {
+      if (mounted) _load();
+    };
   }
 
   Future<void> _load() async {

@@ -2,6 +2,7 @@ const { randomUUID } = require('crypto');
 
 const prisma = require('../utils/prisma');
 const { getProviderRadiusKm, getCommissionPercent } = require('../utils/settings');
+const { broadcastToAll } = require('../services/socketService');
 
 // Haversine distance in km between two lat/lng points.
 const distanceKm = (lat1, lng1, lat2, lng2) => {
@@ -302,6 +303,12 @@ const updateProfile = async (req, res) => {
         });
 
         console.log('Profile Updated Successfully:', profile);
+
+        // Covers bank details, category, CNIC/selfie docs, city, etc. in one
+        // shot — the admin Providers screen (bank account #, category, docs)
+        // otherwise only picked this up on the next manual refresh.
+        broadcastToAll('provider_profile_updated', { providerId: id });
+
         res.json({ success: true, data: profile });
     } catch (err) {
         console.error("Update Profile Error:", err);
@@ -332,6 +339,14 @@ const toggleAvailability = async (req, res) => {
             where: { user_id: id },
             data,
             select: { is_online: true },
+        });
+
+        // The admin Providers screen showed this only on the next manual
+        // refresh — no push existed for it at all, unlike the block/rating
+        // events that already update live.
+        broadcastToAll('provider_availability_updated', {
+            providerId: id,
+            isOnline: profile.is_online,
         });
 
         res.json({ success: true, is_online: profile.is_online });
