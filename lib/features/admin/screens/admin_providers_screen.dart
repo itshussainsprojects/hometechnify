@@ -420,11 +420,26 @@ class _AdminProvidersScreenState extends State<AdminProvidersScreen> {
             _infoRow('Category', profile['category']?['name'] ?? 'N/A', Icons.category_rounded),
             _infoRow('Availability', profile['is_online'] == true ? 'Available' : 'Not Available', Icons.power_settings_new_rounded),
             _infoRow('Rating', '${profile['rating'] ?? 0}', Icons.star_rounded),
+            // Backend already sent these on every fetch; they just weren't
+            // shown here, unlike the provider's own profile screen which now
+            // displays trade/experience — admin had no way to see them
+            // without checking the DB directly.
+            _infoRow('Experience', '${profile['experience'] ?? 0} ${profile['experience'] == 1 ? 'year' : 'years'}', Icons.work_history_rounded),
             // Pricing here is per-job/negotiated at booking time, not a fixed
             // hourly rate the provider sets — this field is unused by that
             // flow and only confused admins into thinking it meant something.
             _infoRow('Bank', profile['bank_name'] ?? 'N/A', Icons.account_balance_rounded),
             _infoRow('Account #', profile['account_number'] ?? 'N/A', Icons.credit_card_rounded),
+            if ((profile['bio'] as String?)?.isNotEmpty == true) ...[
+              const SizedBox(height: 4),
+              Text('Bio', style: TextStyle(fontSize: 11, color: AppColors.textSecondary)),
+              const SizedBox(height: 4),
+              Text(
+                profile['bio'] as String,
+                style: const TextStyle(fontSize: 13, height: 1.4),
+              ),
+              const SizedBox(height: 8),
+            ],
             const Divider(height: 32),
           ],
           // Verification documents
@@ -520,10 +535,10 @@ class _AdminProvidersScreenState extends State<AdminProvidersScreen> {
           child: Icon(icon, size: 18, color: AppColors.primaryBlue),
         ),
         const SizedBox(width: 12),
-        Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
+        Expanded(child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
           Text(label, style: TextStyle(fontSize: 11, color: AppColors.textSecondary)),
           Text(value, style: const TextStyle(fontSize: 14, fontWeight: FontWeight.w700)),
-        ]),
+        ])),
       ]),
     );
   }
