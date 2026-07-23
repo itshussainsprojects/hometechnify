@@ -343,10 +343,12 @@ class _AdminServicesScreenState extends State<AdminServicesScreen> with SingleTi
                 children: [
                   Text('${_categories.length} Categories', style: const TextStyle(fontSize: 13, color: AppColors.textSecondary, fontWeight: FontWeight.w600)),
                   const SizedBox(height: 12),
-                  Row(
+                  Wrap(
+                    spacing: 10,
+                    runSpacing: 10,
+                    crossAxisAlignment: WrapCrossAlignment.center,
                     children: [
                       _neuActionButton(icon: Icons.add_rounded, label: 'Add Category', color: AppColors.primaryBlue, onTap: () => _showCategoryDialog()),
-                      const SizedBox(width: 10),
                       _neuIconButton(icon: Icons.refresh_rounded, color: AppColors.textSecondary, onTap: _loadCategories),
                     ],
                   ),
@@ -375,7 +377,7 @@ class _AdminServicesScreenState extends State<AdminServicesScreen> with SingleTi
                             : const Icon(Icons.category_rounded, color: AppColors.primaryBlue, size: 24),
                       ),
                       const SizedBox(height: 10),
-                      Text(c['name'] ?? '', style: const TextStyle(fontWeight: FontWeight.w800, fontSize: 14), textAlign: TextAlign.center, overflow: TextOverflow.ellipsis),
+                      Text(c['name'] ?? '', style: const TextStyle(fontWeight: FontWeight.w800, fontSize: 14), textAlign: TextAlign.center, maxLines: 1, overflow: TextOverflow.ellipsis),
                       Text('$serviceCount services', style: TextStyle(fontSize: 11, color: AppColors.textSecondary)),
                       const SizedBox(height: 10),
                       Row(mainAxisAlignment: MainAxisAlignment.center, children: [
@@ -399,10 +401,12 @@ class _AdminServicesScreenState extends State<AdminServicesScreen> with SingleTi
                 children: [
                   Text('${_services.length} Services', style: const TextStyle(fontSize: 13, color: AppColors.textSecondary, fontWeight: FontWeight.w600)),
                   const SizedBox(height: 12),
-                  Row(
+                  Wrap(
+                    spacing: 10,
+                    runSpacing: 10,
+                    crossAxisAlignment: WrapCrossAlignment.center,
                     children: [
                       _neuActionButton(icon: Icons.add_rounded, label: 'Add Service', color: AppColors.success, onTap: () => _showServiceDialog()),
-                      const SizedBox(width: 10),
                       _neuIconButton(icon: Icons.refresh_rounded, color: AppColors.textSecondary, onTap: _loadServices),
                     ],
                   ),
