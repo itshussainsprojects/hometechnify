@@ -21,6 +21,13 @@ class AuthProvider extends ChangeNotifier {
     // 403. Capture the role BEFORE logout() wipes it, so the blocked
     // screen's own Logout button can still send them to the right place.
     _socketService.onAccountBlocked = (data) {
+      // The account's own in-flight API calls (a dashboard poll, etc.) can
+      // get their 403 back around the same moment and race this via
+      // api_service.dart's separate handler — only the first one to claim
+      // this gets to log out and navigate; the loser has nothing further to
+      // do since the winner already fully handles it (and, critically,
+      // reads role from ITS own reliable source before either one clears it).
+      if (!SessionCache.claimAccountBlockedNavigation()) return;
       debugPrint('🚫 Blocked by admin');
       final blockedRole = _user?.role;
       logout();
@@ -89,6 +96,9 @@ class AuthProvider extends ChangeNotifier {
       u.role,
       providerPending: u.role == 'PROVIDER' && u.status == 'pending_verification',
     );
+    // A fresh, healthy session — clear any stale claim from a previous
+    // block/delete in this same app run so a later one is handled again.
+    SessionCache.resetAccountBlockedNavigation();
   }
 
   Future<void> checkAuthStatus() async {

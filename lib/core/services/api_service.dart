@@ -209,17 +209,32 @@ class ApiService {
   Future<void> _forceSignOut({required String route}) async {
     if (_signingOut) return;
     _signingOut = true;
+
+    // '/account-blocked' can be reached from here OR from auth_provider.dart's
+    // socket handler reacting to the very same admin action — both fire
+    // independently, seconds (or milliseconds) apart, for a live account.
+    // Whichever navigates SECOND used to read SessionCache.role() after the
+    // FIRST one's logout() had already cleared it, landing null and silently
+    // sending the blocked screen's Logout button to the customer login
+    // regardless of the account's real role. Only the winner of this claim
+    // gets to navigate; the loser still signs out below (harmless) but
+    // leaves the screen the winner already put up alone.
+    final claimedNav = route != '/account-blocked' ||
+        SessionCache.claimAccountBlockedNavigation();
     // Read before signing out — the blocked screen's own Logout button needs
     // to know whether to send a PROVIDER back to '/provider/login' instead
     // of the customer '/login', and this is gone the instant the session is.
-    final role = route == '/account-blocked' ? await SessionCache.role() : null;
+    final role =
+        (claimedNav && route == '/account-blocked') ? await SessionCache.role() : null;
     try {
       await FirebaseAuth.instance.signOut();
     } catch (_) {/* already signed out */}
 
-    final nav = navigatorKey.currentState;
-    if (nav != null) {
-      nav.pushNamedAndRemoveUntil(route, (r) => false, arguments: {'role': role});
+    if (claimedNav) {
+      final nav = navigatorKey.currentState;
+      if (nav != null) {
+        nav.pushNamedAndRemoveUntil(route, (r) => false, arguments: {'role': role});
+      }
     }
     _signingOut = false;
   }
