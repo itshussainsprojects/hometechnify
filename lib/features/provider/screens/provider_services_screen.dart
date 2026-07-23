@@ -16,8 +16,6 @@ class ProviderServicesScreen extends StatefulWidget {
 class _ProviderServicesScreenState extends State<ProviderServicesScreen> {
   final _bioController = TextEditingController();
   final _experienceController = TextEditingController();
-  final _serviceInputController = TextEditingController(); // To add new service
-  List<String> _services = [];
   bool _isEditing = false;
 
   @override
@@ -37,12 +35,11 @@ class _ProviderServicesScreenState extends State<ProviderServicesScreen> {
     if (provider != null) {
       _bioController.text = provider.bio ?? '';
       _experienceController.text = provider.experience.toString();
-      _services = List.from(provider.services);
     }
   }
-  
+
   bool _fieldsInitialized = false;
-  
+
   @override
   void didChangeDependencies() {
     super.didChangeDependencies();
@@ -57,24 +54,7 @@ class _ProviderServicesScreenState extends State<ProviderServicesScreen> {
   void dispose() {
     _bioController.dispose();
     _experienceController.dispose();
-    _serviceInputController.dispose();
     super.dispose();
-  }
-
-  void _addService() {
-    final text = _serviceInputController.text.trim();
-    if (text.isNotEmpty && !_services.contains(text)) {
-      setState(() {
-        _services.add(text);
-        _serviceInputController.clear();
-      });
-    }
-  }
-
-  void _removeService(String service) {
-    setState(() {
-      _services.remove(service);
-    });
   }
 
   /// Was a separate "My Trade" card on the main Profile screen. Merged in
@@ -194,7 +174,6 @@ class _ProviderServicesScreenState extends State<ProviderServicesScreen> {
     final success = await context.read<ProviderController>().updateProfile({
       'bio': _bioController.text,
       'experience': _experienceController.text,
-      'services': _services,
     });
 
     if (success && mounted) {
@@ -243,10 +222,9 @@ class _ProviderServicesScreenState extends State<ProviderServicesScreen> {
         padding: const EdgeInsets.all(20),
         child: Column(
           children: [
-            // Trade / Category Card — tap to change. This used to be a
-            // separate read-only card here plus a whole separate "My Trade"
-            // card+picker on the main Profile screen, both editing the exact
-            // same service_category_id field via the same backend call.
+            // Trade / Category Card — tap to change. This is the one place
+            // that edits service_category_id; the main Profile screen only
+            // shows a read-only summary of the same field, not a second editor.
             GestureDetector(
               onTap: _showTradePicker,
               child: Container(
@@ -296,57 +274,8 @@ class _ProviderServicesScreenState extends State<ProviderServicesScreen> {
             ).animate().slideY(begin: 0.1, duration: 400.ms),
 
             const SizedBox(height: 24),
-            
-            // Services List
-            _buildInfoCard(
-              title: 'Services Provided', 
-              icon: Icons.list_alt_rounded,
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  if (_services.isEmpty)
-                    const Padding(
-                      padding: EdgeInsets.symmetric(vertical: 8.0),
-                      child: Text('No specific services listed.', style: TextStyle(color: AppColors.textTertiary)),
-                    ),
-                  Wrap(
-                    spacing: 8,
-                    runSpacing: 8,
-                    children: _services.map((service) => Chip(
-                      label: Text(service, style: const TextStyle(fontSize: 12, color: AppColors.primaryBlue)),
-                      backgroundColor: AppColors.primaryBlue.withValues(alpha: 0.1),
-                      deleteIcon: _isEditing ? const Icon(Icons.close_rounded, size: 16, color: AppColors.primaryBlue) : null,
-                      onDeleted: _isEditing ? () => _removeService(service) : null,
-                      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8), side: BorderSide.none),
-                    )).toList(),
-                  ),
-                  if (_isEditing) ...[
-                    const SizedBox(height: 12),
-                    Row(
-                      children: [
-                        Expanded(
-                          child: TextField(
-                            controller: _serviceInputController,
-                            decoration: const InputDecoration(
-                              hintText: 'Add service (e.g. AC Cleaning)',
-                              isDense: true,
-                              contentPadding: EdgeInsets.symmetric(horizontal: 12, vertical: 10),
-                              border: OutlineInputBorder(borderRadius: BorderRadius.all(Radius.circular(8))),
-                            ),
-                          ),
-                        ),
-                        const SizedBox(width: 8),
-                        IconButton(
-                          onPressed: _addService, 
-                          icon: const Icon(Icons.add_circle_rounded, color: AppColors.primaryBlue),
-                        ),
-                      ],
-                    ),
-                  ],
-                ],
-              ),
-            ),
-            
+
+
             const SizedBox(height: 16),
 
             _buildInfoCard(
