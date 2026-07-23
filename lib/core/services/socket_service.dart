@@ -41,6 +41,9 @@ class SocketService {
   // A provider updated their own profile (bank details, category, CNIC/
   // selfie docs, city, etc.) — admin's Providers screen picks it up live.
   Function(Map<String, dynamic>)? onProviderProfileUpdated;
+  // A booking was created or changed status (any trade) — admin's Bookings
+  // screen picks it up live instead of on next manual refresh.
+  Function(Map<String, dynamic>)? onAdminBookingUpdated;
 
   bool get isConnected => _isConnected;
 
@@ -196,6 +199,12 @@ class SocketService {
     _socket!.on('provider_profile_updated', (data) {
       debugPrint('📝 Provider profile updated: $data');
       onProviderProfileUpdated?.call(Map<String, dynamic>.from(data as Map));
+    });
+
+    // A booking was created or its status changed.
+    _socket!.on('admin_booking_updated', (data) {
+      debugPrint('📅 Booking updated: $data');
+      onAdminBookingUpdated?.call(Map<String, dynamic>.from(data as Map));
     });
 
     // User status (online/offline)

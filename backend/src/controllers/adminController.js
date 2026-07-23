@@ -668,11 +668,15 @@ const setPlatformSettings = async (req, res) => {
 // ─────────────────────────────────────────────
 const getBookings = async (req, res) => {
     try {
-        const { status, search, page = 1, limit = 50 } = req.query;
+        const { status, categoryId, page = 1, limit = 50 } = req.query;
         const skip = (parseInt(page) - 1) * parseInt(limit);
 
         const where = {};
         if (status && status !== 'all') where.status = status.toUpperCase();
+        // Filter by trade — every booking is for a Service, and every Service
+        // belongs to exactly one Category, so this reaches through that
+        // relation rather than needing a category_id column on Booking itself.
+        if (categoryId) where.service = { category_id: categoryId };
 
         const [bookings, total] = await Promise.all([
             prisma.booking.findMany({
@@ -682,7 +686,7 @@ const getBookings = async (req, res) => {
                 include: {
                     customer: { select: { id: true, name: true, email: true, phone: true, profileImage: true } },
                     provider: { select: { id: true, name: true, email: true, phone: true, profileImage: true } },
-                    service: { select: { id: true, name: true, price: true } },
+                    service: { select: { id: true, name: true, price: true, category: { select: { id: true, name: true } } } },
                     review: true,
                 },
                 orderBy: { created_at: 'desc' },

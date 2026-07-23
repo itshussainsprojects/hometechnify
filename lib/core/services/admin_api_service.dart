@@ -163,10 +163,11 @@ class AdminApiService {
   // BOOKINGS
   // ─────────────────────────────────────────────
 
-  /// Fetch all bookings with optional status filter.
-  Future<List<dynamic>> fetchBookings({String? status, int page = 1}) async {
+  /// Fetch all bookings with optional status + trade (category) filter.
+  Future<List<dynamic>> fetchBookings({String? status, String? categoryId, int page = 1}) async {
     final params = <String, dynamic>{'page': page, 'limit': 100};
     if (status != null && status != 'all') params['status'] = status;
+    if (categoryId != null && categoryId != 'all') params['categoryId'] = categoryId;
     final res = await _dio.get('/admin/bookings', queryParameters: params);
     return res.data['data'] as List;
   }

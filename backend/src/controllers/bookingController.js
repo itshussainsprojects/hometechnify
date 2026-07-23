@@ -3,8 +3,14 @@ const admin = require('../config/firebase');
 const prisma = require('../utils/prisma');
 
 const { sendNotification, clearJobNotifications } = require('../services/notificationService');
-const { getIO } = require('../services/socketService');
+const { getIO, broadcastToAll } = require('../services/socketService');
 const { getCommissionPercent } = require('../utils/settings');
+
+// The admin Bookings screen showed nothing new until a manual refresh — none
+// of the booking_status_changed emits below are broadcast, they're all
+// targeted at the specific customer/provider room, which the admin panel
+// never joins.
+const notifyAdminBookings = (bookingId) => broadcastToAll('admin_booking_updated', { bookingId });
 
 // Helper wrapper
 const notifyUser = async (userId, title, body, type, data = {}) => {
@@ -108,6 +114,7 @@ const createBooking = async (req, res) => {
         );
 
         console.log("Booking Created Successfully:", booking.id);
+        notifyAdminBookings(booking.id);
         res.status(201).json({ success: true, data: booking });
     } catch (err) {
         console.error("Booking Creation Failed:", err);
@@ -321,6 +328,7 @@ const updateBookingStatus = async (req, res) => {
             console.warn('Socket emit failed (non-critical):', socketErr.message);
         }
 
+        notifyAdminBookings(booking.id);
         res.json({ success: true, data: updatedBooking });
     } catch (err) {
         console.error('updateBookingStatus error:', err);
@@ -559,6 +567,7 @@ const acceptOffer = async (req, res) => {
             }
         } catch (_) { /* non-critical */ }
 
+        notifyAdminBookings(booking.id);
         res.json({ success: true, data: updatedBooking });
     } catch (err) {
         res.status(500).json({ success: false, message: err.message });
@@ -812,6 +821,7 @@ const startWork = async (req, res) => {
             if (io) io.to(`user:${booking.customer_id}`).emit('booking_status_changed', { bookingId: id, status: 'ONGOING' });
         } catch (_) {}
 
+        notifyAdminBookings(id);
         res.json({ success: true, data: stripOtpForProvider(updated, userId) });
     } catch (err) {
         res.status(500).json({ success: false, message: err.message });
@@ -921,6 +931,7 @@ const completeWork = async (req, res) => {
             if (io) io.to(`user:${booking.customer_id}`).emit('booking_status_changed', { bookingId: id, status: 'COMPLETED' });
         } catch (_) {}
 
+        notifyAdminBookings(id);
         res.json({ success: true, data: stripOtpForProvider(updated, userId) });
     } catch (err) {
         res.status(500).json({ success: false, message: err.message });

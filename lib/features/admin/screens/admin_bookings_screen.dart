@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_animate/flutter_animate.dart';
 import '../../../core/constants/constants.dart';
 import '../../../core/services/admin_api_service.dart';
+import '../../../core/services/socket_service.dart';
 
 class AdminBookingsScreen extends StatefulWidget {
   const AdminBookingsScreen({super.key});
@@ -12,8 +13,10 @@ class AdminBookingsScreen extends StatefulWidget {
 
 class _AdminBookingsScreenState extends State<AdminBookingsScreen> {
   List<dynamic> _bookings = [];
+  List<dynamic> _categories = [];
   bool _isLoading = true;
   String _statusFilter = 'all';
+  String _categoryFilter = 'all';
 
   final _statusFilters = ['all', 'PENDING', 'ACCEPTED', 'ONGOING', 'COMPLETED', 'CANCELLED', 'NEGOTIATING'];
 
@@ -21,16 +24,55 @@ class _AdminBookingsScreenState extends State<AdminBookingsScreen> {
   void initState() {
     super.initState();
     _load();
+    _loadCategories();
+    // A booking was created or changed status, in any trade — refetch so the
+    // list updates live instead of waiting for a manual refresh.
+    SocketService().onAdminBookingUpdated = (_) {
+      if (mounted) _load();
+    };
+  }
+
+  Future<void> _loadCategories() async {
+    try {
+      final cats = await adminApiService.fetchCategories();
+      if (mounted) setState(() => _categories = cats);
+    } catch (_) {/* trade filter just stays status-only if this fails */}
   }
 
   Future<void> _load() async {
     setState(() => _isLoading = true);
     try {
-      final data = await adminApiService.fetchBookings(status: _statusFilter == 'all' ? null : _statusFilter);
+      final data = await adminApiService.fetchBookings(
+        status: _statusFilter == 'all' ? null : _statusFilter,
+        categoryId: _categoryFilter == 'all' ? null : _categoryFilter,
+      );
       setState(() { _bookings = data; _isLoading = false; });
     } catch (e) {
       setState(() => _isLoading = false);
     }
+  }
+
+  Widget _tradeChip(String label, String value) {
+    final isSelected = _categoryFilter == value;
+    return Padding(
+      padding: const EdgeInsets.only(right: 8),
+      child: GestureDetector(
+        onTap: () { setState(() => _categoryFilter = value); _load(); },
+        child: Container(
+          padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 7),
+          decoration: BoxDecoration(
+            color: isSelected ? AppColors.primaryDark : AppColors.grey100,
+            borderRadius: BorderRadius.circular(20),
+            border: Border.all(color: isSelected ? AppColors.primaryDark : AppColors.grey200),
+          ),
+          child: Row(mainAxisSize: MainAxisSize.min, children: [
+            Icon(Icons.engineering_rounded, size: 12, color: isSelected ? Colors.white : AppColors.textSecondary),
+            const SizedBox(width: 4),
+            Text(label, style: TextStyle(fontSize: 11, fontWeight: FontWeight.w700, color: isSelected ? Colors.white : AppColors.textSecondary)),
+          ]),
+        ),
+      ),
+    );
   }
 
   Color _getStatusColor(String status) {
@@ -78,6 +120,18 @@ class _AdminBookingsScreenState extends State<AdminBookingsScreen> {
               );
             }).toList(),
           )),
+          if (_categories.isNotEmpty) ...[
+            const SizedBox(height: 10),
+            SingleChildScrollView(scrollDirection: Axis.horizontal, child: Row(
+              children: [
+                _tradeChip('All Trades', 'all'),
+                ..._categories.map((c) => _tradeChip(
+                      (c as Map<String, dynamic>)['name'] as String? ?? 'Trade',
+                      c['id'] as String,
+                    )),
+              ],
+            )),
+          ],
         ]),
       ),
       Expanded(
@@ -94,6 +148,7 @@ class _AdminBookingsScreenState extends State<AdminBookingsScreen> {
                       final customer = b['customer'] as Map<String, dynamic>?;
                       final provider = b['provider'] as Map<String, dynamic>?;
                       final service = b['service'] as Map<String, dynamic>?;
+                      final category = (service?['category'] as Map<String, dynamic>?)?['name'] as String?;
                       final price = (b['total_amount'] as num?)?.toDouble() ?? (service?['price'] as num?)?.toDouble() ?? 0;
                       final date = DateTime.tryParse(b['created_at'] ?? '') ?? DateTime.now();
                       final hasReview = b['review'] != null;
@@ -119,6 +174,10 @@ class _AdminBookingsScreenState extends State<AdminBookingsScreen> {
                                 child: Text(status, style: TextStyle(fontSize: 10, fontWeight: FontWeight.w900, color: _getStatusColor(status))),
                               ),
                             ]),
+                            if (category != null && category.isNotEmpty) ...[
+                              const SizedBox(height: 4),
+                              Text(category, style: TextStyle(fontSize: 11.5, color: AppColors.primaryDark, fontWeight: FontWeight.w600)),
+                            ],
                             const SizedBox(height: 12),
                             Row(children: [
                               const Icon(Icons.person_outline_rounded, size: 14, color: AppColors.textHint),
