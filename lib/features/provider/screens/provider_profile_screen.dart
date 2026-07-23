@@ -190,6 +190,7 @@ class _ProviderProfileScreenState extends State<ProviderProfileScreen> {
           else ...[
              SliverToBoxAdapter(child: _buildProfileInfo(horizontalPadding, isSmall, provider)),
              SliverToBoxAdapter(child: _buildVerificationStatus(horizontalPadding, isSmall, provider)),
+             SliverToBoxAdapter(child: _buildTradeInfo(horizontalPadding, provider)),
              SliverToBoxAdapter(child: _buildProviderInfo(horizontalPadding, isSmall, provider, providerController.dashboardStats)),
              SliverToBoxAdapter(child: _buildServiceMenu(horizontalPadding, isSmall)),
              SliverToBoxAdapter(child: _buildOtherMenu(horizontalPadding, isSmall)),
@@ -432,6 +433,72 @@ class _ProviderProfileScreenState extends State<ProviderProfileScreen> {
           ),
         ],
       ),
+    );
+  }
+
+  // The trade and experience picked at registration (or changed later via
+  // "My Trade & Services") were saved correctly all along but never actually
+  // shown anywhere on the provider's own profile.
+  Widget _buildTradeInfo(double horizontalPadding, ProviderModel? provider) {
+    final category = provider?.category ?? 'Not set';
+    final experience = provider?.experience ?? 0;
+
+    return Container(
+      margin: EdgeInsets.symmetric(horizontal: horizontalPadding, vertical: 6),
+      padding: const EdgeInsets.symmetric(vertical: 18, horizontal: 20),
+      decoration: BoxDecoration(
+        color: AppColors.white,
+        borderRadius: BorderRadius.circular(16),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withValues(alpha: 0.03),
+            blurRadius: 15,
+            offset: const Offset(0, 5),
+          ),
+        ],
+      ),
+      child: Row(
+        children: [
+          Expanded(
+            child: _tradeInfoTile(
+              icon: Icons.engineering_rounded,
+              label: 'Trade',
+              value: category,
+            ),
+          ),
+          Container(width: 1, height: 36, color: AppColors.grey200),
+          Expanded(
+            child: _tradeInfoTile(
+              icon: Icons.work_history_rounded,
+              label: 'Experience',
+              value: '$experience ${experience == 1 ? 'year' : 'years'}',
+            ),
+          ),
+        ],
+      ),
+    ).animate().fadeIn(duration: 400.ms, delay: 100.ms).slideY(begin: 0.1);
+  }
+
+  Widget _tradeInfoTile({required IconData icon, required String label, required String value}) {
+    return Row(
+      children: [
+        Icon(icon, color: AppColors.primaryBlue, size: 20),
+        const SizedBox(width: 10),
+        Expanded(
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text(label, style: TextStyle(fontSize: 11, color: AppColors.textSecondary, fontWeight: FontWeight.w500)),
+              const SizedBox(height: 2),
+              Text(
+                value,
+                style: const TextStyle(fontSize: 14, fontWeight: FontWeight.w800),
+                overflow: TextOverflow.ellipsis,
+              ),
+            ],
+          ),
+        ),
+      ],
     );
   }
 
