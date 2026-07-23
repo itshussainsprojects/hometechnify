@@ -1,5 +1,12 @@
 
 const prisma = require('../utils/prisma');
+const { broadcastToAll } = require('../services/socketService');
+
+// Categories/services power the customer home screen's icon grid and the
+// provider trade picker, but neither had any live-update path — a new
+// category, a renamed service, or a changed icon only ever showed up on the
+// app's next cold start / manual refresh.
+const notifyCatalogChanged = () => broadcastToAll('catalog_updated', {});
 
 // Internal parking category for providers who have not been assigned a trade
 // yet. It is a bookkeeping bucket, not something a customer can book, so it is
@@ -32,6 +39,7 @@ const createCategory = async (req, res) => {
         const category = await prisma.category.create({
             data: { name, icon_url: req.file?.path || iconUrl || null },
         });
+        notifyCatalogChanged();
         res.status(201).json({ success: true, data: category });
     } catch (err) {
         res.status(500).json({ success: false, message: err.message });
@@ -50,6 +58,7 @@ const updateCategory = async (req, res) => {
                 ...(icon !== undefined && { icon_url: icon || null }),
             },
         });
+        notifyCatalogChanged();
         res.json({ success: true, data: category });
     } catch (err) {
         res.status(500).json({ success: false, message: err.message });
@@ -60,6 +69,7 @@ const deleteCategory = async (req, res) => {
     try {
         const { id } = req.params;
         await prisma.category.delete({ where: { id } });
+        notifyCatalogChanged();
         res.json({ success: true, message: 'Category deleted' });
     } catch (err) {
         res.status(500).json({ success: false, message: err.message });
@@ -118,6 +128,7 @@ const createService = async (req, res) => {
             },
             include: { category: true },
         });
+        notifyCatalogChanged();
         res.status(201).json({ success: true, data: service });
     } catch (err) {
         res.status(500).json({ success: false, message: err.message });
@@ -164,6 +175,7 @@ const updateService = async (req, res) => {
             data,
             include: { category: true },
         });
+        notifyCatalogChanged();
         res.json({ success: true, data: service });
     } catch (err) {
         res.status(500).json({ success: false, message: err.message });
@@ -174,6 +186,7 @@ const deleteService = async (req, res) => {
     try {
         const { id } = req.params;
         await prisma.service.delete({ where: { id } });
+        notifyCatalogChanged();
         res.json({ success: true, message: 'Service deleted' });
     } catch (err) {
         res.status(500).json({ success: false, message: err.message });

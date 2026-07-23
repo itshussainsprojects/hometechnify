@@ -116,6 +116,10 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin, 
       // for the widget's whole lifetime, and nothing invalidated it), so a
       // promo created/edited/deleted was invisible until the app restarted.
       SocketService().onPromosUpdated = _onPromosUpdated;
+      // Admin created/edited/deleted a category or service (icon, price,
+      // etc.) — this used to only ever show up on the app's next cold
+      // start, since nothing refetched the icon grid after the initial load.
+      SocketService().onCatalogUpdated = _onCatalogUpdated;
       if(mounted) {
           context.read<ServiceProvider>().loadServices();
       }
@@ -366,6 +370,7 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin, 
     _notifProvider?.removeListener(_onNotificationsChanged);
     _profileProvider?.removeListener(_onProfileChanged);
     SocketService().onPromosUpdated = null;
+    SocketService().onCatalogUpdated = null;
     _searchController.dispose();
     _bannerPageController.dispose();
     _tabSwitchController.dispose();
@@ -376,6 +381,11 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin, 
   void _onPromosUpdated() {
     if (!mounted) return;
     setState(() => _promosCache = null);
+  }
+
+  void _onCatalogUpdated() {
+    if (!mounted) return;
+    context.read<ServiceProvider>().loadServices();
   }
 
   void _onNavTap(int index) {

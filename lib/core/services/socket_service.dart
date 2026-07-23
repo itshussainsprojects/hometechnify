@@ -44,6 +44,10 @@ class SocketService {
   // A booking was created or changed status (any trade) — admin's Bookings
   // screen picks it up live instead of on next manual refresh.
   Function(Map<String, dynamic>)? onAdminBookingUpdated;
+  // Admin created/edited/deleted a category or service (icon, price, etc.) —
+  // the customer home screen's icon grid and the provider trade picker
+  // refetch live instead of only on next cold start.
+  void Function()? onCatalogUpdated;
 
   bool get isConnected => _isConnected;
 
@@ -205,6 +209,12 @@ class SocketService {
     _socket!.on('admin_booking_updated', (data) {
       debugPrint('📅 Booking updated: $data');
       onAdminBookingUpdated?.call(Map<String, dynamic>.from(data as Map));
+    });
+
+    // A category or service was created/edited/deleted.
+    _socket!.on('catalog_updated', (_) {
+      debugPrint('🗂️ Catalog updated');
+      onCatalogUpdated?.call();
     });
 
     // User status (online/offline)

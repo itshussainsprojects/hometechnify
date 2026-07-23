@@ -5,6 +5,8 @@ import 'package:flutter_animate/flutter_animate.dart';
 import 'package:image_picker/image_picker.dart';
 import '../../../core/constants/constants.dart';
 import '../../../core/services/admin_api_service.dart';
+import '../../../core/services/socket_service.dart';
+import '../../../core/theme/neu_theme.dart';
 
 class AdminServicesScreen extends StatefulWidget {
   const AdminServicesScreen({super.key});
@@ -26,10 +28,19 @@ class _AdminServicesScreenState extends State<AdminServicesScreen> with SingleTi
     _tab = TabController(length: 2, vsync: this);
     _loadCategories();
     _loadServices();
+    // Catches a change made from a different admin session/tab — this one
+    // refetches live instead of only reflecting its own edits.
+    SocketService().onCatalogUpdated = () {
+      if (mounted) { _loadCategories(); _loadServices(); }
+    };
   }
 
   @override
-  void dispose() { _tab.dispose(); super.dispose(); }
+  void dispose() {
+    SocketService().onCatalogUpdated = null;
+    _tab.dispose();
+    super.dispose();
+  }
 
   Future<void> _loadCategories() async {
     setState(() => _loadingCats = true);
@@ -131,6 +142,7 @@ class _AdminServicesScreenState extends State<AdminServicesScreen> with SingleTi
       context: context,
       builder: (_) => StatefulBuilder(
         builder: (ctx, setD) => AlertDialog(
+          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
           title: Text(existing == null ? 'New Category' : 'Edit Category'),
           content: Column(mainAxisSize: MainAxisSize.min, children: [
             TextField(controller: nameCtrl, decoration: const InputDecoration(labelText: 'Category Name *', border: OutlineInputBorder())),
@@ -188,6 +200,7 @@ class _AdminServicesScreenState extends State<AdminServicesScreen> with SingleTi
     showDialog(
       context: context,
       builder: (_) => StatefulBuilder(builder: (ctx, setD) => AlertDialog(
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
         title: Text(existing == null ? 'New Service' : 'Edit Service'),
         content: SingleChildScrollView(child: Column(mainAxisSize: MainAxisSize.min, children: [
           _iconPicker(
@@ -267,195 +280,218 @@ class _AdminServicesScreenState extends State<AdminServicesScreen> with SingleTi
     );
   }
 
+  Widget _neuIconButton({required IconData icon, required Color color, required VoidCallback onTap}) {
+    return InkWell(
+      onTap: onTap,
+      borderRadius: BorderRadius.circular(10),
+      child: Container(
+        padding: const EdgeInsets.all(8),
+        decoration: NeuTheme.sm(radius: 10),
+        child: Icon(icon, size: 15, color: color),
+      ),
+    );
+  }
+
+  Widget _neuActionButton({required IconData icon, required String label, required Color color, required VoidCallback onTap}) {
+    return InkWell(
+      onTap: onTap,
+      borderRadius: BorderRadius.circular(12),
+      child: Container(
+        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
+        decoration: NeuTheme.raised(radius: 12),
+        child: Row(mainAxisSize: MainAxisSize.min, children: [
+          Icon(icon, size: 16, color: color),
+          const SizedBox(width: 6),
+          Text(label, style: TextStyle(fontSize: 13, fontWeight: FontWeight.w800, color: color)),
+        ]),
+      ),
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
-    return Column(children: [
-      Container(
-        color: AppColors.white,
-        child: TabBar(
-          controller: _tab,
-          labelColor: AppColors.primaryBlue,
-          unselectedLabelColor: AppColors.textSecondary,
-          indicatorColor: AppColors.primaryBlue,
-          tabs: const [
-            Tab(icon: Icon(Icons.category_rounded), text: 'Categories'),
-            Tab(icon: Icon(Icons.build_rounded), text: 'Services'),
-          ],
-        ),
-      ),
-      Expanded(child: TabBarView(controller: _tab, children: [
-        // CATEGORIES TAB
-        Column(children: [
-          Container(
-            width: double.infinity,
-            padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 12),
-            color: AppColors.grey50,
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                Text('${_categories.length} Categories', style: const TextStyle(fontSize: 13, color: AppColors.textSecondary, fontWeight: FontWeight.w600)),
-                const SizedBox(height: 12),
-                Row(
-                  children: [
-                    ElevatedButton.icon(
-                      onPressed: () => _showCategoryDialog(),
-                      icon: const Icon(Icons.add_rounded, size: 16),
-                      label: const Text('Add Category'),
-                      style: ElevatedButton.styleFrom(backgroundColor: AppColors.primaryBlue, foregroundColor: Colors.white, padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10), shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10))),
-                    ),
-                    const SizedBox(width: 8),
-                    IconButton(icon: const Icon(Icons.refresh_rounded, size: 20), onPressed: _loadCategories),
-                  ],
-                ),
+    return Container(
+      color: NeuTheme.bg,
+      child: Column(children: [
+        Padding(
+          padding: const EdgeInsets.fromLTRB(16, 12, 16, 0),
+          child: Container(
+            padding: const EdgeInsets.all(4),
+            decoration: NeuTheme.inset(radius: 16),
+            child: TabBar(
+              controller: _tab,
+              labelColor: Colors.white,
+              unselectedLabelColor: AppColors.textSecondary,
+              indicator: BoxDecoration(borderRadius: BorderRadius.circular(12), gradient: AppColors.primaryGradient),
+              indicatorSize: TabBarIndicatorSize.tab,
+              dividerColor: Colors.transparent,
+              tabs: const [
+                Tab(icon: Icon(Icons.category_rounded, size: 18), text: 'Categories'),
+                Tab(icon: Icon(Icons.build_rounded, size: 18), text: 'Services'),
               ],
             ),
           ),
-          Expanded(child: _loadingCats ? const Center(child: CircularProgressIndicator()) :
-            GridView.builder(
-              padding: const EdgeInsets.all(16),
-              gridDelegate: const SliverGridDelegateWithMaxCrossAxisExtent(maxCrossAxisExtent: 200, crossAxisSpacing: 12, mainAxisSpacing: 12, childAspectRatio: 1.2),
-              itemCount: _categories.length,
-              itemBuilder: (ctx, i) {
-                final c = _categories[i] as Map<String, dynamic>;
-                final serviceCount = (c['_count']?['services'] as int?) ?? 0;
-                return Container(
-                  decoration: BoxDecoration(color: AppColors.white, borderRadius: BorderRadius.circular(16), border: Border.all(color: AppColors.grey100),
-                    boxShadow: [BoxShadow(color: Colors.black.withValues(alpha: 0.04), blurRadius: 8)]),
-                  child: Column(mainAxisAlignment: MainAxisAlignment.center, children: [
-                    c['icon_url'] != null && (c['icon_url'] as String).isNotEmpty
-                        ? CircleAvatar(radius: 24, backgroundImage: NetworkImage(c['icon_url'] as String))
-                        : Container(width: 48, height: 48, decoration: BoxDecoration(color: AppColors.primaryBlue.withValues(alpha: 0.1), shape: BoxShape.circle), child: const Icon(Icons.category_rounded, color: AppColors.primaryBlue, size: 24)),
-                    const SizedBox(height: 8),
-                    Text(c['name'] ?? '', style: const TextStyle(fontWeight: FontWeight.w800, fontSize: 14), textAlign: TextAlign.center),
-                    Text('$serviceCount services', style: TextStyle(fontSize: 11, color: AppColors.textSecondary)),
-                    const SizedBox(height: 8),
-                    Row(mainAxisAlignment: MainAxisAlignment.center, children: [
-                      InkWell(onTap: () => _showCategoryDialog(existing: c), child: Container(padding: const EdgeInsets.all(6), decoration: BoxDecoration(color: AppColors.primaryBlue.withValues(alpha: 0.1), borderRadius: BorderRadius.circular(8)), child: const Icon(Icons.edit_rounded, size: 14, color: AppColors.primaryBlue))),
-                      const SizedBox(width: 8),
-                      InkWell(onTap: () async { final ok = await adminApiService.deleteCategory(c['id']); if (ok) _loadCategories(); }, child: Container(padding: const EdgeInsets.all(6), decoration: BoxDecoration(color: AppColors.error.withValues(alpha: 0.1), borderRadius: BorderRadius.circular(8)), child: const Icon(Icons.delete_outline_rounded, size: 14, color: AppColors.error))),
-                    ]),
-                  ]),
-                ).animate(delay: Duration(milliseconds: i * 50)).fadeIn(duration: 300.ms).scale(begin: const Offset(0.9, 0.9));
-              },
-            ),
-          ),
-        ]),
-
-        // SERVICES TAB
-        Column(children: [
-          Container(
-            padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
-            color: AppColors.grey50,
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  mainAxisSize: MainAxisSize.min,
-                  children: [
-                    Text('${_services.length} Services', style: const TextStyle(fontSize: 13, color: AppColors.textSecondary, fontWeight: FontWeight.w600)),
-                    const SizedBox(height: 12),
-                    Row(
-                      children: [
-                        ElevatedButton.icon(
-                          onPressed: () => _showServiceDialog(),
-                          icon: const Icon(Icons.add_rounded, size: 16),
-                          label: const Text('Add Service'),
-                          style: ElevatedButton.styleFrom(backgroundColor: AppColors.success, foregroundColor: Colors.white, padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10), shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10))),
-                        ),
-                        const SizedBox(width: 8),
-                        IconButton(icon: const Icon(Icons.refresh_rounded, size: 20), onPressed: _loadServices),
-                      ],
-                    ),
-                  ],
-                ),
-              const SizedBox(height: 8),
-              SingleChildScrollView(scrollDirection: Axis.horizontal, child: Row(
+        ),
+        Expanded(child: TabBarView(controller: _tab, children: [
+          // CATEGORIES TAB
+          Column(children: [
+            Padding(
+              padding: const EdgeInsets.fromLTRB(20, 16, 20, 8),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                mainAxisSize: MainAxisSize.min,
                 children: [
-                  GestureDetector(
-                    onTap: () { setState(() => _selectedCategoryId = null); _loadServices(); },
-                    child: Container(
-                      margin: const EdgeInsets.only(right: 8),
-                      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
-                      decoration: BoxDecoration(
-                        gradient: _selectedCategoryId == null ? AppColors.primaryGradient : null,
-                        color: _selectedCategoryId == null ? null : AppColors.grey100,
-                        borderRadius: BorderRadius.circular(16),
-                      ),
-                      child: Text('All', style: TextStyle(fontSize: 11, fontWeight: FontWeight.w700, color: _selectedCategoryId == null ? Colors.white : AppColors.textSecondary)),
-                    ),
+                  Text('${_categories.length} Categories', style: const TextStyle(fontSize: 13, color: AppColors.textSecondary, fontWeight: FontWeight.w600)),
+                  const SizedBox(height: 12),
+                  Row(
+                    children: [
+                      _neuActionButton(icon: Icons.add_rounded, label: 'Add Category', color: AppColors.primaryBlue, onTap: () => _showCategoryDialog()),
+                      const SizedBox(width: 10),
+                      _neuIconButton(icon: Icons.refresh_rounded, color: AppColors.textSecondary, onTap: _loadCategories),
+                    ],
                   ),
-                  ..._categories.map((c) => GestureDetector(
-                    onTap: () { setState(() => _selectedCategoryId = c['id'] as String); _loadServices(); },
-                    child: Container(
-                      margin: const EdgeInsets.only(right: 8),
-                      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
-                      decoration: BoxDecoration(
-                        gradient: _selectedCategoryId == c['id'] ? AppColors.primaryGradient : null,
-                        color: _selectedCategoryId == c['id'] ? null : AppColors.grey100,
-                        borderRadius: BorderRadius.circular(16),
+                ],
+              ),
+            ),
+            Expanded(child: _loadingCats ? const Center(child: CircularProgressIndicator()) :
+              GridView.builder(
+                padding: const EdgeInsets.all(16),
+                gridDelegate: const SliverGridDelegateWithMaxCrossAxisExtent(maxCrossAxisExtent: 200, crossAxisSpacing: 14, mainAxisSpacing: 14, childAspectRatio: 1.1),
+                itemCount: _categories.length,
+                itemBuilder: (ctx, i) {
+                  final c = _categories[i] as Map<String, dynamic>;
+                  final serviceCount = (c['_count']?['services'] as int?) ?? 0;
+                  return Container(
+                    padding: const EdgeInsets.all(12),
+                    decoration: NeuTheme.raised(radius: 18),
+                    child: Column(mainAxisAlignment: MainAxisAlignment.center, children: [
+                      Container(
+                        width: 56, height: 56,
+                        decoration: NeuTheme.circle(),
+                        alignment: Alignment.center,
+                        child: c['icon_url'] != null && (c['icon_url'] as String).isNotEmpty
+                            ? ClipOval(child: Image.network(c['icon_url'] as String, width: 44, height: 44, fit: BoxFit.cover,
+                                errorBuilder: (_, _, _) => const Icon(Icons.category_rounded, color: AppColors.primaryBlue, size: 24)))
+                            : const Icon(Icons.category_rounded, color: AppColors.primaryBlue, size: 24),
                       ),
-                      child: Text(c['name'] as String, style: TextStyle(fontSize: 11, fontWeight: FontWeight.w700, color: _selectedCategoryId == c['id'] ? Colors.white : AppColors.textSecondary)),
-                    ),
+                      const SizedBox(height: 10),
+                      Text(c['name'] ?? '', style: const TextStyle(fontWeight: FontWeight.w800, fontSize: 14), textAlign: TextAlign.center, overflow: TextOverflow.ellipsis),
+                      Text('$serviceCount services', style: TextStyle(fontSize: 11, color: AppColors.textSecondary)),
+                      const SizedBox(height: 10),
+                      Row(mainAxisAlignment: MainAxisAlignment.center, children: [
+                        _neuIconButton(icon: Icons.edit_rounded, color: AppColors.primaryBlue, onTap: () => _showCategoryDialog(existing: c)),
+                        const SizedBox(width: 8),
+                        _neuIconButton(icon: Icons.delete_outline_rounded, color: AppColors.error, onTap: () async { final ok = await adminApiService.deleteCategory(c['id']); if (ok) _loadCategories(); }),
+                      ]),
+                    ]),
+                  ).animate(delay: Duration(milliseconds: i * 50)).fadeIn(duration: 300.ms).scale(begin: const Offset(0.9, 0.9));
+                },
+              ),
+            ),
+          ]),
+
+          // SERVICES TAB
+          Column(children: [
+            Padding(
+              padding: const EdgeInsets.fromLTRB(16, 16, 16, 8),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text('${_services.length} Services', style: const TextStyle(fontSize: 13, color: AppColors.textSecondary, fontWeight: FontWeight.w600)),
+                  const SizedBox(height: 12),
+                  Row(
+                    children: [
+                      _neuActionButton(icon: Icons.add_rounded, label: 'Add Service', color: AppColors.success, onTap: () => _showServiceDialog()),
+                      const SizedBox(width: 10),
+                      _neuIconButton(icon: Icons.refresh_rounded, color: AppColors.textSecondary, onTap: _loadServices),
+                    ],
+                  ),
+                  const SizedBox(height: 12),
+                  SingleChildScrollView(scrollDirection: Axis.horizontal, child: Row(
+                    children: [
+                      _tradeFilterChip('All', null),
+                      ..._categories.map((c) => _tradeFilterChip(c['name'] as String, c['id'] as String)),
+                    ],
                   )),
                 ],
-              )),
-            ]),
-          ),
-          Expanded(child: _loadingServices ? const Center(child: CircularProgressIndicator()) :
-            ListView.builder(
-              padding: const EdgeInsets.all(16),
-              itemCount: _services.length,
-              itemBuilder: (ctx, i) {
-                final s = _services[i] as Map<String, dynamic>;
-                final cat = s['category'] as Map<String, dynamic>?;
-                return ListTile(
-                  contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-                  tileColor: AppColors.white,
-                  shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(14)),
-                  leading: Container(
-                    width: 44,
-                    height: 44,
-                    decoration: BoxDecoration(
-                      color: AppColors.success.withValues(alpha: 0.1),
-                      borderRadius: BorderRadius.circular(12),
-                      image: (s['icon_url'] != null && (s['icon_url'] as String).isNotEmpty)
-                          ? DecorationImage(image: NetworkImage(s['icon_url'] as String), fit: BoxFit.cover)
-                          : null,
-                    ),
-                    child: (s['icon_url'] != null && (s['icon_url'] as String).isNotEmpty)
-                        ? null
-                        : const Icon(Icons.build_rounded, color: AppColors.success, size: 20),
-                  ),
-                  title: Text(s['name'] ?? '', style: const TextStyle(fontWeight: FontWeight.w800)),
-                  subtitle: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
-                    const SizedBox(height: 2),
-                    Text('${cat?['name'] ?? 'Uncategorized'} • Rs. ${s['price'] != null ? (s['price'] as num).toStringAsFixed(0) : '0'}', style: TextStyle(fontSize: 12, color: AppColors.textSecondary)),
-                    if (s['min_price'] != null || s['max_price'] != null)
-                      Padding(
-                        padding: const EdgeInsets.only(top: 3),
-                        child: Container(
-                          padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
-                          decoration: BoxDecoration(color: AppColors.primaryBlue.withValues(alpha: 0.1), borderRadius: BorderRadius.circular(6)),
-                          child: Text(
-                            'Bid range: Rs. ${s['min_price'] != null ? (s['min_price'] as num).toStringAsFixed(0) : '0'} – ${s['max_price'] != null ? (s['max_price'] as num).toStringAsFixed(0) : '∞'}',
-                            style: const TextStyle(fontSize: 10.5, color: AppColors.primaryDark, fontWeight: FontWeight.w700),
-                          ),
-                        ),
-                      ),
-                    if (s['description'] != null) Text(s['description'] as String, style: TextStyle(fontSize: 11, color: AppColors.textHint), maxLines: 1, overflow: TextOverflow.ellipsis),
-                  ]),
-                  trailing: Row(mainAxisSize: MainAxisSize.min, children: [
-                    IconButton(icon: const Icon(Icons.edit_rounded, size: 18, color: AppColors.primaryBlue), onPressed: () => _showServiceDialog(existing: s)),
-                    IconButton(icon: const Icon(Icons.delete_outline_rounded, size: 18, color: AppColors.error), onPressed: () async { final ok = await adminApiService.deleteService(s['id']); if (ok) _loadServices(); }),
-                  ]),
-                );
-              },
+              ),
             ),
-          ),
-        ]),
-      ])),
-    ]);
+            Expanded(child: _loadingServices ? const Center(child: CircularProgressIndicator()) :
+              ListView.builder(
+                padding: const EdgeInsets.all(16),
+                itemCount: _services.length,
+                itemBuilder: (ctx, i) {
+                  final s = _services[i] as Map<String, dynamic>;
+                  final cat = s['category'] as Map<String, dynamic>?;
+                  return Container(
+                    margin: const EdgeInsets.only(bottom: 12),
+                    padding: const EdgeInsets.all(14),
+                    decoration: NeuTheme.raised(radius: 16),
+                    child: Row(crossAxisAlignment: CrossAxisAlignment.start, children: [
+                      Container(
+                        width: 48, height: 48,
+                        decoration: NeuTheme.circle(),
+                        alignment: Alignment.center,
+                        child: (s['icon_url'] != null && (s['icon_url'] as String).isNotEmpty)
+                            ? ClipOval(child: Image.network(s['icon_url'] as String, width: 38, height: 38, fit: BoxFit.cover,
+                                errorBuilder: (_, _, _) => const Icon(Icons.build_rounded, color: AppColors.success, size: 20)))
+                            : const Icon(Icons.build_rounded, color: AppColors.success, size: 20),
+                      ),
+                      const SizedBox(width: 14),
+                      Expanded(
+                        child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
+                          Text(s['name'] ?? '', style: const TextStyle(fontWeight: FontWeight.w800, fontSize: 14)),
+                          const SizedBox(height: 3),
+                          Text('${cat?['name'] ?? 'Uncategorized'} • Rs. ${s['price'] != null ? (s['price'] as num).toStringAsFixed(0) : '0'}', style: TextStyle(fontSize: 12, color: AppColors.textSecondary)),
+                          if (s['min_price'] != null || s['max_price'] != null)
+                            Padding(
+                              padding: const EdgeInsets.only(top: 5),
+                              child: Container(
+                                padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
+                                decoration: NeuTheme.inset(radius: 8),
+                                child: Text(
+                                  'Bid range: Rs. ${s['min_price'] != null ? (s['min_price'] as num).toStringAsFixed(0) : '0'} – ${s['max_price'] != null ? (s['max_price'] as num).toStringAsFixed(0) : '∞'}',
+                                  style: const TextStyle(fontSize: 10.5, color: AppColors.primaryDark, fontWeight: FontWeight.w700),
+                                ),
+                              ),
+                            ),
+                          if (s['description'] != null) ...[
+                            const SizedBox(height: 4),
+                            Text(s['description'] as String, style: TextStyle(fontSize: 11, color: AppColors.textHint), maxLines: 1, overflow: TextOverflow.ellipsis),
+                          ],
+                        ]),
+                      ),
+                      const SizedBox(width: 8),
+                      Column(mainAxisSize: MainAxisSize.min, children: [
+                        _neuIconButton(icon: Icons.edit_rounded, color: AppColors.primaryBlue, onTap: () => _showServiceDialog(existing: s)),
+                        const SizedBox(height: 8),
+                        _neuIconButton(icon: Icons.delete_outline_rounded, color: AppColors.error, onTap: () async { final ok = await adminApiService.deleteService(s['id']); if (ok) _loadServices(); }),
+                      ]),
+                    ]),
+                  ).animate(delay: Duration(milliseconds: i * 30)).fadeIn(duration: 260.ms);
+                },
+              ),
+            ),
+          ]),
+        ])),
+      ]),
+    );
+  }
+
+  Widget _tradeFilterChip(String label, String? value) {
+    final isSelected = _selectedCategoryId == value;
+    return Padding(
+      padding: const EdgeInsets.only(right: 8),
+      child: GestureDetector(
+        onTap: () { setState(() => _selectedCategoryId = value); _loadServices(); },
+        child: Container(
+          padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 8),
+          decoration: isSelected
+              ? BoxDecoration(borderRadius: BorderRadius.circular(20), gradient: AppColors.primaryGradient)
+              : NeuTheme.sm(radius: 20),
+          child: Text(label, style: TextStyle(fontSize: 11, fontWeight: FontWeight.w700, color: isSelected ? Colors.white : AppColors.textSecondary)),
+        ),
+      ),
+    );
   }
 }
