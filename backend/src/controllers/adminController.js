@@ -685,7 +685,15 @@ const getBookings = async (req, res) => {
                 take: parseInt(limit),
                 include: {
                     customer: { select: { id: true, name: true, email: true, phone: true, profileImage: true } },
-                    provider: { select: { id: true, name: true, email: true, phone: true, profileImage: true } },
+                    // Provider's own trade/rating/verified — tapping a booking's
+                    // provider only ever showed their bare name before; the admin
+                    // had to leave this screen entirely to see who they actually are.
+                    provider: {
+                        select: {
+                            id: true, name: true, email: true, phone: true, profileImage: true,
+                            provider_profile: { select: { rating: true, is_online: true, category: { select: { name: true } } } },
+                        },
+                    },
                     service: { select: { id: true, name: true, price: true, category: { select: { id: true, name: true } } } },
                     review: true,
                 },

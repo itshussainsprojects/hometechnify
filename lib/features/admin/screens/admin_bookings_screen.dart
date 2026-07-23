@@ -52,6 +52,56 @@ class _AdminBookingsScreenState extends State<AdminBookingsScreen> {
     }
   }
 
+  // A customer/provider name in the list was plain text — no way to see
+  // anything about them without leaving this screen for Users/Providers and
+  // searching them up. This shows what's already sitting in the booking
+  // payload (provider now also carries trade/rating/online status).
+  void _showPersonDetail(Map<String, dynamic>? person, {required bool isProvider}) {
+    if (person == null) return;
+    final profile = person['provider_profile'] as Map<String, dynamic>?;
+    showDialog(
+      context: context,
+      builder: (_) => AlertDialog(
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(18)),
+        title: Row(children: [
+          CircleAvatar(
+            radius: 22,
+            backgroundColor: AppColors.primaryBlue.withValues(alpha: 0.1),
+            backgroundImage: (person['profileImage'] as String?)?.isNotEmpty == true
+                ? NetworkImage(person['profileImage'] as String) : null,
+            child: (person['profileImage'] as String?)?.isNotEmpty != true
+                ? Text((person['name'] ?? '?').toString()[0].toUpperCase(),
+                    style: TextStyle(fontWeight: FontWeight.w800, color: AppColors.primaryBlue))
+                : null,
+          ),
+          const SizedBox(width: 12),
+          Expanded(child: Text(person['name'] ?? 'Unknown', style: const TextStyle(fontSize: 16, fontWeight: FontWeight.w800))),
+        ]),
+        content: Column(mainAxisSize: MainAxisSize.min, crossAxisAlignment: CrossAxisAlignment.start, children: [
+          _detailLine(Icons.email_outlined, person['email']?.toString() ?? 'N/A'),
+          _detailLine(Icons.phone_outlined, person['phone']?.toString() ?? 'N/A'),
+          if (isProvider) ...[
+            _detailLine(Icons.engineering_rounded, profile?['category']?['name']?.toString() ?? 'No trade set'),
+            _detailLine(Icons.star_rounded, '${profile?['rating'] ?? 0} rating'),
+            _detailLine(Icons.power_settings_new_rounded, profile?['is_online'] == true ? 'Available' : 'Not available'),
+          ],
+        ]),
+        actions: [
+          TextButton(onPressed: () => Navigator.pop(context), child: const Text('Close')),
+        ],
+      ),
+    );
+  }
+
+  Widget _detailLine(IconData icon, String text) => Padding(
+        padding: const EdgeInsets.symmetric(vertical: 4),
+        child: Row(children: [
+          Icon(icon, size: 16, color: AppColors.primaryBlue),
+          const SizedBox(width: 8),
+          Expanded(child: Text(text, style: const TextStyle(fontSize: 13))),
+        ]),
+      );
+
   Widget _tradeChip(String label, String value) {
     final isSelected = _categoryFilter == value;
     return Padding(
@@ -180,13 +230,25 @@ class _AdminBookingsScreenState extends State<AdminBookingsScreen> {
                             ],
                             const SizedBox(height: 12),
                             Row(children: [
-                              const Icon(Icons.person_outline_rounded, size: 14, color: AppColors.textHint),
-                              const SizedBox(width: 4),
-                              Text(customer?['name'] ?? 'Unknown', style: const TextStyle(fontSize: 12, fontWeight: FontWeight.w600)),
+                              GestureDetector(
+                                onTap: () => _showPersonDetail(customer, isProvider: false),
+                                child: Row(mainAxisSize: MainAxisSize.min, children: [
+                                  const Icon(Icons.person_outline_rounded, size: 14, color: AppColors.textHint),
+                                  const SizedBox(width: 4),
+                                  Text(customer?['name'] ?? 'Unknown',
+                                      style: const TextStyle(fontSize: 12, fontWeight: FontWeight.w600, decoration: TextDecoration.underline)),
+                                ]),
+                              ),
                               const SizedBox(width: 16),
-                              const Icon(Icons.engineering_rounded, size: 14, color: AppColors.textHint),
-                              const SizedBox(width: 4),
-                              Text(provider?['name'] ?? 'Unknown', style: const TextStyle(fontSize: 12, fontWeight: FontWeight.w700, color: AppColors.primaryBlue)),
+                              GestureDetector(
+                                onTap: () => _showPersonDetail(provider, isProvider: true),
+                                child: Row(mainAxisSize: MainAxisSize.min, children: [
+                                  const Icon(Icons.engineering_rounded, size: 14, color: AppColors.textHint),
+                                  const SizedBox(width: 4),
+                                  Text(provider?['name'] ?? 'Unknown',
+                                      style: const TextStyle(fontSize: 12, fontWeight: FontWeight.w700, color: AppColors.primaryBlue, decoration: TextDecoration.underline)),
+                                ]),
+                              ),
                             ]),
                             const SizedBox(height: 8),
                             Row(children: [
