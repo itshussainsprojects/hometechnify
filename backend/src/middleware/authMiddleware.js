@@ -32,12 +32,19 @@ const authMiddleware = async (req, res, next) => {
             });
         }
 
-        // Blocked users lose all API access
+        // Blocked users lose all API access. `role` is included here because a
+        // blocked account's /auth/me call always fails with this same 403 - the
+        // client then had NO reliable way to know if this is a customer or a
+        // provider (it fell back to a locally-cached copy that can be stale or
+        // just wrong), so a blocked provider's Logout button silently sent them
+        // to the customer login. This 403 response IS the database read, so
+        // it's the one place a role can never be stale.
         if (user.is_blocked) {
             return res.status(403).json({
                 success: false,
                 message: 'Your account has been blocked. Please contact support.',
-                code: 'ACCOUNT_BLOCKED'
+                code: 'ACCOUNT_BLOCKED',
+                role: user.role,
             });
         }
 
@@ -47,7 +54,8 @@ const authMiddleware = async (req, res, next) => {
             return res.status(403).json({
                 success: false,
                 message: 'This account has been removed. Please contact support.',
-                code: 'ACCOUNT_DELETED'
+                code: 'ACCOUNT_DELETED',
+                role: user.role,
             });
         }
 

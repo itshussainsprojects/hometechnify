@@ -120,7 +120,15 @@ class ApiService {
         // failing every request with no explanation.
         if (status == 403 && (code == 'ACCOUNT_BLOCKED' || code == 'ACCOUNT_DELETED')) {
           debugPrint('Account is $code — signing out');
-          await _forceSignOut(route: '/account-blocked');
+          // The backend now sends the account's real role straight from this
+          // same DB read. A blocked account's /auth/me always 403s too, so
+          // there was no other reliable way to know its role client-side —
+          // the fallback was a locally-cached copy (SharedPreferences or the
+          // Firestore mirror) that could be stale or simply wrong, which is
+          // exactly what sent a blocked PROVIDER's Logout button to the
+          // customer login.
+          final roleFromServer = (data is Map) ? data['role'] as String? : null;
+          await _forceSignOut(route: '/account-blocked', knownRole: roleFromServer);
           return handler.next(e);
         }
 
@@ -206,7 +214,7 @@ class ApiService {
   /// Ends the session and sends the user somewhere that makes sense. Guarded so
   /// a burst of failing requests cannot fire this a dozen times over.
   static bool _signingOut = false;
-  Future<void> _forceSignOut({required String route}) async {
+  Future<void> _forceSignOut({required String route, String? knownRole}) async {
     if (_signingOut) return;
     _signingOut = true;
 
@@ -221,11 +229,13 @@ class ApiService {
     // leaves the screen the winner already put up alone.
     final claimedNav = route != '/account-blocked' ||
         SessionCache.claimAccountBlockedNavigation();
-    // Read before signing out — the blocked screen's own Logout button needs
-    // to know whether to send a PROVIDER back to '/provider/login' instead
-    // of the customer '/login', and this is gone the instant the session is.
-    final role =
-        (claimedNav && route == '/account-blocked') ? await SessionCache.role() : null;
+    // Prefer the role the 403 itself just sent (read straight from the DB at
+    // the moment of the block check — can't be stale). Only fall back to the
+    // cache for an older backend that doesn't send it, or a route that isn't
+    // account-blocked at all.
+    final role = !claimedNav
+        ? null
+        : (knownRole ?? (route == '/account-blocked' ? await SessionCache.role() : null));
     try {
       await FirebaseAuth.instance.signOut();
     } catch (_) {/* already signed out */}
