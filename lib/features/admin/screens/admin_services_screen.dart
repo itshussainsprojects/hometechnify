@@ -134,7 +134,15 @@ class _AdminServicesScreenState extends State<AdminServicesScreen> with SingleTi
   }
 
   void _showCategoryDialog({Map<String, dynamic>? existing}) {
+    final isNew = existing == null;
     final nameCtrl = TextEditingController(text: existing?['name'] ?? '');
+    // Booking is by service_id, not category — a new trade with no service
+    // under it can't actually be booked at all until someone remembers to go
+    // add one separately. Creating the category's first service in the same
+    // step (same name, admin's chosen bid range) means a trade is bookable
+    // the moment it's created.
+    final minCtrl = TextEditingController();
+    final maxCtrl = TextEditingController();
     String? existingIcon = existing?['icon_url'];
     String? pickedIcon;
 
@@ -143,8 +151,8 @@ class _AdminServicesScreenState extends State<AdminServicesScreen> with SingleTi
       builder: (_) => StatefulBuilder(
         builder: (ctx, setD) => AlertDialog(
           shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
-          title: Text(existing == null ? 'New Category' : 'Edit Category'),
-          content: Column(mainAxisSize: MainAxisSize.min, children: [
+          title: Text(isNew ? 'New Category' : 'Edit Category'),
+          content: SingleChildScrollView(child: Column(mainAxisSize: MainAxisSize.min, children: [
             TextField(controller: nameCtrl, decoration: const InputDecoration(labelText: 'Category Name *', border: OutlineInputBorder())),
             const SizedBox(height: 16),
             _iconPicker(
@@ -159,15 +167,42 @@ class _AdminServicesScreenState extends State<AdminServicesScreen> with SingleTi
                 existingIcon = null;
               }),
             ),
-          ]),
+            if (isNew) ...[
+              const SizedBox(height: 16),
+              const Align(alignment: Alignment.centerLeft, child: Text('Bid range for this trade', style: TextStyle(fontSize: 13, fontWeight: FontWeight.w700))),
+              const SizedBox(height: 4),
+              const Align(alignment: Alignment.centerLeft, child: Text('Sets the price fence provider and customer negotiate within. Leave blank for open bidding.', style: TextStyle(fontSize: 11, color: AppColors.textHint))),
+              const SizedBox(height: 8),
+              Row(children: [
+                Expanded(child: TextField(controller: minCtrl, keyboardType: TextInputType.number, decoration: const InputDecoration(labelText: 'Min (Rs.)', hintText: 'optional', border: OutlineInputBorder()))),
+                const SizedBox(width: 10),
+                Expanded(child: TextField(controller: maxCtrl, keyboardType: TextInputType.number, decoration: const InputDecoration(labelText: 'Max (Rs.)', hintText: 'optional', border: OutlineInputBorder()))),
+              ]),
+            ],
+          ])),
           actions: [
             TextButton(onPressed: () => Navigator.pop(context), child: const Text('Cancel')),
             ElevatedButton(
               onPressed: () async {
                 if (nameCtrl.text.isEmpty) return;
+                final minV = double.tryParse(minCtrl.text.trim());
+                final maxV = double.tryParse(maxCtrl.text.trim());
+                if (minV != null && maxV != null && minV > maxV) {
+                  ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('Min cannot be greater than Max')));
+                  return;
+                }
                 Navigator.pop(context);
-                if (existing == null) {
-                  await adminApiService.createCategory(nameCtrl.text, iconPath: pickedIcon);
+                if (isNew) {
+                  final category = await adminApiService.createCategory(nameCtrl.text, iconPath: pickedIcon);
+                  if (category != null) {
+                    await adminApiService.createService(
+                      categoryId: category['id'] as String,
+                      name: nameCtrl.text,
+                      price: minV ?? maxV ?? 0,
+                      minPrice: minV,
+                      maxPrice: maxV,
+                    );
+                  }
                 } else {
                   await adminApiService.updateCategory(
                     existing['id'],
@@ -178,6 +213,7 @@ class _AdminServicesScreenState extends State<AdminServicesScreen> with SingleTi
                   );
                 }
                 _loadCategories();
+                _loadServices();
               },
               child: const Text('Save'),
             ),
