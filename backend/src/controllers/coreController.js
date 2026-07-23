@@ -68,7 +68,31 @@ const updateCategory = async (req, res) => {
 const deleteCategory = async (req, res) => {
     try {
         const { id } = req.params;
-        await prisma.category.delete({ where: { id } });
+
+        // A category almost always has at least one Service under it now
+        // (new categories auto-create one) - deleting the category alone hit
+        // the Service.category_id foreign key and 500'd, which the client had
+        // no handling for at all: the delete button looked like it silently
+        // did nothing.
+        //
+        // A service with real booking history can't just be cascade-deleted
+        // either - Booking.service_id has no cascade, so that history would
+        // block it the same way. Refuse with a clear reason instead of a
+        // second silent 500.
+        const bookingCount = await prisma.booking.count({ where: { service: { category_id: id } } });
+        if (bookingCount > 0) {
+            return res.status(409).json({
+                success: false,
+                message: `Cannot delete: ${bookingCount} booking(s) exist under this trade's service(s). A trade with real activity can't be removed.`,
+            });
+        }
+
+        // Services only exist to be booked under their category, so there's
+        // nothing to preserve by keeping them once it's gone.
+        await prisma.$transaction([
+            prisma.service.deleteMany({ where: { category_id: id } }),
+            prisma.category.delete({ where: { id } }),
+        ]);
         notifyCatalogChanged();
         res.json({ success: true, message: 'Category deleted' });
     } catch (err) {
@@ -185,6 +209,18 @@ const updateService = async (req, res) => {
 const deleteService = async (req, res) => {
     try {
         const { id } = req.params;
+
+        // Booking.service_id has no cascade - a service with real booking
+        // history would 500 on delete with no explanation. Same guard as
+        // deleteCategory, for deleting a service directly.
+        const bookingCount = await prisma.booking.count({ where: { service_id: id } });
+        if (bookingCount > 0) {
+            return res.status(409).json({
+                success: false,
+                message: `Cannot delete: ${bookingCount} booking(s) exist for this service.`,
+            });
+        }
+
         await prisma.service.delete({ where: { id } });
         notifyCatalogChanged();
         res.json({ success: true, message: 'Service deleted' });

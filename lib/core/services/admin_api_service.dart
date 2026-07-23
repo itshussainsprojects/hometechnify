@@ -343,9 +343,19 @@ class AdminApiService {
     return res.data['success'] == true;
   }
 
+  // A category with real booking history under its service(s) is refused
+  // with a 409 + explanation (see coreController.deleteCategory) rather than
+  // a bare success:false — catching that here and rethrowing it as the
+  // exception's message is what lets the delete button actually SHOW the
+  // reason instead of just silently doing nothing, which is what a raw
+  // DioException surfacing from a 409 used to look like.
   Future<bool> deleteCategory(String id) async {
-    final res = await _dio.delete('/categories/$id');
-    return res.data['success'] == true;
+    try {
+      final res = await _dio.delete('/categories/$id');
+      return res.data['success'] == true;
+    } on DioException catch (e) {
+      throw Exception(e.response?.data?['message'] ?? 'Could not delete this category');
+    }
   }
 
   Future<List<dynamic>> fetchServices({String? categoryId}) async {
@@ -396,8 +406,12 @@ class AdminApiService {
   }
 
   Future<bool> deleteService(String id) async {
-    final res = await _dio.delete('/services/$id');
-    return res.data['success'] == true;
+    try {
+      final res = await _dio.delete('/services/$id');
+      return res.data['success'] == true;
+    } on DioException catch (e) {
+      throw Exception(e.response?.data?['message'] ?? 'Could not delete this service');
+    }
   }
 }
 

@@ -54,6 +54,80 @@ class _AdminServicesScreenState extends State<AdminServicesScreen> with SingleTi
     }
   }
 
+  // Every create/update/delete call in this screen used to just fire and
+  // forget: a failure (a 409 from a booking-history guard, a network blip,
+  // anything) left the admin with no feedback at all — the button "did
+  // nothing," same as an uncaught DioException on a 4xx/5xx response would.
+  Future<void> _runCrud(Future<void> Function() action, {String? successMsg}) async {
+    try {
+      await action();
+      if (successMsg != null && mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(successMsg), backgroundColor: AppColors.success));
+      }
+    } catch (e) {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(SnackBar(
+          content: Text(e.toString().replaceFirst('Exception: ', '')),
+          backgroundColor: AppColors.error,
+        ));
+      }
+    }
+  }
+
+  Future<void> _confirmDeleteCategory(Map<String, dynamic> c) async {
+    final serviceCount = (c['_count']?['services'] as int?) ?? 0;
+    final confirmed = await showDialog<bool>(
+      context: context,
+      builder: (ctx) => AlertDialog(
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
+        title: const Text('Delete category?'),
+        content: Text(serviceCount > 0
+            ? 'This will also delete ${serviceCount == 1 ? 'its 1 service' : 'its $serviceCount services'} under "${c['name']}". This cannot be undone.'
+            : 'Delete "${c['name']}"? This cannot be undone.'),
+        actions: [
+          TextButton(onPressed: () => Navigator.pop(ctx, false), child: const Text('Cancel')),
+          ElevatedButton(
+            onPressed: () => Navigator.pop(ctx, true),
+            style: ElevatedButton.styleFrom(backgroundColor: AppColors.error, foregroundColor: Colors.white),
+            child: const Text('Delete'),
+          ),
+        ],
+      ),
+    );
+    if (confirmed != true) return;
+    await _runCrud(() async {
+      final ok = await adminApiService.deleteCategory(c['id']);
+      if (ok) {
+        _loadCategories();
+        _loadServices();
+      }
+    }, successMsg: 'Category deleted');
+  }
+
+  Future<void> _confirmDeleteService(Map<String, dynamic> s) async {
+    final confirmed = await showDialog<bool>(
+      context: context,
+      builder: (ctx) => AlertDialog(
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
+        title: const Text('Delete service?'),
+        content: Text('Delete "${s['name']}"? This cannot be undone.'),
+        actions: [
+          TextButton(onPressed: () => Navigator.pop(ctx, false), child: const Text('Cancel')),
+          ElevatedButton(
+            onPressed: () => Navigator.pop(ctx, true),
+            style: ElevatedButton.styleFrom(backgroundColor: AppColors.error, foregroundColor: Colors.white),
+            child: const Text('Delete'),
+          ),
+        ],
+      ),
+    );
+    if (confirmed != true) return;
+    await _runCrud(() async {
+      final ok = await adminApiService.deleteService(s['id']);
+      if (ok) _loadServices();
+    }, successMsg: 'Service deleted');
+  }
+
   Future<void> _loadServices() async {
     setState(() => _loadingServices = true);
     try {
@@ -192,28 +266,30 @@ class _AdminServicesScreenState extends State<AdminServicesScreen> with SingleTi
                   return;
                 }
                 Navigator.pop(context);
-                if (isNew) {
-                  final category = await adminApiService.createCategory(nameCtrl.text, iconPath: pickedIcon);
-                  if (category != null) {
-                    await adminApiService.createService(
-                      categoryId: category['id'] as String,
+                await _runCrud(() async {
+                  if (isNew) {
+                    final category = await adminApiService.createCategory(nameCtrl.text, iconPath: pickedIcon);
+                    if (category != null) {
+                      await adminApiService.createService(
+                        categoryId: category['id'] as String,
+                        name: nameCtrl.text,
+                        price: minV ?? maxV ?? 0,
+                        minPrice: minV,
+                        maxPrice: maxV,
+                      );
+                    }
+                  } else {
+                    await adminApiService.updateCategory(
+                      existing['id'],
                       name: nameCtrl.text,
-                      price: minV ?? maxV ?? 0,
-                      minPrice: minV,
-                      maxPrice: maxV,
+                      iconPath: pickedIcon,
+                      // Sending '' clears a removed icon; null leaves it untouched.
+                      iconUrl: pickedIcon == null && existingIcon == null ? '' : null,
                     );
                   }
-                } else {
-                  await adminApiService.updateCategory(
-                    existing['id'],
-                    name: nameCtrl.text,
-                    iconPath: pickedIcon,
-                    // Sending '' clears a removed icon; null leaves it untouched.
-                    iconUrl: pickedIcon == null && existingIcon == null ? '' : null,
-                  );
-                }
-                _loadCategories();
-                _loadServices();
+                  _loadCategories();
+                  _loadServices();
+                }, successMsg: isNew ? 'Category created' : 'Category updated');
               },
               child: const Text('Save'),
             ),
@@ -286,28 +362,30 @@ class _AdminServicesScreenState extends State<AdminServicesScreen> with SingleTi
                 return;
               }
               Navigator.pop(context);
-              if (existing == null) {
-                await adminApiService.createService(
-                  categoryId: selectedCatId!,
-                  name: nameCtrl.text,
-                  price: double.tryParse(priceCtrl.text) ?? 0,
-                  description: descCtrl.text.isEmpty ? null : descCtrl.text,
-                  minPrice: minV,
-                  maxPrice: maxV,
-                  iconPath: pickedIcon,
-                );
-              } else {
-                await adminApiService.updateService(
-                  existing['id'],
-                  name: nameCtrl.text,
-                  price: double.tryParse(priceCtrl.text),
-                  description: descCtrl.text.isEmpty ? null : descCtrl.text,
-                  minPrice: minV,
-                  maxPrice: maxV,
-                  iconPath: pickedIcon,
-                );
-              }
-              _loadServices();
+              await _runCrud(() async {
+                if (existing == null) {
+                  await adminApiService.createService(
+                    categoryId: selectedCatId!,
+                    name: nameCtrl.text,
+                    price: double.tryParse(priceCtrl.text) ?? 0,
+                    description: descCtrl.text.isEmpty ? null : descCtrl.text,
+                    minPrice: minV,
+                    maxPrice: maxV,
+                    iconPath: pickedIcon,
+                  );
+                } else {
+                  await adminApiService.updateService(
+                    existing['id'],
+                    name: nameCtrl.text,
+                    price: double.tryParse(priceCtrl.text),
+                    description: descCtrl.text.isEmpty ? null : descCtrl.text,
+                    minPrice: minV,
+                    maxPrice: maxV,
+                    iconPath: pickedIcon,
+                  );
+                }
+                _loadServices();
+              }, successMsg: existing == null ? 'Service created' : 'Service updated');
             },
             child: const Text('Save'),
           ),
@@ -419,7 +497,7 @@ class _AdminServicesScreenState extends State<AdminServicesScreen> with SingleTi
                       Row(mainAxisAlignment: MainAxisAlignment.center, children: [
                         _neuIconButton(icon: Icons.edit_rounded, color: AppColors.primaryBlue, onTap: () => _showCategoryDialog(existing: c)),
                         const SizedBox(width: 8),
-                        _neuIconButton(icon: Icons.delete_outline_rounded, color: AppColors.error, onTap: () async { final ok = await adminApiService.deleteCategory(c['id']); if (ok) _loadCategories(); }),
+                        _neuIconButton(icon: Icons.delete_outline_rounded, color: AppColors.error, onTap: () => _confirmDeleteCategory(c)),
                       ]),
                     ]),
                   ).animate(delay: Duration(milliseconds: i * 50)).fadeIn(duration: 300.ms).scale(begin: const Offset(0.9, 0.9));
@@ -505,7 +583,7 @@ class _AdminServicesScreenState extends State<AdminServicesScreen> with SingleTi
                       Column(mainAxisSize: MainAxisSize.min, children: [
                         _neuIconButton(icon: Icons.edit_rounded, color: AppColors.primaryBlue, onTap: () => _showServiceDialog(existing: s)),
                         const SizedBox(height: 8),
-                        _neuIconButton(icon: Icons.delete_outline_rounded, color: AppColors.error, onTap: () async { final ok = await adminApiService.deleteService(s['id']); if (ok) _loadServices(); }),
+                        _neuIconButton(icon: Icons.delete_outline_rounded, color: AppColors.error, onTap: () => _confirmDeleteService(s)),
                       ]),
                     ]),
                   ).animate(delay: Duration(milliseconds: i * 30)).fadeIn(duration: 260.ms);
