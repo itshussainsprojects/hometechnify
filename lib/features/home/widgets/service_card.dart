@@ -6,9 +6,10 @@ import '../../../core/utils/service_visuals.dart';
 import 'job_posting_modal.dart';
 import '../data/models/service_model.dart';
 
-/// Premium service tile - a soft squircle icon chip on white, with a real
-/// trade-specific icon and curated color resolved from the service name
-/// (never a broken network image or a generic "category" glyph).
+/// Premium service tile - a soft squircle icon chip on white. Shows the
+/// admin-uploaded icon when the category has one; otherwise (or if it fails
+/// to load) falls back to a curated, trade-specific Material icon resolved
+/// from the service name, so there's never a broken/empty state.
 class ServiceCard extends StatefulWidget {
   final ServiceModel data;
   final int index;
@@ -84,7 +85,20 @@ class _ServiceCardState extends State<ServiceCard> {
                       borderRadius:
                           BorderRadius.circular(iconContainerSize * 0.32),
                     ),
-                    child: Icon(visual.icon, size: iconSize, color: serviceColor),
+                    child: (widget.data.iconUrl?.isNotEmpty ?? false)
+                        ? ClipRRect(
+                            borderRadius:
+                                BorderRadius.circular(iconContainerSize * 0.32),
+                            child: Image.network(
+                              widget.data.iconUrl!,
+                              width: iconContainerSize,
+                              height: iconContainerSize,
+                              fit: BoxFit.cover,
+                              errorBuilder: (_, _, _) =>
+                                  Icon(visual.icon, size: iconSize, color: serviceColor),
+                            ),
+                          )
+                        : Icon(visual.icon, size: iconSize, color: serviceColor),
                   ),
                   SizedBox(height: isSmall ? 8 : 10),
                   // Service name

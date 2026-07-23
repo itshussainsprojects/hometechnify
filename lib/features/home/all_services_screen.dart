@@ -181,7 +181,9 @@ class _AllServicesScreenState extends State<AllServicesScreen> {
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            // Icon container with colored background
+            // Icon container with colored background — shows the
+            // admin-uploaded icon when the category has one, falling back to
+            // the curated Material icon otherwise (or if it fails to load).
             Container(
               width: isSmall ? 56 : 64,
               height: isSmall ? 56 : 64,
@@ -189,13 +191,26 @@ class _AllServicesScreenState extends State<AllServicesScreen> {
                 color: bgColor,
                 borderRadius: BorderRadius.circular(16),
               ),
-              child: Center(
-                child: Icon(
-                  iconData,
-                  size: isSmall ? 28 : 32,
-                  color: color,
-                ),
-              ),
+              child: (service.iconUrl?.isNotEmpty ?? false)
+                  ? ClipRRect(
+                      borderRadius: BorderRadius.circular(16),
+                      child: Image.network(
+                        service.iconUrl!,
+                        width: isSmall ? 56 : 64,
+                        height: isSmall ? 56 : 64,
+                        fit: BoxFit.cover,
+                        errorBuilder: (_, _, _) => Center(
+                          child: Icon(iconData, size: isSmall ? 28 : 32, color: color),
+                        ),
+                      ),
+                    )
+                  : Center(
+                      child: Icon(
+                        iconData,
+                        size: isSmall ? 28 : 32,
+                        color: color,
+                      ),
+                    ),
             ),
             SizedBox(height: isSmall ? 10 : 12),
             // Category name

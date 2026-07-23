@@ -104,13 +104,20 @@ class _JobPostingModalState extends State<JobPostingModal> {
               color: Colors.white.withValues(alpha: 0.2),
               borderRadius: BorderRadius.circular(12),
             ),
-            child: widget.serviceIconUrl != null
-                ? Image.network(
-                    widget.serviceIconUrl!,
-                    width: isSmall ? 20 : 24,
-                    height: isSmall ? 20 : 24,
-                    color: Colors.white,
-                    errorBuilder: (context, error, stack) => Icon(widget.serviceIcon ?? Icons.work, color: Colors.white, size: isSmall ? 20 : 24),
+            // A real uploaded icon is a normal image — tinting it solid white
+            // (as this used to) painted it a flat white blob regardless of
+            // what it actually showed. Only the Material fallback icon
+            // should be white, to sit on this colored header.
+            child: (widget.serviceIconUrl?.isNotEmpty ?? false)
+                ? ClipRRect(
+                    borderRadius: BorderRadius.circular(8),
+                    child: Image.network(
+                      widget.serviceIconUrl!,
+                      width: isSmall ? 20 : 24,
+                      height: isSmall ? 20 : 24,
+                      fit: BoxFit.cover,
+                      errorBuilder: (context, error, stack) => Icon(widget.serviceIcon ?? Icons.work, color: Colors.white, size: isSmall ? 20 : 24),
+                    ),
                   )
                 : Icon(widget.serviceIcon ?? Icons.work, color: Colors.white, size: isSmall ? 20 : 24),
           ),

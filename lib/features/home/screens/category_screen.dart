@@ -196,12 +196,20 @@ class _CategoryScreenState extends State<CategoryScreen> {
                   color: color.withValues(alpha: 0.12),
                   borderRadius: BorderRadius.circular(16),
                 ),
-                child: service.iconUrl != null
-                    ? Padding(
-                        padding: const EdgeInsets.all(12),
+                child: (service.iconUrl?.isNotEmpty ?? false)
+                    // A real uploaded icon is a normal image, not a monochrome
+                    // glyph — tinting it with the curated accent color (as
+                    // this used to) painted it a single flat color, which is
+                    // exactly the "broken tint" ServiceVisuals was built to
+                    // avoid. Show it as-is; only the Material fallback icon
+                    // uses the curated color.
+                    ? ClipRRect(
+                        borderRadius: BorderRadius.circular(16),
                         child: Image.network(
                           service.iconUrl!,
-                          color: color,
+                          width: isSmall ? 52 : 60,
+                          height: isSmall ? 52 : 60,
+                          fit: BoxFit.cover,
                           errorBuilder: (context, error, stack) => Icon(Icons.category_rounded, color: color, size: 28),
                         ),
                       )
