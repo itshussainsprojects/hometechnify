@@ -32,101 +32,110 @@ class AccountBlockedScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      body: Stack(
-        children: [
-          // A blocked account has no legitimate reason to see its own real
-          // data behind this — unlike the pending-verification screen, this
-          // is a plain brand-gradient backdrop, blurred, not the live app.
-          Positioned.fill(
-            child: Container(
-              decoration: BoxDecoration(
-                gradient: LinearGradient(
-                  begin: Alignment.topLeft,
-                  end: Alignment.bottomRight,
-                  colors: [
-                    AppColors.primaryBlue.withValues(alpha: 0.35),
-                    Colors.black.withValues(alpha: 0.6),
-                  ],
-                ),
-              ),
-            ),
-          ),
-          Positioned.fill(
-            child: BackdropFilter(
-              filter: ImageFilter.blur(sigmaX: 20, sigmaY: 20),
-              child: Container(color: Colors.black.withValues(alpha: 0.25)),
-            ),
-          ),
-          SafeArea(
-            child: Center(
-              child: Padding(
-                padding: const EdgeInsets.all(24.0),
-                child: Container(
-                  padding: const EdgeInsets.all(28),
-                  decoration: NeuTheme.raised(radius: 28),
-                  child: Column(
-                    mainAxisSize: MainAxisSize.min,
-                    children: [
-                      Container(
-                        width: 90,
-                        height: 90,
-                        decoration: NeuTheme.circle(),
-                        child: Icon(Icons.lock_person_rounded, size: 44, color: AppColors.error),
-                      ).animate().scale(delay: 100.ms, duration: 500.ms, curve: Curves.easeOutBack),
-                      const SizedBox(height: 24),
-                      const Text(
-                        'Account Blocked',
-                        style: TextStyle(fontSize: 22, fontWeight: FontWeight.w900, color: AppColors.textPrimary),
-                        textAlign: TextAlign.center,
-                      ),
-                      const SizedBox(height: 14),
-                      Text(
-                        'The HomeTechnify team has blocked your account. Please contact our helpline for more details.',
-                        textAlign: TextAlign.center,
-                        style: TextStyle(fontSize: 15, color: AppColors.textSecondary, height: 1.5),
-                      ),
-                      const SizedBox(height: 16),
-                      Container(
-                        padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
-                        decoration: NeuTheme.inset(radius: 12),
-                        child: Row(
-                          mainAxisSize: MainAxisSize.min,
-                          children: [
-                            Icon(Icons.email_outlined, size: 16, color: AppColors.primaryBlue),
-                            const SizedBox(width: 8),
-                            Text(
-                              'info.hometechnify@gmail.com',
-                              style: TextStyle(fontSize: 13, fontWeight: FontWeight.w700, color: AppColors.primaryBlue),
-                            ),
-                          ],
-                        ),
-                      ),
-                      const SizedBox(height: 28),
-                      Row(
-                        children: [
-                          Expanded(child: _NeuActionButton(icon: Icons.call_rounded, label: 'Call', onTap: () => _call(context))),
-                          const SizedBox(width: 16),
-                          Expanded(child: _NeuActionButton(icon: Icons.email_rounded, label: 'Email', onTap: () => _email(context))),
-                        ],
-                      ),
-                      const SizedBox(height: 20),
-                      SizedBox(
-                        width: double.infinity,
-                        child: _NeuActionButton(
-                          icon: Icons.logout_rounded,
-                          label: 'Logout',
-                          color: AppColors.error,
-                          onTap: () => _logout(context),
-                        ),
-                      ),
+    // Always reached via pushNamedAndRemoveUntil (socket block event or the
+    // 403 fallback), which clears the whole stack — there is nothing left to
+    // pop back to. Without this, the system back button had nowhere to go,
+    // which read as a black-screen glitch. A blocked account has no route
+    // out via back anyway — Logout or the helpline buttons are the only way
+    // off this screen.
+    return PopScope(
+      canPop: false,
+      child: Scaffold(
+        body: Stack(
+          children: [
+            // A blocked account has no legitimate reason to see its own real
+            // data behind this — unlike the pending-verification screen, this
+            // is a plain brand-gradient backdrop, blurred, not the live app.
+            Positioned.fill(
+              child: Container(
+                decoration: BoxDecoration(
+                  gradient: LinearGradient(
+                    begin: Alignment.topLeft,
+                    end: Alignment.bottomRight,
+                    colors: [
+                      AppColors.primaryBlue.withValues(alpha: 0.35),
+                      Colors.black.withValues(alpha: 0.6),
                     ],
                   ),
                 ),
               ),
             ),
-          ),
-        ],
+            Positioned.fill(
+              child: BackdropFilter(
+                filter: ImageFilter.blur(sigmaX: 20, sigmaY: 20),
+                child: Container(color: Colors.black.withValues(alpha: 0.25)),
+              ),
+            ),
+            SafeArea(
+              child: Center(
+                child: Padding(
+                  padding: const EdgeInsets.all(24.0),
+                  child: Container(
+                    padding: const EdgeInsets.all(28),
+                    decoration: NeuTheme.raised(radius: 28),
+                    child: Column(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        Container(
+                          width: 90,
+                          height: 90,
+                          decoration: NeuTheme.circle(),
+                          child: Icon(Icons.lock_person_rounded, size: 44, color: AppColors.error),
+                        ).animate().scale(delay: 100.ms, duration: 500.ms, curve: Curves.easeOutBack),
+                        const SizedBox(height: 24),
+                        const Text(
+                          'Account Blocked',
+                          style: TextStyle(fontSize: 22, fontWeight: FontWeight.w900, color: AppColors.textPrimary),
+                          textAlign: TextAlign.center,
+                        ),
+                        const SizedBox(height: 14),
+                        Text(
+                          'The HomeTechnify team has blocked your account. Please contact our helpline for more details.',
+                          textAlign: TextAlign.center,
+                          style: TextStyle(fontSize: 15, color: AppColors.textSecondary, height: 1.5),
+                        ),
+                        const SizedBox(height: 16),
+                        Container(
+                          padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
+                          decoration: NeuTheme.inset(radius: 12),
+                          child: Row(
+                            mainAxisSize: MainAxisSize.min,
+                            children: [
+                              Icon(Icons.email_outlined, size: 16, color: AppColors.primaryBlue),
+                              const SizedBox(width: 8),
+                              Text(
+                                'info.hometechnify@gmail.com',
+                                style: TextStyle(fontSize: 13, fontWeight: FontWeight.w700, color: AppColors.primaryBlue),
+                              ),
+                            ],
+                          ),
+                        ),
+                        const SizedBox(height: 28),
+                        Row(
+                          children: [
+                            Expanded(child: _NeuActionButton(icon: Icons.call_rounded, label: 'Call', onTap: () => _call(context))),
+                            const SizedBox(width: 16),
+                            Expanded(child: _NeuActionButton(icon: Icons.email_rounded, label: 'Email', onTap: () => _email(context))),
+                          ],
+                        ),
+                        const SizedBox(height: 20),
+                        SizedBox(
+                          width: double.infinity,
+                          child: _NeuActionButton(
+                            icon: Icons.logout_rounded,
+                            label: 'Logout',
+                            color: AppColors.error,
+                            onTap: () => _logout(context),
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                ),
+              ),
+            ),
+          ],
+        ),
       ),
     );
   }
