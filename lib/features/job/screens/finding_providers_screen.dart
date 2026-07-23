@@ -581,6 +581,46 @@ class _FindingProvidersScreenState extends State<FindingProvidersScreen> {
                                   fontWeight: FontWeight.w600)),
                         ],
                       ]),
+                      // Trade + experience were only visible after tapping
+                      // into the profile sheet — a customer deciding between
+                      // several quotes had to open each one just to compare
+                      // who's actually qualified for the job.
+                      if ((info?.category.isNotEmpty ?? false) ||
+                          (info?.experience ?? 0) > 0) ...[
+                        const SizedBox(height: 3),
+                        Row(children: [
+                          if (info?.category.isNotEmpty ?? false) ...[
+                            const Icon(Icons.engineering_rounded,
+                                size: 12, color: AppColors.textSecondary),
+                            const SizedBox(width: 3),
+                            Flexible(
+                                child: Text(info!.category,
+                                    style: TextStyle(
+                                        fontSize: 11.5,
+                                        color: AppColors.textSecondary,
+                                        fontWeight: FontWeight.w600),
+                                    overflow: TextOverflow.ellipsis)),
+                          ],
+                          if ((info?.experience ?? 0) > 0) ...[
+                            const SizedBox(width: 8),
+                            Text('${info!.experience}y exp',
+                                style: TextStyle(
+                                    fontSize: 11.5,
+                                    color: AppColors.textSecondary,
+                                    fontWeight: FontWeight.w600)),
+                          ],
+                        ]),
+                      ],
+                      if ((info?.bio ?? '').trim().isNotEmpty) ...[
+                        const SizedBox(height: 3),
+                        Text(
+                          info!.bio!.trim(),
+                          maxLines: 1,
+                          overflow: TextOverflow.ellipsis,
+                          style: TextStyle(
+                              fontSize: 11.5, color: AppColors.textTertiary),
+                        ),
+                      ],
                     ],
                   ),
                 ),
